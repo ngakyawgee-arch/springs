@@ -28,6 +28,7 @@ table{width:100%;border-collapse:collapse}
 th,td{border-bottom:1px solid #333;padding:6px;text-align:center;font-size:13px}
 footer{text-align:center;opacity:.6;margin-top:20px}
 .small{font-size:12px;opacity:.8}
+.actionBtn{padding:4px 8px;font-size:12px}
 </style>
 </head>
 
@@ -42,11 +43,11 @@ footer{text-align:center;opacity:.6;margin-top:20px}
   <h3>Admin Login</h3>
   <input id="email" placeholder="Admin Email">
   <input id="password" type="password" placeholder="Admin Password">
-  <button type="button" onclick="adminLogin()">Admin ဝင်မည်</button>
+  <button onclick="adminLogin()">Admin ဝင်မည်</button>
   <hr>
   <h3>Member Login</h3>
   <input id="memberPin" placeholder="Member PIN">
-  <button type="button" class="gray" onclick="memberLogin()">Member ဝင်မည်</button>
+  <button class="gray" onclick="memberLogin()">Member ဝင်မည်</button>
 </div>
 
 <!-- MAIN -->
@@ -60,7 +61,7 @@ footer{text-align:center;opacity:.6;margin-top:20px}
   <button class="red" onclick="logout()">Logout</button>
 </div>
 
-<!-- ADD / EDIT -->
+<!-- ADD -->
 <div id="addBox" class="card hide">
   <h3 id="formTitle">အလှူစာရင်းထည့်</h3>
   <input id="name" placeholder="အမည်">
@@ -94,24 +95,22 @@ footer{text-align:center;opacity:.6;margin-top:20px}
 </div>
 
 <script>
-/* ================= FIREBASE ================= */
-const firebaseConfig = {
+/* FIREBASE */
+firebase.initializeApp({
   apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
   authDomain: "lamp-88a25.firebaseapp.com",
   databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "lamp-88a25"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const auth=firebase.auth();
 const db=firebase.database();
 
-/* ================= STATE ================= */
-let role=""; // admin | member
-let editId=null;
+/* STATE */
+let role="", editId=null;
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 function adminLogin(){
-  if(!email.value||!password.value){alert("ဖြည့်ပါ");return;}
+  if(!email.value||!password.value) return alert("ဖြည့်ပါ");
   auth.signInWithEmailAndPassword(email.value,password.value)
   .then(()=>{ role="admin"; enter(); })
   .catch(e=>alert(e.message));
@@ -123,15 +122,15 @@ function memberLogin(){
 function enter(){
   loginBox.classList.add("hide");
   mainBox.classList.remove("hide");
-  if(role==="member") document.getElementById("actionCol").style.display="none";
+  if(role==="member") actionCol.style.display="none";
   loadData();
 }
 function logout(){ location.reload(); }
 
-/* ================= VIEW ================= */
+/* VIEW */
 function hideAll(){ addBox.classList.add("hide"); tableBox.classList.add("hide"); }
 function showAdd(){
-  if(role!=="admin"){alert("Admin only");return;}
+  if(role!=="admin") return alert("Admin only");
   editId=null;
   formTitle.innerText="အလှူစာရင်းထည့်";
   name.value=place.value=amount.value=note.value="";
@@ -139,29 +138,19 @@ function showAdd(){
 }
 function showTable(){ hideAll(); tableBox.classList.remove("hide"); }
 
-/* ================= SAVE (ADD / EDIT) ================= */
+/* SAVE */
 function saveData(){
-  if(role!=="admin"){alert("Admin only");return;}
-  if(!name.value||!place.value||!amount.value){alert("အချက်အလက်အပြည့်ထည့်ပါ");return;}
-  const data={
-    name:name.value,
-    place:place.value,
-    amount:Number(amount.value),
-    note:note.value,
-    time:Date.now()
-  };
-  const ref = editId ? db.ref("donations/"+editId) : db.ref("donations").push();
-  ref.set(data).then(()=>{
-    alert("အောင်မြင်ပါပြီ");
-    showTable();
-  });
+  if(role!=="admin") return alert("Admin only");
+  if(!name.value||!place.value||!amount.value) return alert("အချက်အလက်အပြည့်ထည့်ပါ");
+  const data={name:name.value,place:place.value,amount:+amount.value,note:note.value,time:Date.now()};
+  const ref = editId?db.ref("donations/"+editId):db.ref("donations").push();
+  ref.set(data).then(()=>{ alert("အောင်မြင်ပါပြီ"); showTable(); });
 }
 
-/* ================= LOAD ================= */
+/* LOAD */
 function loadData(){
   db.ref("donations").on("value",snap=>{
-    tbody.innerHTML="";
-    let total=0;
+    tbody.innerHTML=""; let total=0;
     snap.forEach(c=>{
       const d=c.val(); total+=d.amount;
       tbody.innerHTML+=`
@@ -170,10 +159,9 @@ function loadData(){
         <td>${d.place}</td>
         <td>${d.amount}</td>
         <td>${d.note||""}</td>
-        <td>
-          ${role==="admin"?
-          `<button onclick="edit('${c.key}')">✏️</button>
-           <button onclick="del('${c.key}')">❌</button>`:""}
+        <td>${role==="admin"?`
+          <button class="actionBtn" onclick="edit('${c.key}')">✏️</button>
+          <button class="actionBtn red" onclick="del('${c.key}')">❌</button>`:""}
         </td>
       </tr>`;
     });
@@ -181,37 +169,20 @@ function loadData(){
   });
 }
 
-/* ================= EDIT / DELETE ================= */
+/* EDIT / DELETE */
 function edit(id){
   db.ref("donations/"+id).once("value",s=>{
-    const d=s.val();
-    editId=id;
+    const d=s.val(); editId=id;
     formTitle.innerText="အလှူစာရင်းပြင်";
     name.value=d.name; place.value=d.place; amount.value=d.amount; note.value=d.note||"";
     showAdd();
   });
 }
-function del(id){
-  if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove();
-}
+function del(id){ if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove(); }
 
-/* ================= EXPORT ================= */
-function exportPNG(){
-  showTable();
-  html2canvas(tableBox).then(c=>{
-    const a=document.createElement("a");
-    a.download="LFM.png"; a.href=c.toDataURL(); a.click();
-  });
-}
-function exportPDF(){
-  showTable();
-  html2canvas(tableBox).then(c=>{
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF();
-    pdf.addImage(c.toDataURL(),"PNG",10,10,190,0);
-    pdf.save("LFM_Monthly_Report.pdf");
-  });
-}
+/* EXPORT */
+function exportPNG(){ showTable(); html2canvas(tableBox).then(c=>{const a=document.createElement("a");a.download="LFM.png";a.href=c.toDataURL();a.click();});}
+function exportPDF(){ showTable(); html2canvas(tableBox).then(c=>{const {jsPDF}=window.jspdf;const pdf=new jsPDF();pdf.addImage(c.toDataURL(),"PNG",10,10,190,0);pdf.save("LFM_Report.pdf");});}
 </script>
 </body>
 </html>
