@@ -2,94 +2,214 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
-<title>LFM Donation</title>
+<title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- Export -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{margin:0;background:#111;color:#fff;font-family:sans-serif}
+body{margin:0;background:#0d0d0d;color:#fff;font-family:sans-serif}
 .container{max-width:420px;margin:auto;padding:15px}
-.card{background:#1c1c1c;padding:15px;border-radius:15px;margin-bottom:12px}
+.card{background:#1a1a1a;padding:15px;border-radius:14px;margin-bottom:12px}
+h2,h3{text-align:center;margin:6px 0}
 input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none}
 button{background:#1e8f4d;color:#fff;font-weight:bold}
+.gray{background:#333}
+.red{background:#b71c1c}
+.hide{display:none}
 table{width:100%;border-collapse:collapse}
-th,td{border-bottom:1px solid #333;padding:6px;text-align:center}
+th,td{border-bottom:1px solid #333;padding:6px;text-align:center;font-size:13px}
+footer{text-align:center;opacity:.6;margin-top:20px}
+.small{font-size:12px;opacity:.8}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h2 align="center">✊ ဖိုးစောင့်တောင်မီးအိမ် (LFM)</h2>
+<h2>✊ ဖိုးစောင့်တောင်မီးအိမ် (LFM)</h2>
+<p class="small" align="center">တော်လှန်ရေးကို အားပေးသော အလှူရှင်များ၏ မှတ်တမ်း</p>
+
+<!-- LOGIN -->
+<div id="loginBox" class="card">
+  <h3>Admin Login</h3>
+  <input id="email" placeholder="Admin Email">
+  <input id="password" type="password" placeholder="Admin Password">
+  <button type="button" onclick="adminLogin()">Admin ဝင်မည်</button>
+  <hr>
+  <h3>Member Login</h3>
+  <input id="memberPin" placeholder="Member PIN">
+  <button type="button" class="gray" onclick="memberLogin()">Member ဝင်မည်</button>
+</div>
+
+<!-- MAIN -->
+<div id="mainBox" class="hide">
 
 <div class="card">
+  <button onclick="showAdd()">➕ အလှူထည့်</button>
+  <button onclick="showTable()">📋 စာရင်းကြည့်</button>
+  <button onclick="exportPNG()">🖼 PNG</button>
+  <button onclick="exportPDF()">📄 PDF</button>
+  <button class="red" onclick="logout()">Logout</button>
+</div>
+
+<!-- ADD / EDIT -->
+<div id="addBox" class="card hide">
+  <h3 id="formTitle">အလှူစာရင်းထည့်</h3>
   <input id="name" placeholder="အမည်">
-  <input id="place" placeholder="နေရပ်">
+  <input id="place" placeholder="နေရပ် / နိုင်ငံ">
   <input id="amount" type="number" placeholder="အလှူငွေ">
-  <button type="button" onclick="addData()">စာရင်းသွင်း</button>
+  <input id="note" placeholder="မှတ်ချက်">
+  <button onclick="saveData()">သိမ်းမည်</button>
 </div>
 
-<div class="card" id="tableBox">
-<table>
-<thead>
-<tr><th>အမည်</th><th>နေရပ်</th><th>ငွေ</th></tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+<!-- TABLE -->
+<div id="tableBox" class="card hide">
+  <h3>အလှူရှင်စာရင်း</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>အမည်</th>
+        <th>နေရပ်</th>
+        <th>ငွေ</th>
+        <th>မှတ်ချက်</th>
+        <th id="actionCol">လုပ်ဆောင်ချက်</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="summary" class="small"></div>
 </div>
 
-<button type="button" onclick="exportPNG()">PNG ထုတ်</button>
+</div>
 
+<footer>✊ Revolution Powered by LFM</footer>
 </div>
 
 <script>
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
-  databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app"
+  authDomain: "lamp-88a25.firebaseapp.com",
+  databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lamp-88a25"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const auth=firebase.auth();
+const db=firebase.database();
 
-function addData(){
-  const n=name.value.trim();
-  const p=place.value.trim();
-  const a=amount.value.trim();
+/* ================= STATE ================= */
+let role=""; // admin | member
+let editId=null;
 
-  if(!n||!p||!a){ alert("အချက်အလက်အပြည့်ထည့်ပါ"); return; }
+/* ================= LOGIN ================= */
+function adminLogin(){
+  if(!email.value||!password.value){alert("ဖြည့်ပါ");return;}
+  auth.signInWithEmailAndPassword(email.value,password.value)
+  .then(()=>{ role="admin"; enter(); })
+  .catch(e=>alert(e.message));
+}
+function memberLogin(){
+  if(memberPin.value==="1111"){ role="member"; enter(); }
+  else alert("PIN မှား");
+}
+function enter(){
+  loginBox.classList.add("hide");
+  mainBox.classList.remove("hide");
+  if(role==="member") document.getElementById("actionCol").style.display="none";
+  loadData();
+}
+function logout(){ location.reload(); }
 
-  db.ref("donations").push({
-    name:n,
-    place:p,
-    amount:Number(a),
+/* ================= VIEW ================= */
+function hideAll(){ addBox.classList.add("hide"); tableBox.classList.add("hide"); }
+function showAdd(){
+  if(role!=="admin"){alert("Admin only");return;}
+  editId=null;
+  formTitle.innerText="အလှူစာရင်းထည့်";
+  name.value=place.value=amount.value=note.value="";
+  hideAll(); addBox.classList.remove("hide");
+}
+function showTable(){ hideAll(); tableBox.classList.remove("hide"); }
+
+/* ================= SAVE (ADD / EDIT) ================= */
+function saveData(){
+  if(role!=="admin"){alert("Admin only");return;}
+  if(!name.value||!place.value||!amount.value){alert("အချက်အလက်အပြည့်ထည့်ပါ");return;}
+  const data={
+    name:name.value,
+    place:place.value,
+    amount:Number(amount.value),
+    note:note.value,
     time:Date.now()
-  }).then(()=>{
-    name.value=place.value=amount.value="";
+  };
+  const ref = editId ? db.ref("donations/"+editId) : db.ref("donations").push();
+  ref.set(data).then(()=>{
     alert("အောင်မြင်ပါပြီ");
-  }).catch(e=>alert(e.message));
+    showTable();
+  });
 }
 
-db.ref("donations").on("value",snap=>{
-  tbody.innerHTML="";
-  snap.forEach(c=>{
-    const d=c.val();
-    tbody.innerHTML+=`
+/* ================= LOAD ================= */
+function loadData(){
+  db.ref("donations").on("value",snap=>{
+    tbody.innerHTML="";
+    let total=0;
+    snap.forEach(c=>{
+      const d=c.val(); total+=d.amount;
+      tbody.innerHTML+=`
       <tr>
         <td>${d.name}</td>
         <td>${d.place}</td>
         <td>${d.amount}</td>
+        <td>${d.note||""}</td>
+        <td>
+          ${role==="admin"?
+          `<button onclick="edit('${c.key}')">✏️</button>
+           <button onclick="del('${c.key}')">❌</button>`:""}
+        </td>
       </tr>`;
+    });
+    summary.innerText="စုစုပေါင်း အလှူငွေ = "+total;
   });
-});
+}
 
+/* ================= EDIT / DELETE ================= */
+function edit(id){
+  db.ref("donations/"+id).once("value",s=>{
+    const d=s.val();
+    editId=id;
+    formTitle.innerText="အလှူစာရင်းပြင်";
+    name.value=d.name; place.value=d.place; amount.value=d.amount; note.value=d.note||"";
+    showAdd();
+  });
+}
+function del(id){
+  if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove();
+}
+
+/* ================= EXPORT ================= */
 function exportPNG(){
+  showTable();
   html2canvas(tableBox).then(c=>{
     const a=document.createElement("a");
-    a.download="LFM.png";
-    a.href=c.toDataURL();
-    a.click();
+    a.download="LFM.png"; a.href=c.toDataURL(); a.click();
+  });
+}
+function exportPDF(){
+  showTable();
+  html2canvas(tableBox).then(c=>{
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF();
+    pdf.addImage(c.toDataURL(),"PNG",10,10,190,0);
+    pdf.save("LFM_Monthly_Report.pdf");
   });
 }
 </script>
