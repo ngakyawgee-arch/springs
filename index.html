@@ -3,156 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🔥 LAMP Donation System</title>
+<title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
+
+<!-- ICON / PWA -->
+<link rel="icon" href="https://i.ibb.co/1000011246/logo.jpg">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="https://i.ibb.co/1000011246/logo.jpg">
+<link rel="manifest" href="data:application/json,{
+ &quot;name&quot;:&quot;LFM&quot;,
+ &quot;short_name&quot;:&quot;LFM&quot;,
+ &quot;start_url&quot;:&quot;.&quot;,
+ &quot;display&quot;:&quot;standalone&quot;,
+ &quot;background_color&quot;:&quot;#000000&quot;,
+ &quot;theme_color&quot;:&quot;#000000&quot;,
+ &quot;icons&quot;:[{
+  &quot;src&quot;:&quot;https://i.ibb.co/1000011246/logo.jpg&quot;,
+  &quot;sizes&quot;:&quot;192x192&quot;,
+  &quot;type&quot;:&quot;image/png&quot;
+ }]
+}">
+
+<style>
+body{margin:0;background:#0b0b0b;color:#eee;font-family:sans-serif}
+.hidden{display:none}
+h1,h2,h3{text-align:center}
+.card{background:#151515;margin:12px;padding:16px;border-radius:16px}
+input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none}
+button{background:#b91c1c;color:#fff;font-weight:bold}
+.green{background:#1b8f4a}
+.red{background:#7f1d1d}
+.tabbar{display:flex;gap:6px;margin:10px}
+.tabbar button{flex:1;background:#222}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid #333;padding:6px}
+td[contenteditable]{background:#111}
+.action button{font-size:11px;padding:6px}
+footer{text-align:center;font-size:12px;color:#777;margin:20px}
+</style>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- html2canvas -->
+<!-- Tools -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-<style>
-body{margin:0;font-family:sans-serif;background:#111;color:#eee}
-.hidden{display:none}
-.box{max-width:420px;margin:20px auto;padding:20px;border-radius:12px;background:#1c1c1c}
-input,select,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:none}
-button{background:#1e8e3e;color:#fff;font-weight:bold}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-td,th{border:1px solid #444;padding:6px;text-align:center}
-.menu button{margin:4px 0;background:#333}
-.logout{background:#b3261e}
-h2{text-align:center}
-</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="box">
-<h2>✊ တော်လှန်ရေး အလှူ စနစ်</h2>
+<!-- SPLASH -->
+<div id="splash" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999">
+<img src="https://i.ibb.co/1000011246/logo.jpg" style="width:160px;border-radius:50%">
+</div>
+
+<h2>✊ ဖိုးစောင့်တောင်မီးအိမ် (LFM)</h2>
+<p style="text-align:center;color:#aaa">တော်လှန်ရေး အလှူစနစ်</p>
+
+<!-- MEMBER PIN -->
+<div id="memberLogin" class="card">
+<h3>🔐 Member Access</h3>
+<input id="memberPin" type="password" placeholder="Member PIN">
+<button onclick="memberLogin()">ဝင်မယ်</button>
+</div>
+
+<!-- MEMBER VIEW -->
+<div id="memberBox" class="card hidden">
+<h3>✊ ပြည်သူ့ထောက်ပံ့ စုစုပေါင်း</h3>
+<h1 id="memberTotal">0</h1>
+<button onclick="exportPNG('memberBox')">PNG</button>
+<button onclick="exportPDF('memberBox')">PDF</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="loginBox" class="card">
+<h3>🔐 Admin Login</h3>
 <input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="doLogin()">ဝင်မည်</button>
+<input id="password" type="password">
+<button onclick="login()">Login</button>
 </div>
 
 <!-- APP -->
-<div id="appBox" class="hidden">
+<div id="app" class="hidden">
 
-<div class="box menu">
-<button onclick="showTab('donate')">💰 အလှူထည့်</button>
-<button onclick="showTab('table')">📋 စာရင်း</button>
-<button onclick="showTab('report')">📊 Monthly Report</button>
-<button onclick="exportPNG()">🧾 Receipt PNG</button>
-<button class="logout" onclick="logout()">Logout</button>
+<div class="tabbar">
+<button onclick="showTab('donate')">အလှူထည့်</button>
+<button onclick="showTab('list')">စာရင်း</button>
+<button onclick="showTab('report')">Report</button>
+<button onclick="logout()" class="red">Logout</button>
 </div>
 
-<!-- DONATE -->
-<div id="donate" class="box hidden">
-<input id="name" placeholder="အမည်">
-<input id="country" placeholder="နိုင်ငံ">
-<input id="amount" type="number" placeholder="ငွေပမာဏ">
-<input id="note" placeholder="မှတ်ချက်">
-<button onclick="addData()">သိမ်းမည်</button>
+<div id="donate" class="card">
+<h3>✊ အလှူစာရင်းသွင်း</h3>
+<input id="name" placeholder="အလှူရှင်အမည်">
+<input id="country" placeholder="နေရပ်">
+<input id="amount" type="number" placeholder="အလှူငွေ">
+<button class="green" onclick="addData()">သိမ်းမယ်</button>
 </div>
 
-<!-- TABLE -->
-<div id="table" class="box hidden">
+<div id="list" class="card hidden">
+<h3>📋 အလှူစာရင်း</h3>
 <table>
-<thead><tr><th>အမည်</th><th>နိုင်ငံ</th><th>Ks</th></tr></thead>
-<tbody id="list"></tbody>
+<thead>
+<tr><th>အမည်</th><th>နေရပ်</th><th>ငွေ</th><th>လုပ်ဆောင်ချက်</th></tr>
+</thead>
+<tbody id="rows"></tbody>
 </table>
+<button onclick="exportPNG('list')">PNG</button>
+<button onclick="exportPDF('list')">PDF</button>
 </div>
 
-<!-- REPORT -->
-<div id="report" class="box hidden">
-<h2>စုစုပေါင်း</h2>
-<h1 id="total">0 Ks</h1>
-</div>
-
-<!-- RECEIPT -->
-<div id="receipt" class="box hidden">
-<h2>🧾 LAMP Donation Receipt</h2>
-<div id="receiptContent"></div>
+<div id="report" class="card hidden">
+<h3>📊 လစဉ် စုစုပေါင်း</h3>
+<h1 id="total">0</h1>
+<canvas id="chart"></canvas>
+<button onclick="monthlyPDF()">📄 Monthly PDF</button>
 </div>
 
 </div>
+
+<footer>✊ Revolution Powered by LFM</footer>
 
 <script>
-/* Firebase Config */
+// SPLASH
+setTimeout(()=>splash.remove(),1500);
+
+// FIREBASE
 firebase.initializeApp({
- apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
- authDomain: "lamp-88a25.firebaseapp.com",
- databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
- projectId: "lamp-88a25",
- storageBucket: "lamp-88a25.firebasestorage.app",
- messagingSenderId: "151980650338",
- appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
+ apiKey:"AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+ authDomain:"lamp-88a25.firebaseapp.com",
+ databaseURL:"https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"lamp-88a25"
 });
+const auth=firebase.auth();
+const db=firebase.database();
 
-const auth = firebase.auth();
-const db = firebase.database();
+// MEMBER PIN
+const MEMBER_PIN="1234";
+function memberLogin(){
+ if(memberPin.value===MEMBER_PIN){
+  localStorage.setItem("member","1");
+  memberLogin.classList.add("hidden");
+  memberBox.classList.remove("hidden");
+ }else alert("PIN မှားနေတယ်");
+}
+if(localStorage.getItem("member")==="1"){
+ memberLogin.classList.add("hidden");
+ memberBox.classList.remove("hidden");
+}
 
-/* Login */
-function doLogin(){
+// ADMIN
+function login(){
  auth.signInWithEmailAndPassword(email.value,password.value)
  .then(()=>{
   loginBox.classList.add("hidden");
-  appBox.classList.remove("hidden");
+  app.classList.remove("hidden");
+  showTab("donate");
   load();
  })
  .catch(e=>alert(e.message));
 }
+function logout(){auth.signOut();location.reload()}
 
-/* Logout */
-function logout(){
- auth.signOut().then(()=>location.reload());
-}
-
-/* Tabs */
 function showTab(id){
- ["donate","table","report"].forEach(t=>document.getElementById(t).classList.add("hidden"));
+ ["donate","list","report"].forEach(x=>document.getElementById(x).classList.add("hidden"));
  document.getElementById(id).classList.remove("hidden");
 }
 
-/* Add Data */
+// CRUD
 function addData(){
- const d={
+ if(!name.value||!amount.value) return alert("မပြည့်စုံပါ");
+ db.ref("donations").push({
   name:name.value,
   country:country.value,
-  amount:+amount.value,
-  time:Date.now()
- };
- db.ref("donations").push(d);
- name.value=country.value=amount.value=note.value="";
+  amount:+amount.value
+ });
+ name.value=country.value=amount.value="";
 }
 
-/* Load */
+let chart;
 function load(){
  db.ref("donations").on("value",snap=>{
-  let html="",sum=0,receipt="";
+  rows.innerHTML="";
+  let sum=0, labels=[], data=[];
   snap.forEach(s=>{
-   let d=s.val();
-   sum+=d.amount;
-   html+=`<tr><td>${d.name}</td><td>${d.country}</td><td>${d.amount}</td></tr>`;
-   receipt+=`${d.name} - ${d.amount} Ks<br>`;
+   const d=s.val(); sum+=d.amount;
+   labels.push(d.name); data.push(d.amount);
+   rows.innerHTML+=`
+   <tr>
+    <td contenteditable onblur="edit('${s.key}','name',this.innerText)">${d.name}</td>
+    <td contenteditable onblur="edit('${s.key}','country',this.innerText)">${d.country}</td>
+    <td contenteditable onblur="edit('${s.key}','amount',this.innerText)">${d.amount}</td>
+    <td class="action"><button class="red" onclick="del('${s.key}')">Del</button></td>
+   </tr>`;
   });
-  list.innerHTML=html;
-  total.innerText=sum+" Ks";
-  receiptContent.innerHTML=receipt;
+  total.innerText=sum;
+  memberTotal.innerText=sum;
+
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById("chart"),{
+   type:"bar",
+   data:{labels:labels,datasets:[{label:"အလှူငွေ",data:data}]}
+  });
  });
 }
+function edit(id,f,v){
+ const o={}; o[f]=f=="amount"?Number(v):v;
+ db.ref("donations/"+id).update(o);
+}
+function del(id){
+ if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove();
+}
 
-/* Export PNG */
-function exportPNG(){
- showTab("receipt");
- html2canvas(receipt).then(c=>{
+// EXPORT
+function exportPNG(id){
+ html2canvas(document.getElementById(id)).then(c=>{
   let a=document.createElement("a");
-  a.href=c.toDataURL();
-  a.download="receipt.png";
-  a.click();
+  a.download=id+".png"; a.href=c.toDataURL(); a.click();
  });
+}
+function exportPDF(id){
+ const {jsPDF}=window.jspdf;
+ html2canvas(document.getElementById(id)).then(c=>{
+  const pdf=new jsPDF();
+  pdf.addImage(c.toDataURL(),"PNG",10,10,190,0);
+  pdf.save(id+".pdf");
+ });
+}
+function monthlyPDF(){ exportPDF("report"); }
+
+// OFFLINE SW
+if("serviceWorker"in navigator){
+ const code=`self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))))`;
+ navigator.serviceWorker.register(URL.createObjectURL(new Blob([code])));
 }
 </script>
 
