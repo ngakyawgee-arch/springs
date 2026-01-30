@@ -2,8 +2,8 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Revolution Fund Management</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🔥 LAMP Donation System</title>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -14,204 +14,146 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-body{margin:0;font-family:sans-serif;background:#0f172a;color:#e5e7eb}
+body{margin:0;font-family:sans-serif;background:#111;color:#eee}
 .hidden{display:none}
-.card{background:#020617;margin:12px;padding:14px;border-radius:14px;border:1px solid #334155}
-input,textarea,select,button{
- width:100%;padding:10px;margin:6px 0;border-radius:8px;
- border:1px solid #475569;background:#020617;color:#e5e7eb
-}
-button{background:#dc2626;color:#fff;font-weight:bold;border:none}
-button.alt{background:#2563eb}
-button.dark{background:#020617;border:1px solid #475569}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border:1px solid #334155;padding:6px}
-th{background:#020617}
-.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-h2,h3{text-align:center;color:#f87171}
-.logo{width:80px;margin:8px auto;display:block}
-#receipt{width:300px;background:#fff;color:#000;padding:16px;border-radius:12px}
+.box{max-width:420px;margin:20px auto;padding:20px;border-radius:12px;background:#1c1c1c}
+input,select,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:none}
+button{background:#1e8e3e;color:#fff;font-weight:bold}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{border:1px solid #444;padding:6px;text-align:center}
+.menu button{margin:4px 0;background:#333}
+.logout{background:#b3261e}
+h2{text-align:center}
 </style>
 </head>
 
 <body>
 
-<h2>✊ တော်လှန်ရေး ရန်ပုံငွေ စီမံခန့်ခွဲမှု ✊</h2>
-
 <!-- LOGIN -->
-<div id="login" class="card">
- <input id="email" placeholder="အဖွဲ့ဝင် Email">
- <input id="password" type="password" placeholder="လျှို့ဝှက် စကားဝှက်">
- <button onclick="login()">ဝင်ရောက်မည်</button>
+<div id="loginBox" class="box">
+<h2>✊ တော်လှန်ရေး အလှူ စနစ်</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="doLogin()">ဝင်မည်</button>
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
+<div id="appBox" class="hidden">
 
-<div class="menu">
- <button onclick="show('add')">ရန်ပုံငွေ ထည့်သွင်း</button>
- <button onclick="show('table')">တော်လှန်ရေး စာရင်း</button>
- <button onclick="show('report')">လစဉ် အစီရင်ခံစာ</button>
- <button onclick="logout()">ထွက်မည်</button>
+<div class="box menu">
+<button onclick="showTab('donate')">💰 အလှူထည့်</button>
+<button onclick="showTab('table')">📋 စာရင်း</button>
+<button onclick="showTab('report')">📊 Monthly Report</button>
+<button onclick="exportPNG()">🧾 Receipt PNG</button>
+<button class="logout" onclick="logout()">Logout</button>
 </div>
 
-<!-- ADD -->
-<div id="add" class="card hidden">
- <h3>ရန်ပုံငွေ ထည့်သွင်းခြင်း</h3>
- <input id="name" placeholder="အလှူရှင် အမည်">
- <input id="place" placeholder="ဒေသ / မြို့နယ်">
- <input id="amount" type="number" placeholder="ထောက်ပံ့ငွေ">
- <textarea id="note" placeholder="တော်လှန်ရေး သဘောထား / မှတ်ချက်"></textarea>
- <button onclick="save()">အတည်ပြု သိမ်းဆည်းမည်</button>
+<!-- DONATE -->
+<div id="donate" class="box hidden">
+<input id="name" placeholder="အမည်">
+<input id="country" placeholder="နိုင်ငံ">
+<input id="amount" type="number" placeholder="ငွေပမာဏ">
+<input id="note" placeholder="မှတ်ချက်">
+<button onclick="addData()">သိမ်းမည်</button>
 </div>
 
 <!-- TABLE -->
-<div id="table" class="card hidden">
- <h3>အလှူရှင် စာရင်း</h3>
- <table id="dataTable"></table>
- <h3>စုစုပေါင်း ထောက်ပံ့ငွေ : <span id="total">0</span> Ks</h3>
+<div id="table" class="box hidden">
+<table>
+<thead><tr><th>အမည်</th><th>နိုင်ငံ</th><th>Ks</th></tr></thead>
+<tbody id="list"></tbody>
+</table>
 </div>
 
-<!-- MONTHLY REPORT -->
-<div id="report" class="card hidden">
- <h3>လစဉ် တော်လှန်ရေး အစီရင်ခံစာ</h3>
- <select onchange="monthlyReport(this.value)" id="monthSelect"></select>
- <div id="reportResult"></div>
- <button class="alt" onclick="exportMonthlyPNG()">အစီရင်ခံစာ PNG ထုတ်မည်</button>
-</div>
-
+<!-- REPORT -->
+<div id="report" class="box hidden">
+<h2>စုစုပေါင်း</h2>
+<h1 id="total">0 Ks</h1>
 </div>
 
 <!-- RECEIPT -->
-<div id="receipt" class="hidden">
- <img src="https://i.ibb.co/1000011246/logo.jpg" class="logo">
- <h3>တော်လှန်ရေး ရန်ပုံငွေ လက်ခံပြေစာ</h3>
- <hr>
- <p><b>အလှူရှင် :</b> <span id="rName"></span></p>
- <p><b>ဒေသ :</b> <span id="rPlace"></span></p>
- <p><b>ထောက်ပံ့ငွေ :</b> <span id="rAmount"></span> Ks</p>
- <p><b>မှတ်ချက် :</b> <span id="rNote"></span></p>
- <p><b>နေ့စွဲ :</b> <span id="rDate"></span></p>
+<div id="receipt" class="box hidden">
+<h2>🧾 LAMP Donation Receipt</h2>
+<div id="receiptContent"></div>
+</div>
+
 </div>
 
 <script>
-// Firebase
-const firebaseConfig={
- apiKey:"AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
- authDomain:"lamp-88a25.firebaseapp.com",
- databaseURL:"https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
- projectId:"lamp-88a25",
- storageBucket:"lamp-88a25.appspot.com",
- messagingSenderId:"151980650338",
- appId:"1:151980650338:web:0e4e02c09d0ba58a16c63b"
-};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
+/* Firebase Config */
+firebase.initializeApp({
+ apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+ authDomain: "lamp-88a25.firebaseapp.com",
+ databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId: "lamp-88a25",
+ storageBucket: "lamp-88a25.firebasestorage.app",
+ messagingSenderId: "151980650338",
+ appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
+});
 
-let allData=[];
-let months=new Set();
+const auth = firebase.auth();
+const db = firebase.database();
 
-function login(){
+/* Login */
+function doLogin(){
  auth.signInWithEmailAndPassword(email.value,password.value)
- .then(()=>{login.classList.add("hidden");app.classList.remove("hidden");load();})
+ .then(()=>{
+  loginBox.classList.add("hidden");
+  appBox.classList.remove("hidden");
+  load();
+ })
  .catch(e=>alert(e.message));
 }
-function logout(){auth.signOut();location.reload();}
 
-function show(id){
- ["add","table","report"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+/* Logout */
+function logout(){
+ auth.signOut().then(()=>location.reload());
+}
+
+/* Tabs */
+function showTab(id){
+ ["donate","table","report"].forEach(t=>document.getElementById(t).classList.add("hidden"));
  document.getElementById(id).classList.remove("hidden");
 }
 
-function save(){
+/* Add Data */
+function addData(){
  const d={
   name:name.value,
-  place:place.value,
-  amount:Number(amount.value),
-  note:note.value,
-  date:new Date().toISOString()
+  country:country.value,
+  amount:+amount.value,
+  time:Date.now()
  };
  db.ref("donations").push(d);
- name.value=place.value=amount.value=note.value="";
+ name.value=country.value=amount.value=note.value="";
 }
 
+/* Load */
 function load(){
- db.ref("donations").on("value",s=>{
-  allData=[];
-  months.clear();
-  s.forEach(r=>{
-   const v=r.val();
-   allData.push(v);
-   months.add(v.date.slice(0,7));
+ db.ref("donations").on("value",snap=>{
+  let html="",sum=0,receipt="";
+  snap.forEach(s=>{
+   let d=s.val();
+   sum+=d.amount;
+   html+=`<tr><td>${d.name}</td><td>${d.country}</td><td>${d.amount}</td></tr>`;
+   receipt+=`${d.name} - ${d.amount} Ks<br>`;
   });
-  renderTable();
-  renderMonths();
+  list.innerHTML=html;
+  total.innerText=sum+" Ks";
+  receiptContent.innerHTML=receipt;
  });
 }
 
-function renderTable(){
- let t=0;
- let h="<tr><th>အမည်</th><th>ဒေသ</th><th>ငွေ</th><th>မှတ်ချက်</th><th>Receipt</th></tr>";
- allData.forEach(d=>{
-  t+=d.amount;
-  h+=`
-  <tr>
-   <td>${d.name}</td>
-   <td>${d.place}</td>
-   <td>${d.amount}</td>
-   <td>${d.note}</td>
-   <td><button onclick='receipt(${JSON.stringify(d)})'>PNG</button></td>
-  </tr>`;
- });
- dataTable.innerHTML=h;
- total.innerText=t;
-}
-
-function renderMonths(){
- monthSelect.innerHTML="";
- [...months].sort().forEach(m=>{
-  monthSelect.innerHTML+=`<option value="${m}">${m}</option>`;
- });
-}
-
-function monthlyReport(m){
- let sum=0;
- let count=0;
- allData.filter(d=>d.date.startsWith(m)).forEach(d=>{
-  sum+=d.amount;count++;
- });
- reportResult.innerHTML=`
- <p>📅 လ : <b>${m}</b></p>
- <p>✊ ထောက်ပံ့သူ အရေအတွက် : <b>${count}</b></p>
- <p>🔥 စုစုပေါင်း ထောက်ပံ့ငွေ : <b>${sum}</b> Ks</p>`;
-}
-
-function exportMonthlyPNG(){
- html2canvas(document.getElementById("report")).then(c=>{
-  const a=document.createElement("a");
-  a.href=c.toDataURL();
-  a.download="monthly_report.png";
-  a.click();
- });
-}
-
-function receipt(d){
- rName.innerText=d.name;
- rPlace.innerText=d.place;
- rAmount.innerText=d.amount;
- rNote.innerText=d.note;
- rDate.innerText=new Date(d.date).toLocaleString();
- receiptDiv.classList.remove("hidden");
- html2canvas(receiptDiv).then(c=>{
-  const a=document.createElement("a");
+/* Export PNG */
+function exportPNG(){
+ showTab("receipt");
+ html2canvas(receipt).then(c=>{
+  let a=document.createElement("a");
   a.href=c.toDataURL();
   a.download="receipt.png";
   a.click();
-  receiptDiv.classList.add("hidden");
  });
 }
-const receiptDiv=document.getElementById("receipt");
 </script>
 
 </body>
