@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
-<title>LFM Donation System</title>
+<title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Firebase -->
@@ -10,20 +10,21 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- PNG -->
+<!-- PNG Export -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 body{margin:0;background:#0b0b0b;color:#fff;font-family:sans-serif}
 .container{max-width:420px;margin:auto;padding:15px}
 .card{background:#161616;padding:15px;border-radius:15px;margin-bottom:12px}
+h2,h3{text-align:center;margin:5px 0}
 input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;font-size:15px}
 button{background:#1e8f4d;color:#fff;font-weight:bold}
 .red{background:#b71c1c}
 .gray{background:#333}
 .hide{display:none}
 table{width:100%;border-collapse:collapse}
-th,td{border-bottom:1px solid #333;padding:6px;font-size:13px}
+th,td{border-bottom:1px solid #333;padding:6px;font-size:13px;text-align:center}
 footer{text-align:center;opacity:.6;margin-top:20px}
 </style>
 </head>
@@ -31,44 +32,53 @@ footer{text-align:center;opacity:.6;margin-top:20px}
 <body>
 <div class="container">
 
-<h2 align="center">✊ ဖိုးစောင့်တောင်မီးအိမ် (LFM)</h2>
+<h2>✊ ဖိုးစောင့်တောင်မီးအိမ် (LFM)</h2>
 
 <!-- LOGIN -->
-<div id="login" class="card">
+<div id="loginBox" class="card">
+  <h3>Admin Login</h3>
   <input id="email" placeholder="Admin Email">
   <input id="password" type="password" placeholder="Admin Password">
-  <button onclick="adminLogin()">Admin Login</button>
+  <button type="button" onclick="adminLogin()">Admin ဝင်မည်</button>
   <hr>
+  <h3>Member Login</h3>
   <input id="memberPin" placeholder="Member PIN">
-  <button class="gray" onclick="memberLogin()">Member Login</button>
+  <button type="button" class="gray" onclick="memberLogin()">Member ဝင်မည်</button>
 </div>
 
 <!-- MAIN -->
-<div id="main" class="hide">
+<div id="mainBox" class="hide">
 
 <div class="card">
-  <button onclick="showAdd()">➕ အလှူထည့်</button>
-  <button onclick="showTable()">📋 စာရင်း</button>
-  <button onclick="exportPNG()">🖼 PNG</button>
-  <button class="red" onclick="logout()">Logout</button>
+  <button type="button" onclick="showAdd()">➕ အလှူထည့်</button>
+  <button type="button" onclick="showTable()">📋 စာရင်းကြည့်</button>
+  <button type="button" onclick="exportPNG()">🖼 PNG ထုတ်</button>
+  <button type="button" class="red" onclick="logout()">Logout</button>
 </div>
 
 <!-- ADD -->
 <div id="addBox" class="card hide">
+  <h3>အလှူစာရင်းထည့်</h3>
   <input id="name" placeholder="အမည်">
-  <input id="country" placeholder="နိုင်ငံ">
+  <input id="country" placeholder="နေရပ် / နိုင်ငံ">
   <input id="amount" type="number" placeholder="အလှူငွေ">
-  <button onclick="addData()">သိမ်း</button>
+  <button type="button" onclick="addData()">သိမ်းမည်</button>
 </div>
 
 <!-- TABLE -->
 <div id="tableBox" class="card hide">
-<table>
-<thead>
-<tr><th>အမည်</th><th>နိုင်ငံ</th><th>ငွေ</th><th id="actionCol"></th></tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+  <h3>အလှူရှင်စာရင်း</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>အမည်</th>
+        <th>နေရပ်</th>
+        <th>ငွေ</th>
+        <th id="actionCol">လုပ်ဆောင်ချက်</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
 </div>
@@ -77,7 +87,7 @@ footer{text-align:center;opacity:.6;margin-top:20px}
 </div>
 
 <script>
-/* 🔥 Firebase Config */
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
   authDomain: "lamp-88a25.firebaseapp.com",
@@ -85,92 +95,126 @@ const firebaseConfig = {
   projectId: "lamp-88a25"
 };
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
+const auth = firebase.auth();
+const db = firebase.database();
 
-let role="";
+/* ================= GLOBAL ================= */
+let role = ""; // admin | member
 
-/* ADMIN LOGIN */
+/* ================= LOGIN ================= */
 function adminLogin(){
-  auth.signInWithEmailAndPassword(
-    email.value,password.value
-  ).then(()=>{
-    role="admin"; enter();
-  }).catch(e=>alert(e.message));
+  const e = email.value.trim();
+  const p = password.value.trim();
+  if(!e || !p){ alert("Email / Password ထည့်ပါ"); return; }
+
+  auth.signInWithEmailAndPassword(e,p)
+  .then(()=>{
+    role="admin";
+    enterSystem();
+  })
+  .catch(err=>alert(err.message));
 }
 
-/* MEMBER LOGIN */
 function memberLogin(){
   if(memberPin.value==="1111"){
-    role="member"; enter();
-  }else alert("PIN မှား");
+    role="member";
+    enterSystem();
+  }else{
+    alert("PIN မှားနေပါသည်");
+  }
 }
 
-function enter(){
-  login.classList.add("hide");
-  main.classList.remove("hide");
+function enterSystem(){
+  loginBox.classList.add("hide");
+  mainBox.classList.remove("hide");
   loadData();
+  if(role==="member"){
+    document.getElementById("actionCol").style.display="none";
+  }
 }
 
-/* LOGOUT */
-function logout(){ location.reload(); }
+/* ================= LOGOUT ================= */
+function logout(){
+  location.reload();
+}
 
-/* VIEW */
-function showAdd(){
-  if(role!=="admin"){alert("Admin only");return;}
-  hideAll(); addBox.classList.remove("hide");
-}
-function showTable(){
-  hideAll(); tableBox.classList.remove("hide");
-}
+/* ================= VIEW ================= */
 function hideAll(){
   addBox.classList.add("hide");
   tableBox.classList.add("hide");
 }
 
-/* ADD DATA */
-function addData(){
-  const data={
-    name:name.value,
-    country:country.value,
-    amount:amount.value,
-    time:Date.now()
-  };
-  db.ref("donations").push(data);
-  name.value=country.value=amount.value="";
+function showAdd(){
+  if(role!=="admin"){ alert("Admin only"); return; }
+  hideAll();
+  addBox.classList.remove("hide");
 }
 
-/* LOAD DATA */
+function showTable(){
+  hideAll();
+  tableBox.classList.remove("hide");
+}
+
+/* ================= ADD DATA ================= */
+function addData(){
+  if(role!=="admin"){ alert("Admin only"); return; }
+
+  const n = name.value.trim();
+  const c = country.value.trim();
+  const a = amount.value.trim();
+
+  if(!n || !c || !a){
+    alert("အချက်အလက်အပြည့်ထည့်ပါ");
+    return;
+  }
+
+  db.ref("donations").push({
+    name: n,
+    country: c,
+    amount: Number(a),
+    time: Date.now()
+  }).then(()=>{
+    alert("စာရင်းသွင်းပြီးပါပြီ");
+    name.value="";
+    country.value="";
+    amount.value="";
+  }).catch(err=>{
+    alert("Error: "+err.message);
+  });
+}
+
+/* ================= LOAD DATA ================= */
 function loadData(){
   db.ref("donations").on("value",snap=>{
     tbody.innerHTML="";
-    snap.forEach(c=>{
-      const d=c.val();
-      tbody.innerHTML+=`
+    snap.forEach(child=>{
+      const d = child.val();
+      tbody.innerHTML += `
       <tr>
         <td>${d.name}</td>
         <td>${d.country}</td>
         <td>${d.amount}</td>
         <td>
-        ${role==="admin"?
-        `<button onclick="del('${c.key}')">❌</button>`:""}
+          ${role==="admin" ? `<button onclick="delData('${child.key}')">❌</button>` : ``}
         </td>
       </tr>`;
     });
   });
 }
 
-/* DELETE */
-function del(id){
-  if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove();
+/* ================= DELETE ================= */
+function delData(id){
+  if(!confirm("ဖျက်မလား")) return;
+  db.ref("donations/"+id).remove();
 }
 
-/* PNG */
+/* ================= PNG EXPORT ================= */
 function exportPNG(){
-  html2canvas(tableBox).then(c=>{
+  showTable();
+  html2canvas(tableBox).then(canvas=>{
     const a=document.createElement("a");
-    a.download="receipt.png";
-    a.href=c.toDataURL();
+    a.download="LFM_Donation.png";
+    a.href=canvas.toDataURL();
     a.click();
   });
 }
