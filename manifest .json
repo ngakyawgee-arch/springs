@@ -1,0 +1,22 @@
+{
+  "name": "ဖိုးစောင့်တောင်မီးအိမ်",
+  "short_name": "LFM",
+  "description": "တော်လှန်ရေး အလှူရှင်မှတ်တမ်း",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#1e8f4d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
