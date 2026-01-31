@@ -31,6 +31,7 @@
     <!-- External Libraries -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <style>
         :root {
@@ -311,6 +312,13 @@
             background: rgba(255,255,255,0.03);
         }
         
+        .list-number {
+            width: 40px;
+            text-align: center;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
         /* Search Bar */
         .search-container {
             position: relative;
@@ -380,6 +388,15 @@
             
             .nav-icon {
                 font-size: 1.1rem;
+            }
+            
+            .data-table th, .data-table td {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            
+            .list-number {
+                width: 30px;
             }
         }
         
@@ -508,6 +525,30 @@
             opacity: 0.3;
         }
         
+        /* Member Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: var(--warning);
+            color: #000;
+        }
+        
+        .status-approved {
+            background: var(--success);
+            color: white;
+        }
+        
+        .status-rejected {
+            background: var(--danger);
+            color: white;
+        }
+        
         /* Utility Classes */
         .text-center { text-align: center; }
         .text-success { color: var(--success); }
@@ -520,6 +561,10 @@
         .mt-2 { margin-top: 10px; }
         .mt-3 { margin-top: 15px; }
         .p-3 { padding: 15px; }
+        .d-flex { display: flex; }
+        .gap-2 { gap: 10px; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
         
         /* Swipe Animation */
         .page {
@@ -570,7 +615,7 @@
                 <h1 class="app-title">✊ ဖိုးစောင့်တောင်မီးအိမ်</h1>
                 <p class="app-subtitle">တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</p>
                 <div style="margin-top: 10px; font-size: 0.8em; opacity: 0.7;">
-                    <span id="versionInfo">v1.0.0</span>
+                    <span id="versionInfo">v1.3.0</span>
                     • 
                     <span id="connectionStatus">🟢 Online</span>
                 </div>
@@ -584,9 +629,18 @@
                 
                 <hr style="margin: 20px 0; border: none; height: 1px; background: rgba(255,255,255,0.1);">
                 
-                <h3>👥 Member ဝင်ရန်</h3>
-                <input id="memberPin" type="number" placeholder="PIN နံပါတ် (1111)" inputmode="numeric" maxlength="4">
-                <button onclick="memberLogin()" class="btn-secondary">ဝင်မည်</button>
+                <div id="memberLoginSection">
+                    <h3>👥 Member ဝင်ရန်</h3>
+                    <input id="memberEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
+                    <input id="memberPassword" type="password" placeholder="စကားဝှက်" autocomplete="current-password">
+                    <button onclick="memberLogin()" class="btn-secondary">ဝင်မည်</button>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <small class="text-muted">Member account မရှိသေးပါက</small><br>
+                        <button onclick="showMemberRegistration()" class="btn-small" style="background: transparent; color: var(--primary); margin-top: 5px;">
+                            အကောင့်အသစ်ဖွင့်မည်
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <div class="card">
@@ -595,7 +649,7 @@
                     <div id="totalDonations" style="font-size: 2.5rem; font-weight: bold; color: var(--primary);">
                         0
                     </div>
-                    <div style="font-size: 1.1rem; margin-bottom: 10px;">ကျပ်</div>
+                    <div style="font-size: 1.1rem; margin-bottom: 10px;">ဘတ်</div>
                     <div id="totalDonors" style="font-size: 0.9rem; opacity: 0.8;">
                         အလှူရှင် 0 ဦး
                     </div>
@@ -610,6 +664,41 @@
                 <button onclick="checkConnection()" class="btn-secondary mb-2">ချိတ်ဆက်မှုစစ်ဆေးရန်</button>
                 <button onclick="clearCache()" class="btn-secondary mb-2">Cache ရှင်းလင်းရန်</button>
                 <button onclick="exportBackup()" class="btn-success">Backup ထုတ်ယူရန်</button>
+            </div>
+        </div>
+        
+        <!-- Member Registration Page -->
+        <div id="memberRegistrationPage" class="page hide">
+            <div class="app-header">
+                <h1>👥 Member အကောင့်အသစ်</h1>
+                <p class="app-subtitle">အကောင့်ဖွင့်ရန် အချက်အလက်များဖြည့်ပါ</p>
+            </div>
+            
+            <div class="card">
+                <h3>📝 အကောင့်အသစ်ဖွင့်ရန်</h3>
+                <input id="regName" placeholder="အမည်အပြည့်အစုံ" autocomplete="name">
+                <input id="regEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
+                <input id="regPhone" type="tel" placeholder="ဖုန်းနံပါတ်" autocomplete="tel">
+                <input id="regPassword" type="password" placeholder="စကားဝှက်" autocomplete="new-password">
+                <input id="regConfirmPassword" type="password" placeholder="စကားဝှက် ထပ်မံရိုက်ပါ" autocomplete="new-password">
+                <textarea id="regAddress" placeholder="နေရပ်လိပ်စာ" rows="2"></textarea>
+                
+                <div class="d-flex justify-between mt-3">
+                    <button onclick="showLoginPage()" class="btn-secondary">နောက်သို့</button>
+                    <button onclick="submitMemberRegistration()" class="btn-primary">အကောင့်ဖွင့်မည်</button>
+                </div>
+                
+                <div id="regStatus" class="mt-3"></div>
+            </div>
+            
+            <div class="card">
+                <h3>ℹ️ သတိပြုရန်</h3>
+                <ul style="padding-left: 20px; opacity: 0.8; font-size: 0.9em;">
+                    <li>Member အကောင့်သည် Admin ကအတည်ပြုမှသာ အသုံးပြုနိုင်မည်</li>
+                    <li>အကောင့်အခြေအနေကို Admin ကသတ်မှတ်ပေးမည်</li>
+                    <li>အီးမေးလ်နှင့် ဖုန်းနံပါတ် တစ်ခုစီကို အကောင့်တစ်ခုတည်းသာ အသုံးပြုနိုင်သည်</li>
+                    <li>စကားဝှက်ကို အနည်းဆုံး ၆ လုံးထား၍ ခိုင်မာစွာရွေးချယ်ပါ</li>
+                </ul>
             </div>
         </div>
         
@@ -642,6 +731,10 @@
             <span class="nav-icon">📋</span>
             <span>စာရင်း</span>
         </button>
+        <button class="nav-btn" onclick="showTab('members')" id="membersBtn">
+            <span class="nav-icon">👥</span>
+            <span>Members</span>
+        </button>
         <button class="nav-btn" onclick="showTab('export')">
             <span class="nav-icon">📤</span>
             <span>Export</span>
@@ -656,8 +749,7 @@
         // ====================
         // APP CONFIGURATION
         // ====================
-        const APP_VERSION = "1.2.0";
-        const MEMBER_PIN = "1111";
+        const APP_VERSION = "1.3.0";
         const APP_NAME = "ဖိုးစောင့်တောင်မီးအိမ်";
         
         // ====================
@@ -685,11 +777,13 @@
         let deferredPrompt = null;
         let currentTab = 'home';
         let offlineDonations = [];
+        let offlineMembers = [];
         
         // ====================
         // DOM ELEMENTS
         // ====================
         const loginPage = document.getElementById('loginPage');
+        const memberRegistrationPage = document.getElementById('memberRegistrationPage');
         const mainApp = document.getElementById('mainApp');
         const bottomNav = document.getElementById('bottomNav');
         const contentArea = document.getElementById('contentArea');
@@ -697,6 +791,7 @@
         const syncStatus = document.getElementById('syncStatus');
         const installPrompt = document.getElementById('installPrompt');
         const donateBtn = document.getElementById('donateBtn');
+        const membersBtn = document.getElementById('membersBtn');
         const versionInfo = document.getElementById('versionInfo');
         const connectionStatus = document.getElementById('connectionStatus');
         
@@ -733,20 +828,31 @@
             // Load public summary
             loadPublicSummary();
             
-            // Check if user is already logged in
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    currentUser = user;
-                    userRole = 'admin';
-                    userData = {
-                        email: user.email,
-                        uid: user.uid,
-                        lastLogin: Date.now()
-                    };
-                    saveToLocalStorage('userData', userData);
-                    showMainApp();
+            // Check if user is already logged in from localStorage
+            const savedUserData = localStorage.getItem('userData');
+            if (savedUserData) {
+                try {
+                    const data = JSON.parse(savedUserData);
+                    if (data.role === 'member' && data.status === 'approved') {
+                        // Auto-login for approved members
+                        userRole = 'member';
+                        userData = data;
+                        showMainApp();
+                    } else if (data.email) {
+                        // Check Firebase auth state for admin
+                        auth.onAuthStateChanged((user) => {
+                            if (user && user.email === data.email) {
+                                currentUser = user;
+                                userRole = 'admin';
+                                userData = data;
+                                showMainApp();
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log('Error loading saved user data:', e);
                 }
-            });
+            }
             
             // Service Worker Registration
             if ('serviceWorker' in navigator) {
@@ -808,12 +914,17 @@
         // ====================
         function loadOfflineData() {
             try {
-                const saved = localStorage.getItem('offlineDonations');
-                offlineDonations = saved ? JSON.parse(saved) : [];
-                console.log(`Loaded ${offlineDonations.length} offline donations`);
+                const savedDonations = localStorage.getItem('offlineDonations');
+                offlineDonations = savedDonations ? JSON.parse(savedDonations) : [];
+                
+                const savedMembers = localStorage.getItem('offlineMembers');
+                offlineMembers = savedMembers ? JSON.parse(savedMembers) : [];
+                
+                console.log(`Loaded ${offlineDonations.length} offline donations, ${offlineMembers.length} offline members`);
             } catch (error) {
                 console.error('Error loading offline data:', error);
                 offlineDonations = [];
+                offlineMembers = [];
             }
         }
         
@@ -833,37 +944,62 @@
             }
         }
         
+        function saveOfflineMember(member) {
+            try {
+                member.id = 'offline_member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                member.timestamp = Date.now();
+                member.synced = false;
+                
+                offlineMembers.push(member);
+                localStorage.setItem('offlineMembers', JSON.stringify(offlineMembers));
+                
+                return member.id;
+            } catch (error) {
+                console.error('Error saving offline member:', error);
+                return null;
+            }
+        }
+        
         async function syncOfflineData() {
-            if (!navigator.onLine || offlineDonations.length === 0) return;
+            if (!navigator.onLine) return;
             
             syncStatus.classList.remove('hide');
-            
-            const unsynced = offlineDonations.filter(d => !d.synced);
             let syncedCount = 0;
             
-            for (const donation of unsynced) {
+            // Sync donations
+            const unsyncedDonations = offlineDonations.filter(d => !d.synced);
+            for (const donation of unsyncedDonations) {
                 try {
-                    // Remove offline ID before sending to Firebase
                     const { id, synced, ...firebaseDonation } = donation;
-                    
                     await db.ref('donations').push(firebaseDonation);
-                    
-                    // Mark as synced
                     donation.synced = true;
                     syncedCount++;
-                    
                 } catch (error) {
                     console.error('Error syncing donation:', error);
                 }
             }
             
+            // Sync members
+            const unsyncedMembers = offlineMembers.filter(m => !m.synced);
+            for (const member of unsyncedMembers) {
+                try {
+                    const { id, synced, ...firebaseMember } = member;
+                    await db.ref('members').push(firebaseMember);
+                    member.synced = true;
+                    syncedCount++;
+                } catch (error) {
+                    console.error('Error syncing member:', error);
+                }
+            }
+            
             // Update localStorage
             localStorage.setItem('offlineDonations', JSON.stringify(offlineDonations));
+            localStorage.setItem('offlineMembers', JSON.stringify(offlineMembers));
             
             syncStatus.classList.add('hide');
             
             if (syncedCount > 0) {
-                showNotification(`${syncedCount} ခု သော အလှူများ sync လုပ်ပြီးပါပြီ`, 'success');
+                showNotification(`${syncedCount} ခု သော ဒေတာများ sync လုပ်ပြီးပါပြီ`, 'success');
                 loadPublicSummary();
                 
                 // Refresh current view if needed
@@ -871,6 +1007,19 @@
                     showTab(currentTab);
                 }
             }
+        }
+        
+        // ====================
+        // PAGE NAVIGATION
+        // ====================
+        function showLoginPage() {
+            memberRegistrationPage.classList.add('hide');
+            loginPage.classList.remove('hide');
+        }
+        
+        function showMemberRegistration() {
+            loginPage.classList.add('hide');
+            memberRegistrationPage.classList.remove('hide');
         }
         
         // ====================
@@ -895,6 +1044,7 @@
                 userData = {
                     email: currentUser.email,
                     uid: currentUser.uid,
+                    role: 'admin',
                     lastLogin: Date.now()
                 };
                 
@@ -922,30 +1072,151 @@
             hideLoading();
         }
         
-        function memberLogin() {
-            const pin = document.getElementById('memberPin').value.trim();
+        async function memberLogin() {
+            const email = document.getElementById('memberEmail').value.trim();
+            const password = document.getElementById('memberPassword').value;
             
-            if (pin !== MEMBER_PIN) {
-                showNotification('PIN နံပါတ် မှားယွင်းနေပါသည်', 'error');
-                vibrate([200, 100, 200]);
+            if (!email || !password) {
+                showNotification('ကျေးဇူးပြု၍ ဖြည့်ပါ', 'warning');
+                vibrate();
                 return;
             }
             
-            userRole = 'member';
-            userData = {
-                role: 'member',
-                lastLogin: Date.now(),
-                sessionId: 'session_' + Date.now()
-            };
+            showLoading('ဝင်ရောက်နေပါသည်...');
             
-            saveToLocalStorage('userData', userData);
-            showMainApp();
-            showNotification('Member အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
-            vibrate([50, 30, 50]);
+            try {
+                // Check both online and offline members
+                let member = null;
+                
+                if (navigator.onLine) {
+                    // Check Firebase
+                    const snapshot = await db.ref('members').orderByChild('email').equalTo(email).once('value');
+                    snapshot.forEach(child => {
+                        const data = child.val();
+                        if (data.password === password) {
+                            member = data;
+                            member.id = child.key;
+                        }
+                    });
+                }
+                
+                // Check offline members
+                if (!member) {
+                    const offlineMember = offlineMembers.find(m => 
+                        m.email === email && m.password === password && m.status === 'approved');
+                    if (offlineMember) {
+                        member = offlineMember;
+                    }
+                }
+                
+                if (!member) {
+                    showNotification('အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်', 'error');
+                    hideLoading();
+                    return;
+                }
+                
+                if (member.status !== 'approved') {
+                    showNotification('အကောင့်ကို Admin မှ အတည်မပြုရသေးပါ', 'warning');
+                    hideLoading();
+                    return;
+                }
+                
+                userRole = 'member';
+                userData = {
+                    ...member,
+                    role: 'member',
+                    lastLogin: Date.now()
+                };
+                
+                saveToLocalStorage('userData', userData);
+                showMainApp();
+                showNotification('Member အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
+                vibrate([50, 30, 50]);
+                
+            } catch (error) {
+                console.error('Member login error:', error);
+                showNotification('ဝင်ရောက်မှု မအောင်မြင်ပါ', 'error');
+                vibrate([200, 100, 200]);
+            }
+            
+            hideLoading();
+        }
+        
+        async function submitMemberRegistration() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const address = document.getElementById('regAddress').value.trim();
+            
+            if (!name || !email || !phone || !password || !confirmPassword) {
+                showNotification('လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ', 'warning');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('စကားဝှက် နှစ်ခု မတူပါ', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('စကားဝှက်သည် အနည်းဆုံး ၆ လုံးရှိရမည်', 'warning');
+                return;
+            }
+            
+            showLoading('အကောင့်ဖွင့်နေပါသည်...');
+            
+            try {
+                const memberData = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    password: password,
+                    address: address,
+                    status: 'pending',
+                    role: 'member',
+                    registeredAt: Date.now(),
+                    approvedBy: '',
+                    approvedAt: 0
+                };
+                
+                let saved = false;
+                
+                if (navigator.onLine) {
+                    // Save to Firebase
+                    await db.ref('members').push(memberData);
+                    saved = true;
+                } else {
+                    // Save offline
+                    saveOfflineMember(memberData);
+                    saved = true;
+                }
+                
+                if (saved) {
+                    showNotification('အကောင့်ဖွင့်ပြီးပါပြီ။ Admin မှ အတည်ပြုပြီးမှသာ အသုံးပြုနိုင်မည်။', 'success');
+                    showLoginPage();
+                    
+                    // Clear form
+                    document.getElementById('regName').value = '';
+                    document.getElementById('regEmail').value = '';
+                    document.getElementById('regPhone').value = '';
+                    document.getElementById('regPassword').value = '';
+                    document.getElementById('regConfirmPassword').value = '';
+                    document.getElementById('regAddress').value = '';
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showNotification('အကောင့်ဖွင့်မှု မအောင်မြင်ပါ', 'error');
+            }
+            
+            hideLoading();
         }
         
         function showMainApp() {
             loginPage.classList.add('hide');
+            memberRegistrationPage.classList.add('hide');
             mainApp.classList.remove('hide');
             bottomNav.classList.remove('hide');
             
@@ -954,15 +1225,15 @@
             const roleText = document.getElementById('roleText');
             const userInfo = document.getElementById('userInfo');
             
-            if (currentUser) {
+            if (userRole === 'admin' && currentUser) {
                 const username = currentUser.email.split('@')[0];
                 welcomeText.textContent = `မင်္ဂလာပါ ${username}`;
                 userInfo.innerHTML = `
                     <span>✉️ ${currentUser.email}</span>
                     <span style="margin-left: 15px;">👑 Admin</span>
                 `;
-            } else {
-                welcomeText.textContent = 'မင်္ဂလာပါ Member';
+            } else if (userRole === 'member') {
+                welcomeText.textContent = `မင်္ဂလာပါ ${userData.name || 'Member'}`;
                 userInfo.innerHTML = `
                     <span>👥 Member Account</span>
                     <span style="margin-left: 15px;">${new Date().toLocaleDateString('my-MM')}</span>
@@ -971,11 +1242,13 @@
             
             roleText.textContent = userRole === 'admin' ? '👑 Admin Panel' : '👥 Member View';
             
-            // Hide donate button for members
+            // Hide/show buttons based on role
             if (userRole === 'member') {
                 donateBtn.style.display = 'none';
+                membersBtn.style.display = 'none';
             } else {
                 donateBtn.style.display = 'flex';
+                membersBtn.style.display = 'flex';
             }
             
             // Show default tab
@@ -1040,8 +1313,10 @@
                             </div>
                         </div>
                     `;
-                    loadLiveSummary();
-                    loadRecentDonations();
+                    setTimeout(() => {
+                        loadLiveSummary();
+                        loadRecentDonations();
+                    }, 100);
                     break;
                     
                 case 'donate':
@@ -1062,7 +1337,7 @@
                             <h3>➕ အလှူအသစ်ထည့်ရန်</h3>
                             <input id="donorName" placeholder="အလှူရှင်အမည်" autocomplete="name">
                             <input id="donorPlace" placeholder="နေရပ်ဒေသ" autocomplete="address-level2">
-                            <input id="donorAmount" type="number" placeholder="အလှူငွေပမာဏ (ကျပ်)" inputmode="numeric">
+                            <input id="donorAmount" type="number" placeholder="အလှူငွေပမာဏ (ဘတ်)" inputmode="numeric">
                             <textarea id="donorNote" placeholder="မှတ်ချက် (မရှိလျှင်လည်းရ)" rows="3"></textarea>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <button onclick="saveDonation()" class="btn-primary">သိမ်းဆည်းမည်</button>
@@ -1075,7 +1350,7 @@
                             <ul style="padding-left: 20px; opacity: 0.8; font-size: 0.9em;">
                                 <li>အလှူရှင်၏ အမည်အပြည့်အစုံရေးပါ</li>
                                 <li>နေရပ်ဒေသကို မြို့နယ်အထိရေးပါ</li>
-                                <li>ငွေပမာဏကို ကျပ်ဖြင့်ရေးပါ</li>
+                                <li>ငွေပမာဏကို ဘတ်ဖြင့်ရေးပါ</li>
                                 <li>အင်တာနက်မရှိလျှင် offline သိမ်းမည်</li>
                             </ul>
                         </div>
@@ -1111,7 +1386,50 @@
                             <div id="listSummary" style="margin-top: 15px;"></div>
                         </div>
                     `;
-                    loadDonationsList();
+                    setTimeout(() => loadDonationsList(), 100);
+                    break;
+                    
+                case 'members':
+                    if (userRole !== 'admin') {
+                        content = `
+                            <div class="card">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">❌</div>
+                                    <h4>ဝင်ရောက်ခွင့်မရှိပါ</h4>
+                                    <p>ဤ feature ကို Admin သာလျှင် အသုံးပြုနိုင်သည်</p>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    }
+                    content = `
+                        <div class="card">
+                            <h3>👥 Member Management</h3>
+                            <div class="search-container">
+                                <input type="text" id="memberSearch" placeholder="Member အမည်ဖြင့်ရှာမည်" oninput="searchMembers()">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <select id="memberStatusFilter" onchange="loadMembers()">
+                                    <option value="all">အားလုံး</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                                <select id="memberSort" onchange="loadMembers()">
+                                    <option value="newest">နောက်ဆုံးမှစ၍</option>
+                                    <option value="oldest">အဟောင်းမှစ၍</option>
+                                    <option value="name">အမည်အတိုင်း</option>
+                                </select>
+                            </div>
+                            
+                            <div id="membersList" style="max-height: 400px; overflow-y: auto;">
+                                <div class="spinner"></div>
+                            </div>
+                            <div id="membersSummary" style="margin-top: 15px;"></div>
+                        </div>
+                    `;
+                    setTimeout(() => loadMembers(), 100);
                     break;
                     
                 case 'export':
@@ -1135,6 +1453,11 @@
                                     <span class="export-icon">📑</span>
                                     <span>PDF File</span>
                                     <small>.pdf format</small>
+                                </div>
+                                <div class="export-btn" onclick="exportData('png')">
+                                    <span class="export-icon">🖼️</span>
+                                    <span>PNG File</span>
+                                    <small>.png format</small>
                                 </div>
                                 <div class="export-btn" onclick="exportData('json')">
                                     <span class="export-icon">📦</span>
@@ -1192,7 +1515,7 @@
                 amount: amount,
                 note: note || '',
                 timestamp: Date.now(),
-                enteredBy: currentUser ? currentUser.email : (userRole === 'member' ? 'member' : 'unknown'),
+                enteredBy: currentUser ? currentUser.email : (userRole === 'member' ? userData.email : 'unknown'),
                 synced: navigator.onLine
             };
             
@@ -1221,8 +1544,10 @@
                 // Refresh summary and list
                 loadPublicSummary();
                 if (currentTab === 'home') {
-                    loadLiveSummary();
-                    loadRecentDonations();
+                    setTimeout(() => {
+                        loadLiveSummary();
+                        loadRecentDonations();
+                    }, 100);
                 }
                 
                 vibrate();
@@ -1278,15 +1603,32 @@
                     // Use offline data
                     let total = 0;
                     let count = offlineDonations.length;
+                    let lastDonation = 0;
                     
                     offlineDonations.forEach(d => {
                         total += d.amount || 0;
+                        if (d.timestamp > lastDonation) {
+                            lastDonation = d.timestamp;
+                        }
                     });
                     
-                    updateSummaryUI(total, count, 0);
+                    updateSummaryUI(total, count, lastDonation);
                 }
             } catch (error) {
                 console.error('Error loading public summary:', error);
+                // Use offline data as fallback
+                let total = 0;
+                let count = offlineDonations.length;
+                let lastDonation = 0;
+                
+                offlineDonations.forEach(d => {
+                    total += d.amount || 0;
+                    if (d.timestamp > lastDonation) {
+                        lastDonation = d.timestamp;
+                    }
+                });
+                
+                updateSummaryUI(total, count, lastDonation);
             }
         }
         
@@ -1297,6 +1639,8 @@
             if (lastDonation > 0) {
                 const dateStr = new Date(lastDonation).toLocaleDateString('my-MM');
                 document.getElementById('lastUpdated').textContent = `နောက်ဆုံးအပ်ငွေ: ${dateStr}`;
+            } else {
+                document.getElementById('lastUpdated').textContent = `နောက်ဆုံးအပ်ငွေ: မရှိပါ`;
             }
         }
         
@@ -1304,15 +1648,17 @@
             try {
                 const summaryDiv = document.getElementById('liveSummary');
                 
+                let donations = [];
+                let total = 0;
+                let count = 0;
+                let todayTotal = 0;
+                const today = new Date().setHours(0,0,0,0);
+                
                 if (navigator.onLine) {
                     const snapshot = await db.ref('donations').once('value');
-                    let total = 0;
-                    let count = 0;
-                    let todayTotal = 0;
-                    let today = new Date().setHours(0,0,0,0);
-                    
                     snapshot.forEach((child) => {
                         const data = child.val();
+                        donations.push(data);
                         total += data.amount || 0;
                         count++;
                         
@@ -1320,68 +1666,57 @@
                             todayTotal += data.amount || 0;
                         }
                     });
+                }
+                
+                // Add offline data
+                offlineDonations.forEach(d => {
+                    donations.push(d);
+                    total += d.amount || 0;
+                    count++;
+                    if (d.timestamp >= today) {
+                        todayTotal += d.amount || 0;
+                    }
+                });
+                
+                const unsynced = offlineDonations.filter(d => !d.synced).length;
+                
+                summaryDiv.innerHTML = `
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">
+                        ${total.toLocaleString()}
+                    </div>
+                    <div style="font-size: 1.1rem; margin-bottom: 15px;">ဘတ်</div>
                     
-                    // Add offline data
-                    offlineDonations.forEach(d => {
-                        total += d.amount || 0;
-                        count++;
-                        if (d.timestamp >= today) {
-                            todayTotal += d.amount || 0;
-                        }
-                    });
-                    
-                    summaryDiv.innerHTML = `
-                        <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">
-                            ${total.toLocaleString()}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                        <div style="background: rgba(30, 143, 77, 0.1); padding: 15px; border-radius: 10px;">
+                            <div style="font-size: 0.9em; opacity: 0.8;">စုစုပေါင်း</div>
+                            <div style="font-size: 1.5em; font-weight: bold;">${count}</div>
+                            <div style="font-size: 0.8em;">အလှူရှင်</div>
                         </div>
-                        <div style="font-size: 1.1rem; margin-bottom: 15px;">ကျပ်</div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                            <div style="background: rgba(30, 143, 77, 0.1); padding: 15px; border-radius: 10px;">
-                                <div style="font-size: 0.9em; opacity: 0.8;">စုစုပေါင်း</div>
-                                <div style="font-size: 1.5em; font-weight: bold;">${count}</div>
-                                <div style="font-size: 0.8em;">အလှူရှင်</div>
-                            </div>
-                            <div style="background: rgba(33, 150, 243, 0.1); padding: 15px; border-radius: 10px;">
-                                <div style="font-size: 0.9em; opacity: 0.8;">ယနေ့</div>
-                                <div style="font-size: 1.5em; font-weight: bold;">${todayTotal.toLocaleString()}</div>
-                                <div style="font-size: 0.8em;">ကျပ်</div>
-                            </div>
+                        <div style="background: rgba(33, 150, 243, 0.1); padding: 15px; border-radius: 10px;">
+                            <div style="font-size: 0.9em; opacity: 0.8;">ယနေ့</div>
+                            <div style="font-size: 1.5em; font-weight: bold;">${todayTotal.toLocaleString()}</div>
+                            <div style="font-size: 0.8em;">ဘတ်</div>
                         </div>
-                    `;
-                } else {
-                    // Offline mode
-                    let total = 0;
-                    let count = offlineDonations.length;
-                    let unsynced = offlineDonations.filter(d => !d.synced).length;
-                    
-                    offlineDonations.forEach(d => {
-                        total += d.amount || 0;
-                    });
-                    
-                    summaryDiv.innerHTML = `
-                        <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">
-                            ${total.toLocaleString()}
-                        </div>
-                        <div style="font-size: 1.1rem; margin-bottom: 15px;">ကျပ်</div>
-                        
-                        <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    </div>
+                    ${unsynced > 0 ? `
+                        <div style="background: rgba(255, 193, 7, 0.1); padding: 10px; border-radius: 10px; margin-top: 15px;">
                             <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                                 <span>⚠️</span>
                                 <div>
-                                    <div style="font-weight: bold;">Offline Mode</div>
-                                    <div style="font-size: 0.9em;">${unsynced} unsynced donations</div>
+                                    <div style="font-size: 0.9em;">${unsynced} offline donations pending sync</div>
                                 </div>
                             </div>
                         </div>
-                    `;
-                }
+                    ` : ''}
+                `;
+                
             } catch (error) {
                 console.error('Error loading live summary:', error);
                 document.getElementById('liveSummary').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <p>ဒေတာရယူရာတွင် အမှားတစ်ခုဖြစ်နေပါသည်</p>
+                        <div class="empty-state-icon">📊</div>
+                        <p>ဒေတာရယူနေပါသည်...</p>
+                        <button onclick="loadLiveSummary()" class="btn-small mt-2">ပြန်လည်ကြိုးစားမည်</button>
                     </div>
                 `;
             }
@@ -1393,7 +1728,7 @@
                 let donations = [];
                 
                 if (navigator.onLine) {
-                    const snapshot = await db.ref('donations').once('value');
+                    const snapshot = await db.ref('donations').orderByChild('timestamp').limitToLast(10).once('value');
                     snapshot.forEach((child) => {
                         donations.push({
                             id: child.key,
@@ -1424,17 +1759,18 @@
                 }
                 
                 let html = '<table class="data-table">';
-                html += '<tr><th>အမည်</th><th>ပမာဏ</th><th>ရက်စွဲ</th></tr>';
+                html += '<tr><th>နံပါတ်</th><th>အမည်</th><th>ပမာဏ</th><th>ရက်စွဲ</th></tr>';
                 
-                donations.forEach(d => {
+                donations.forEach((d, index) => {
                     const date = new Date(d.timestamp).toLocaleDateString('my-MM');
                     const amount = (d.amount || 0).toLocaleString();
                     const offlineBadge = d.synced === false ? ' <span style="color: var(--warning); font-size: 0.8em;">(Offline)</span>' : '';
                     
                     html += `
                         <tr>
+                            <td class="list-number">${index + 1}</td>
                             <td>${d.name}${offlineBadge}</td>
-                            <td>${amount} ကျပ်</td>
+                            <td>${amount} ဘတ်</td>
                             <td>${date}</td>
                         </tr>
                     `;
@@ -1447,8 +1783,9 @@
                 console.error('Error loading recent donations:', error);
                 document.getElementById('recentDonations').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <p>ဒေတာရယူရာတွင် အမှားတစ်ခုဖြစ်နေပါသည်</p>
+                        <div class="empty-state-icon">📊</div>
+                        <p>ဒေတာရယူနေပါသည်...</p>
+                        <button onclick="loadRecentDonations()" class="btn-small mt-2">ပြန်လည်ကြိုးစားမည်</button>
                     </div>
                 `;
             }
@@ -1521,6 +1858,7 @@
                 html += `
                     <thead>
                         <tr>
+                            <th class="list-number">နံပါတ်</th>
                             <th>အမည်</th>
                             <th>နေရပ်</th>
                             <th>ပမာဏ</th>
@@ -1542,9 +1880,10 @@
                     
                     html += `
                         <tr>
+                            <td class="list-number">${index + 1}</td>
                             <td>${d.name}${offlineBadge}</td>
                             <td>${d.place || ''}</td>
-                            <td>${amount.toLocaleString()} ကျပ်</td>
+                            <td>${amount.toLocaleString()} ဘတ်</td>
                             <td>${date}</td>
                         </tr>
                     `;
@@ -1561,7 +1900,7 @@
                             <strong>စုစုပေါင်း: ${donations.length} ခု</strong>
                             ${unsyncedCount > 0 ? `<span class="text-warning"> (${unsyncedCount} offline)</span>` : ''}
                         </div>
-                        <div><strong>ငွေပမာဏ: ${total.toLocaleString()} ကျပ်</strong></div>
+                        <div><strong>ငွေပမာဏ: ${total.toLocaleString()} ဘတ်</strong></div>
                         <div>${navigator.onLine ? '🟢 Online' : '🔴 Offline'}</div>
                     </div>
                 `;
@@ -1570,12 +1909,215 @@
                 console.error('Error loading donations list:', error);
                 document.getElementById('donationsList').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <p>ဒေတာရယူရာတွင် အမှားတစ်ခုဖြစ်နေပါသည်</p>
-                        <small>${error.message}</small>
+                        <div class="empty-state-icon">📊</div>
+                        <p>ဒေတာရယူနေပါသည်...</p>
+                        <button onclick="loadDonationsList()" class="btn-small mt-2">ပြန်လည်ကြိုးစားမည်</button>
                     </div>
                 `;
             }
+        }
+        
+        async function loadMembers() {
+            try {
+                const container = document.getElementById('membersList');
+                const summaryDiv = document.getElementById('membersSummary');
+                
+                container.innerHTML = '<div class="spinner"></div>';
+                
+                let members = [];
+                
+                if (navigator.onLine) {
+                    const snapshot = await db.ref('members').once('value');
+                    snapshot.forEach((child) => {
+                        members.push({
+                            id: child.key,
+                            ...child.val()
+                        });
+                    });
+                }
+                
+                // Add offline members
+                offlineMembers.forEach(m => {
+                    members.push(m);
+                });
+                
+                // Apply filters
+                const statusFilter = document.getElementById('memberStatusFilter')?.value || 'all';
+                if (statusFilter !== 'all') {
+                    members = members.filter(m => m.status === statusFilter);
+                }
+                
+                // Apply sorting
+                const sortBy = document.getElementById('memberSort')?.value || 'newest';
+                if (sortBy === 'newest') {
+                    members.sort((a, b) => (b.registeredAt || 0) - (a.registeredAt || 0));
+                } else if (sortBy === 'oldest') {
+                    members.sort((a, b) => (a.registeredAt || 0) - (b.registeredAt || 0));
+                } else if (sortBy === 'name') {
+                    members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                }
+                
+                if (members.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>ဖော်ပြရန် Member များ မရှိပါ</p>
+                        </div>
+                    `;
+                    summaryDiv.innerHTML = '';
+                    return;
+                }
+                
+                let html = '<table class="data-table">';
+                html += `
+                    <thead>
+                        <tr>
+                            <th class="list-number">နံပါတ်</th>
+                            <th>အမည်</th>
+                            <th>အီးမေးလ်</th>
+                            <th>ဖုန်း</th>
+                            <th>အခြေအနေ</th>
+                            <th>လုပ်ဆောင်ချက်</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                members.forEach((m, index) => {
+                    const statusBadge = m.status === 'approved' ? 
+                        `<span class="status-badge status-approved">Approved</span>` :
+                        m.status === 'rejected' ?
+                        `<span class="status-badge status-rejected">Rejected</span>` :
+                        `<span class="status-badge status-pending">Pending</span>`;
+                    
+                    const actions = m.status === 'pending' ? `
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="approveMember('${m.id}', '${m.email}')" class="btn-small" style="background: var(--success); padding: 4px 8px; font-size: 0.8em;">Approve</button>
+                            <button onclick="rejectMember('${m.id}', '${m.email}')" class="btn-small" style="background: var(--danger); padding: 4px 8px; font-size: 0.8em;">Reject</button>
+                        </div>
+                    ` : `
+                        <div style="font-size: 0.8em; opacity: 0.7;">
+                            ${m.approvedBy ? `By: ${m.approvedBy}` : ''}
+                        </div>
+                    `;
+                    
+                    html += `
+                        <tr>
+                            <td class="list-number">${index + 1}</td>
+                            <td>${m.name}</td>
+                            <td>${m.email}</td>
+                            <td>${m.phone}</td>
+                            <td>${statusBadge}</td>
+                            <td>${actions}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                container.innerHTML = html;
+                
+                // Update summary
+                const pendingCount = members.filter(m => m.status === 'pending').length;
+                const approvedCount = members.filter(m => m.status === 'approved').length;
+                const rejectedCount = members.filter(m => m.status === 'rejected').length;
+                
+                summaryDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(30, 143, 77, 0.1); border-radius: 8px; font-size: 0.9em; flex-wrap: wrap; gap: 10px;">
+                        <div><strong>စုစုပေါင်း: ${members.length} ဦး</strong></div>
+                        <div><span class="text-warning">Pending: ${pendingCount}</span></div>
+                        <div><span class="text-success">Approved: ${approvedCount}</span></div>
+                        <div><span class="text-danger">Rejected: ${rejectedCount}</span></div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading members:', error);
+                document.getElementById('membersList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>ဒေတာရယူနေပါသည်...</p>
+                        <button onclick="loadMembers()" class="btn-small mt-2">ပြန်လည်ကြိုးစားမည်</button>
+                    </div>
+                `;
+            }
+        }
+        
+        async function approveMember(memberId, memberEmail) {
+            if (!confirm('ဤ Member အကောင့်ကို အတည်ပြုမည်လား?')) return;
+            
+            showLoading('Member အကောင့် အတည်ပြုနေပါသည်...');
+            
+            try {
+                const updateData = {
+                    status: 'approved',
+                    approvedBy: currentUser.email,
+                    approvedAt: Date.now()
+                };
+                
+                if (memberId.startsWith('offline_')) {
+                    // Update offline member
+                    const memberIndex = offlineMembers.findIndex(m => m.id === memberId);
+                    if (memberIndex !== -1) {
+                        offlineMembers[memberIndex] = {
+                            ...offlineMembers[memberIndex],
+                            ...updateData,
+                            synced: false
+                        };
+                        localStorage.setItem('offlineMembers', JSON.stringify(offlineMembers));
+                    }
+                } else if (navigator.onLine) {
+                    // Update Firebase
+                    await db.ref('members/' + memberId).update(updateData);
+                }
+                
+                showNotification('Member အကောင့်အား အတည်ပြုပြီးပါပြီ', 'success');
+                loadMembers();
+                
+            } catch (error) {
+                console.error('Error approving member:', error);
+                showNotification('အတည်ပြုမှု မအောင်မြင်ပါ', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        async function rejectMember(memberId, memberEmail) {
+            if (!confirm('ဤ Member အကောင့်ကို ငြင်းပယ်မည်လား?')) return;
+            
+            showLoading('Member အကောင့် ငြင်းပယ်နေပါသည်...');
+            
+            try {
+                const updateData = {
+                    status: 'rejected',
+                    approvedBy: currentUser.email,
+                    approvedAt: Date.now()
+                };
+                
+                if (memberId.startsWith('offline_')) {
+                    // Update offline member
+                    const memberIndex = offlineMembers.findIndex(m => m.id === memberId);
+                    if (memberIndex !== -1) {
+                        offlineMembers[memberIndex] = {
+                            ...offlineMembers[memberIndex],
+                            ...updateData,
+                            synced: false
+                        };
+                        localStorage.setItem('offlineMembers', JSON.stringify(offlineMembers));
+                    }
+                } else if (navigator.onLine) {
+                    // Update Firebase
+                    await db.ref('members/' + memberId).update(updateData);
+                }
+                
+                showNotification('Member အကောင့်အား ငြင်းပယ်ပြီးပါပြီ', 'warning');
+                loadMembers();
+                
+            } catch (error) {
+                console.error('Error rejecting member:', error);
+                showNotification('ငြင်းပယ်မှု မအောင်မြင်ပါ', 'error');
+            }
+            
+            hideLoading();
         }
         
         function searchDonations() {
@@ -1586,11 +2128,11 @@
             
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length < 3) return;
+                if (cells.length < 5) return;
                 
-                const name = cells[0].textContent.toLowerCase();
-                const place = cells[1].textContent.toLowerCase();
-                const amount = cells[2].textContent.toLowerCase();
+                const name = cells[1].textContent.toLowerCase();
+                const place = cells[2].textContent.toLowerCase();
+                const amount = cells[3].textContent.toLowerCase();
                 
                 if (name.includes(searchTerm) || 
                     place.includes(searchTerm) || 
@@ -1604,15 +2146,53 @@
             
             // Update summary
             const summaryDiv = document.getElementById('listSummary');
-            if (summaryDiv) {
-                const originalText = summaryDiv.textContent;
-                const countMatch = originalText.match(/စုစုပေါင်း: (\d+) ခု/);
-                if (countMatch) {
-                    summaryDiv.innerHTML = summaryDiv.innerHTML.replace(
-                        `စုစုပေါင်း: ${countMatch[1]} ခု`,
-                        `ရလဒ်: ${visibleCount} ခု (ရှာဖွေမှု)`
-                    );
+            if (summaryDiv && searchTerm) {
+                summaryDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(33, 150, 243, 0.1); border-radius: 8px; font-size: 0.9em;">
+                        <div><strong>ရလဒ်: ${visibleCount} ခု (ရှာဖွေမှု)</strong></div>
+                        <div>🔍 "${searchTerm}"</div>
+                    </div>
+                `;
+            } else if (summaryDiv) {
+                loadDonationsList();
+            }
+        }
+        
+        function searchMembers() {
+            const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#membersList tbody tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 6) return;
+                
+                const name = cells[1].textContent.toLowerCase();
+                const email = cells[2].textContent.toLowerCase();
+                const phone = cells[3].textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || 
+                    email.includes(searchTerm) || 
+                    phone.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
                 }
+            });
+            
+            // Update summary
+            const summaryDiv = document.getElementById('membersSummary');
+            if (summaryDiv && searchTerm) {
+                summaryDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(33, 150, 243, 0.1); border-radius: 8px; font-size: 0.9em;">
+                        <div><strong>ရလဒ်: ${visibleCount} ဦး (ရှာဖွေမှု)</strong></div>
+                        <div>🔍 "${searchTerm}"</div>
+                    </div>
+                `;
+            } else if (summaryDiv) {
+                loadMembers();
             }
         }
         
@@ -1665,8 +2245,9 @@
                 switch(format) {
                     case 'csv':
                         // Create CSV
-                        const headers = ['အမည်', 'နေရပ်', 'ပမာဏ', 'မှတ်ချက်', 'ရက်စွဲ', 'အချိန်'];
-                        const rows = donations.map(d => [
+                        const headers = ['နံပါတ်', 'အမည်', 'နေရပ်', 'ပမာဏ', 'မှတ်ချက်', 'ရက်စွဲ', 'အချိန်'];
+                        const rows = donations.map((d, index) => [
+                            index + 1,
                             `"${d.name || ''}"`,
                             `"${d.place || ''}"`,
                             d.amount || 0,
@@ -1687,7 +2268,8 @@
                             return;
                         }
                         
-                        const data = donations.map(d => ({
+                        const data = donations.map((d, index) => ({
+                            'နံပါတ်': index + 1,
                             'အမည်': d.name || '',
                             'နေရပ်': d.place || '',
                             'ပမာဏ': d.amount || 0,
@@ -1727,16 +2309,17 @@
                         
                         // Summary
                         const total = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
-                        doc.text(`စုစုပေါင်း: ${total.toLocaleString()} ကျပ် | အလှူရှင်ဦးရေ: ${donations.length} ဦး`, 105, 35, { align: 'center' });
+                        doc.text(`စုစုပေါင်း: ${total.toLocaleString()} ဘတ် | အလှူရှင်ဦးရေ: ${donations.length} ဦး`, 105, 35, { align: 'center' });
                         
                         // Table header
                         doc.setFillColor(30, 143, 77);
                         doc.setTextColor(255, 255, 255);
                         doc.rect(10, 45, 190, 10, 'F');
                         doc.setFontSize(11);
-                        doc.text('အမည်', 15, 51);
-                        doc.text('နေရပ်', 70, 51);
-                        doc.text('ပမာဏ', 120, 51);
+                        doc.text('နံပါတ်', 15, 51);
+                        doc.text('အမည်', 30, 51);
+                        doc.text('နေရပ်', 80, 51);
+                        doc.text('ပမာဏ', 130, 51);
                         doc.text('ရက်စွဲ', 160, 51);
                         
                         doc.setTextColor(0, 0, 0);
@@ -1750,9 +2333,10 @@
                             }
                             
                             doc.setFontSize(10);
-                            doc.text(d.name || '', 15, y, { maxWidth: 50 });
-                            doc.text(d.place || '', 70, y, { maxWidth: 45 });
-                            doc.text((d.amount || 0).toLocaleString(), 120, y);
+                            doc.text((i + 1).toString(), 15, y);
+                            doc.text(d.name || '', 30, y, { maxWidth: 45 });
+                            doc.text(d.place || '', 80, y, { maxWidth: 45 });
+                            doc.text((d.amount || 0).toLocaleString() + ' ဘတ်', 130, y);
                             doc.text(new Date(d.timestamp).toLocaleDateString('my-MM'), 160, y);
                             
                             y += 10;
@@ -1761,6 +2345,95 @@
                         fileName = `LFM_Donations_${getFormattedDate()}.pdf`;
                         doc.save(fileName);
                         showNotification('PDF ဖိုင်ထုတ်ယူပြီးပါပြီ', 'success');
+                        hideLoading();
+                        return;
+                        
+                    case 'png':
+                        if (typeof html2canvas === 'undefined') {
+                            showNotification('PNG export အတွက် library မရှိပါ', 'error');
+                            hideLoading();
+                            return;
+                        }
+                        
+                        // Create a summary table for PNG
+                        const exportDiv = document.createElement('div');
+                        exportDiv.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; color: black; padding: 20px; font-family: Arial, sans-serif;';
+                        
+                        let html = `
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <h1 style="color: #1e8f4d; margin-bottom: 5px;">${APP_NAME}</h1>
+                                <h3 style="color: #666; margin-top: 0;">တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</h3>
+                                <p style="color: #888; font-size: 14px;">ရက်စွဲ: ${new Date().toLocaleDateString('my-MM')}</p>
+                            </div>
+                            
+                            <div style="background: #f5f5f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                                <div style="font-size: 28px; font-weight: bold; color: #1e8f4d;">
+                                    ${donations.reduce((sum, d) => sum + (d.amount || 0), 0).toLocaleString()} ဘတ်
+                                </div>
+                                <div style="color: #666;">စုစုပေါင်းအလှူငွေ</div>
+                                <div style="margin-top: 10px;">
+                                    <span style="background: #1e8f4d; color: white; padding: 5px 10px; border-radius: 5px; margin: 0 5px;">
+                                        အလှူရှင် ${donations.length} ဦး
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                <thead>
+                                    <tr style="background: #1e8f4d; color: white;">
+                                        <th style="padding: 10px; text-align: left; width: 50px;">နံပါတ်</th>
+                                        <th style="padding: 10px; text-align: left;">အမည်</th>
+                                        <th style="padding: 10px; text-align: left;">နေရပ်</th>
+                                        <th style="padding: 10px; text-align: left;">ပမာဏ</th>
+                                        <th style="padding: 10px; text-align: left;">ရက်စွဲ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        
+                        donations.slice(0, 20).forEach((d, i) => {
+                            html += `
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">${i + 1}</td>
+                                    <td style="padding: 8px;">${d.name}</td>
+                                    <td style="padding: 8px;">${d.place || ''}</td>
+                                    <td style="padding: 8px;">${(d.amount || 0).toLocaleString()} ဘတ်</td>
+                                    <td style="padding: 8px;">${new Date(d.timestamp).toLocaleDateString('my-MM')}</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += `
+                                </tbody>
+                            </table>
+                            ${donations.length > 20 ? `
+                                <div style="text-align: center; margin-top: 15px; color: #888; font-size: 12px;">
+                                    နောက်ထပ် ${donations.length - 20} ခု ရှိပါသည်...
+                                </div>
+                            ` : ''}
+                            <div style="text-align: center; margin-top: 20px; color: #888; font-size: 10px;">
+                                Generated by ${APP_NAME} v${APP_VERSION}
+                            </div>
+                        `;
+                        
+                        exportDiv.innerHTML = html;
+                        document.body.appendChild(exportDiv);
+                        
+                        try {
+                            const canvas = await html2canvas(exportDiv);
+                            document.body.removeChild(exportDiv);
+                            
+                            const imgData = canvas.toDataURL('image/png');
+                            const a = document.createElement('a');
+                            a.href = imgData;
+                            a.download = `LFM_Donations_${getFormattedDate()}.png`;
+                            a.click();
+                            
+                            showNotification('PNG ဖိုင်ထုတ်ယူပြီးပါပြီ', 'success');
+                        } catch (error) {
+                            document.body.removeChild(exportDiv);
+                            throw error;
+                        }
                         hideLoading();
                         return;
                         
@@ -1815,9 +2488,9 @@
                 
                 const text = `${APP_NAME} - အလှူစာရင်း
 
-စုစုပေါင်းအလှူငွေ: ${total.toLocaleString()} ကျပ်
+စုစုပေါင်းအလှူငွေ: ${total.toLocaleString()} ဘတ်
 အလှူရှင်ဦးရေ: ${donations.length} ဦး
-နောက်ဆုံးအလှူ: ${latest.name} - ${(latest.amount || 0).toLocaleString()} ကျပ်
+နောက်ဆုံးအလှူ: ${latest.name} - ${(latest.amount || 0).toLocaleString()} ဘတ်
 နောက်ဆုံးရက်စွဲ: ${new Date(latest.timestamp).toLocaleDateString('my-MM')}
 
 #ဖိုးစောင့်တောင်`;
@@ -1855,6 +2528,7 @@
                     version: APP_VERSION,
                     backupDate: new Date().toISOString(),
                     offlineDonations: offlineDonations,
+                    offlineMembers: offlineMembers,
                     userData: userData
                 };
                 
@@ -1876,7 +2550,6 @@
         }
         
         function restoreBackup() {
-            // This would require file input - simplified version
             showNotification('Restore feature ကို နောက်ပိုင်းဗားရှင်းတွင် ထည့်သွင်းမည်', 'info');
         }
         
@@ -1990,6 +2663,7 @@
                 try {
                     localStorage.clear();
                     offlineDonations = [];
+                    offlineMembers = [];
                     showNotification('Cache ရှင်းလင်းပြီးပါပြီ', 'success');
                     location.reload();
                 } catch (error) {
@@ -2031,8 +2705,11 @@
                 userRole = '';
                 userData = {};
                 
-                // Reload page
-                location.reload();
+                // Show login page
+                loginPage.classList.remove('hide');
+                mainApp.classList.add('hide');
+                bottomNav.classList.add('hide');
+                memberRegistrationPage.classList.add('hide');
             }
         }
         
