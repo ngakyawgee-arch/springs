@@ -20,7 +20,8 @@ body{margin:0;background:#0d0d0d;color:#fff;font-family:sans-serif}
 .card{background:#1a1a1a;padding:15px;border-radius:14px;margin-bottom:12px}
 h2,h3{text-align:center;margin:6px 0}
 input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none}
-button{background:#1e8f4d;color:#fff;font-weight:bold}
+button{background:#1e8f4d;color:#fff;font-weight-bold}
+button:disabled{opacity:0.5;cursor:not-allowed}
 .gray{background:#333}
 .red{background:#b71c1c}
 .hide{display:none}
@@ -29,6 +30,7 @@ th,td{border-bottom:1px solid #333;padding:6px;text-align:center;font-size:13px}
 footer{text-align:center;opacity:.6;margin-top:20px}
 .small{font-size:12px;opacity:.8}
 .actionBtn{padding:4px 8px;font-size:12px}
+.loading{text-align:center;padding:20px}
 </style>
 </head>
 
@@ -41,20 +43,26 @@ footer{text-align:center;opacity:.6;margin-top:20px}
 <!-- LOGIN -->
 <div id="loginBox" class="card">
   <h3>Admin Login</h3>
-  <input id="email" placeholder="Admin Email">
-  <input id="password" type="password" placeholder="Admin Password">
-  <button onclick="adminLogin()">Admin ဝင်မည်</button>
+  <input id="email" type="email" placeholder="Admin Email" value="admin@lfm.com">
+  <input id="password" type="password" placeholder="Admin Password" value="admin123">
+  <button onclick="adminLogin()" id="adminLoginBtn">Admin ဝင်မည်</button>
+  <div id="loginStatus" class="small" style="text-align:center;margin-top:10px;"></div>
   <hr>
   <h3>Member Login</h3>
-  <input id="memberPin" placeholder="Member PIN">
-  <button class="gray" onclick="memberLogin()">Member ဝင်မည်</button>
+  <input id="memberPin" placeholder="Member PIN" value="1111">
+  <button class="gray" onclick="memberLogin()" id="memberLoginBtn">Member ဝင်မည်</button>
+</div>
+
+<!-- LOADING -->
+<div id="loadingBox" class="card hide">
+  <div class="loading">လုပ်ဆောင်နေပါသည်...</div>
 </div>
 
 <!-- MAIN -->
 <div id="mainBox" class="hide">
 
 <div class="card">
-  <button onclick="showAdd()">➕ အလှူထည့်</button>
+  <button onclick="showAdd()" id="addBtn">➕ အလှူထည့်</button>
   <button onclick="showTable()">📋 စာရင်းကြည့်</button>
   <button onclick="exportPNG()">🖼 PNG</button>
   <button onclick="exportPDF()">📄 PDF</button>
@@ -66,9 +74,9 @@ footer{text-align:center;opacity:.6;margin-top:20px}
   <h3 id="formTitle">အလှူစာရင်းထည့်</h3>
   <input id="name" placeholder="အမည်">
   <input id="place" placeholder="နေရပ် / နိုင်ငံ">
-  <input id="amount" type="number" placeholder="အလှူငွေ">
+  <input id="amount" type="number" placeholder="အလှူငွေ" min="1">
   <input id="note" placeholder="မှတ်ချက်">
-  <button onclick="saveData()">သိမ်းမည်</button>
+  <button onclick="saveData()" id="saveBtn">သိမ်းမည်</button>
 </div>
 
 <!-- TABLE -->
@@ -86,7 +94,7 @@ footer{text-align:center;opacity:.6;margin-top:20px}
     </thead>
     <tbody id="tbody"></tbody>
   </table>
-  <div id="summary" class="small"></div>
+  <div id="summary" class="small" style="margin-top:15px;"></div>
 </div>
 
 </div>
@@ -95,94 +103,363 @@ footer{text-align:center;opacity:.6;margin-top:20px}
 </div>
 
 <script>
-/* FIREBASE */
-firebase.initializeApp({
+// Firebase configuration - သင့်ရဲ့ Firebase project ထဲက configuration ကို ဒီနေရာမှာ ပြင်ပေးပါ
+const firebaseConfig = {
   apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
   authDomain: "lamp-88a25.firebaseapp.com",
   databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lamp-88a25"
-});
-const auth=firebase.auth();
-const db=firebase.database();
+  projectId: "lamp-88a25",
+  storageBucket: "lamp-88a25.appspot.com", // Added this line
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Add this if needed
+  appId: "YOUR_APP_ID" // Add this if needed
+};
+
+/* FIREBASE INITIALIZATION */
+try {
+  firebase.initializeApp(firebaseConfig);
+  console.log("Firebase initialized successfully");
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+  document.getElementById("loginStatus").innerText = "Firebase ချိတ်ဆက်မှု မအောင်မြင်ပါ";
+  document.getElementById("loginStatus").style.color = "red";
+}
+
+const auth = firebase.auth();
+const db = firebase.database();
 
 /* STATE */
-let role="", editId=null;
+let role = "", editId = null;
 
-/* LOGIN */
-function adminLogin(){
-  if(!email.value||!password.value) return alert("ဖြည့်ပါ");
-  auth.signInWithEmailAndPassword(email.value,password.value)
-  .then(()=>{ role="admin"; enter(); })
-  .catch(e=>alert(e.message));
+/* UI ELEMENTS */
+const loginBox = document.getElementById('loginBox');
+const loadingBox = document.getElementById('loadingBox');
+const mainBox = document.getElementById('mainBox');
+const addBox = document.getElementById('addBox');
+const tableBox = document.getElementById('tableBox');
+const actionCol = document.getElementById('actionCol');
+const tbody = document.getElementById('tbody');
+const summary = document.getElementById('summary');
+const formTitle = document.getElementById('formTitle');
+const email = document.getElementById('email');
+const password = document.getElementById('password');
+const memberPin = document.getElementById('memberPin');
+const name = document.getElementById('name');
+const place = document.getElementById('place');
+const amount = document.getElementById('amount');
+const note = document.getElementById('note');
+
+/* LOGIN FUNCTIONS */
+function showLoading(show) {
+  if (show) {
+    loadingBox.classList.remove('hide');
+    loginBox.classList.add('hide');
+  } else {
+    loadingBox.classList.add('hide');
+  }
 }
-function memberLogin(){
-  if(memberPin.value==="1111"){ role="member"; enter(); }
-  else alert("PIN မှား");
+
+function adminLogin() {
+  const emailVal = email.value.trim();
+  const passwordVal = password.value.trim();
+  
+  if (!emailVal || !passwordVal) {
+    alert("အီးမေးလ်နှင့် စကားဝှက် ဖြည့်ပါ");
+    return;
+  }
+  
+  showLoading(true);
+  
+  auth.signInWithEmailAndPassword(emailVal, passwordVal)
+    .then((userCredential) => {
+      console.log("Admin login successful:", userCredential.user);
+      role = "admin";
+      enter();
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+      let errorMessage = "ဝင်ရောက်မှု မအောင်မြင်ပါ";
+      
+      switch (error.code) {
+        case "auth/invalid-email":
+          errorMessage = "အီးမေးလ် ဖောမတ် မှားယွင်းနေပါသည်";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "အသုံးပြုသူ မတွေ့ပါ";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "စကားဝှက် မှားယွင်းနေပါသည်";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "အင်တာနက် ချိတ်ဆက်မှု ပြဿနာ";
+          break;
+      }
+      
+      alert(errorMessage);
+    })
+    .finally(() => {
+      showLoading(false);
+    });
 }
-function enter(){
+
+function memberLogin() {
+  const pin = memberPin.value.trim();
+  if (pin === "1111") {
+    role = "member";
+    enter();
+  } else {
+    alert("PIN နံပါတ် မှားယွင်းနေပါသည်");
+  }
+}
+
+function enter() {
   loginBox.classList.add("hide");
   mainBox.classList.remove("hide");
-  if(role==="member") actionCol.style.display="none";
+  
+  if (role === "member") {
+    actionCol.style.display = "none";
+    document.getElementById("addBtn").style.display = "none";
+  } else {
+    actionCol.style.display = "";
+    document.getElementById("addBtn").style.display = "";
+  }
+  
   loadData();
 }
-function logout(){ location.reload(); }
 
-/* VIEW */
-function hideAll(){ addBox.classList.add("hide"); tableBox.classList.add("hide"); }
-function showAdd(){
-  if(role!=="admin") return alert("Admin only");
-  editId=null;
-  formTitle.innerText="အလှူစာရင်းထည့်";
-  name.value=place.value=amount.value=note.value="";
-  hideAll(); addBox.classList.remove("hide");
-}
-function showTable(){ hideAll(); tableBox.classList.remove("hide"); }
-
-/* SAVE */
-function saveData(){
-  if(role!=="admin") return alert("Admin only");
-  if(!name.value||!place.value||!amount.value) return alert("အချက်အလက်အပြည့်ထည့်ပါ");
-  const data={name:name.value,place:place.value,amount:+amount.value,note:note.value,time:Date.now()};
-  const ref = editId?db.ref("donations/"+editId):db.ref("donations").push();
-  ref.set(data).then(()=>{ alert("အောင်မြင်ပါပြီ"); showTable(); });
+function logout() {
+  auth.signOut().then(() => {
+    location.reload();
+  }).catch((error) => {
+    console.error("Logout error:", error);
+    location.reload();
+  });
 }
 
-/* LOAD */
-function loadData(){
-  db.ref("donations").on("value",snap=>{
-    tbody.innerHTML=""; let total=0;
-    snap.forEach(c=>{
-      const d=c.val(); total+=d.amount;
-      tbody.innerHTML+=`
+/* VIEW FUNCTIONS */
+function hideAll() {
+  addBox.classList.add("hide");
+  tableBox.classList.add("hide");
+}
+
+function showAdd() {
+  if (role !== "admin") {
+    alert("Admin သာလျှင် အသုံးပြုနိုင်သည်");
+    return;
+  }
+  
+  editId = null;
+  formTitle.innerText = "အလှူစာရင်းထည့်";
+  name.value = "";
+  place.value = "";
+  amount.value = "";
+  note.value = "";
+  
+  hideAll();
+  addBox.classList.remove("hide");
+}
+
+function showTable() {
+  hideAll();
+  tableBox.classList.remove("hide");
+}
+
+/* SAVE FUNCTION */
+function saveData() {
+  if (role !== "admin") {
+    alert("Admin သာလျှင် အသုံးပြုနိုင်သည်");
+    return;
+  }
+  
+  const nameVal = name.value.trim();
+  const placeVal = place.value.trim();
+  const amountVal = amount.value.trim();
+  const noteVal = note.value.trim();
+  
+  if (!nameVal || !placeVal || !amountVal) {
+    alert("အမည်၊ နေရပ်နှင့် အလှူငွေ ဖြည့်ပါ");
+    return;
+  }
+  
+  if (isNaN(amountVal) || parseInt(amountVal) <= 0) {
+    alert("အလှူငွေ မှန်ကန်စွာ ဖြည့်ပါ");
+    return;
+  }
+  
+  const saveBtn = document.getElementById("saveBtn");
+  saveBtn.disabled = true;
+  saveBtn.innerText = "သိမ်းဆည်းနေသည်...";
+  
+  const data = {
+    name: nameVal,
+    place: placeVal,
+    amount: parseInt(amountVal),
+    note: noteVal,
+    time: Date.now(),
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  };
+  
+  let ref;
+  if (editId) {
+    ref = db.ref("donations/" + editId);
+  } else {
+    ref = db.ref("donations").push();
+  }
+  
+  ref.set(data)
+    .then(() => {
+      alert("အလှူစာရင်း သိမ်းဆည်းခြင်း အောင်မြင်ပါသည်");
+      showTable();
+    })
+    .catch((error) => {
+      console.error("Save error:", error);
+      alert("သိမ်းဆည်းခြင်း မအောင်မြင်ပါ: " + error.message);
+    })
+    .finally(() => {
+      saveBtn.disabled = false;
+      saveBtn.innerText = "သိမ်းမည်";
+    });
+}
+
+/* LOAD DATA */
+function loadData() {
+  db.ref("donations").orderByChild("time").on("value", (snapshot) => {
+    tbody.innerHTML = "";
+    let total = 0;
+    let count = 0;
+    
+    if (!snapshot.exists()) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center; padding:20px;">
+            အလှူစာရင်း မရှိသေးပါ
+          </td>
+        </tr>`;
+      summary.innerText = "စုစုပေါင်း အလှူငွေ = 0";
+      return;
+    }
+    
+    snapshot.forEach((childSnapshot) => {
+      const data = childSnapshot.val();
+      const key = childSnapshot.key;
+      total += data.amount || 0;
+      count++;
+      
+      const row = `
       <tr>
-        <td>${d.name}</td>
-        <td>${d.place}</td>
-        <td>${d.amount}</td>
-        <td>${d.note||""}</td>
-        <td>${role==="admin"?`
-          <button class="actionBtn" onclick="edit('${c.key}')">✏️</button>
-          <button class="actionBtn red" onclick="del('${c.key}')">❌</button>`:""}
+        <td>${escapeHtml(data.name || "")}</td>
+        <td>${escapeHtml(data.place || "")}</td>
+        <td>${formatNumber(data.amount || 0)}</td>
+        <td>${escapeHtml(data.note || "")}</td>
+        <td>
+          ${role === "admin" ? `
+          <button class="actionBtn" onclick="editData('${key}')">✏️</button>
+          <button class="actionBtn red" onclick="deleteData('${key}')">❌</button>
+          ` : ""}
         </td>
       </tr>`;
+      
+      tbody.innerHTML += row;
     });
-    summary.innerText="စုစုပေါင်း အလှူငွေ = "+total;
+    
+    summary.innerHTML = `
+      စုစုပေါင်း အလှူရှင်: ${count} ဦး<br>
+      စုစုပေါင်း အလှူငွေ: ${formatNumber(total)} ကျပ်
+    `;
+  }, (error) => {
+    console.error("Load data error:", error);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center; color:red; padding:20px;">
+          ဒေတာဖော်ပြခြင်း မအောင်မြင်ပါ
+        </td>
+      </tr>`;
   });
 }
 
-/* EDIT / DELETE */
-function edit(id){
-  db.ref("donations/"+id).once("value",s=>{
-    const d=s.val(); editId=id;
-    formTitle.innerText="အလှူစာရင်းပြင်";
-    name.value=d.name; place.value=d.place; amount.value=d.amount; note.value=d.note||"";
-    showAdd();
-  });
+/* EDIT / DELETE FUNCTIONS */
+function editData(id) {
+  db.ref("donations/" + id).once("value")
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        editId = id;
+        formTitle.innerText = "အလှူစာရင်းပြင်ဆင်မည်";
+        name.value = data.name || "";
+        place.value = data.place || "";
+        amount.value = data.amount || "";
+        note.value = data.note || "";
+        showAdd();
+      }
+    })
+    .catch((error) => {
+      console.error("Edit error:", error);
+      alert("ဒေတာရယူခြင်း မအောင်မြင်ပါ");
+    });
 }
-function del(id){ if(confirm("ဖျက်မလား")) db.ref("donations/"+id).remove(); }
 
-/* EXPORT */
-function exportPNG(){ showTable(); html2canvas(tableBox).then(c=>{const a=document.createElement("a");a.download="LFM.png";a.href=c.toDataURL();a.click();});}
-function exportPDF(){ showTable(); html2canvas(tableBox).then(c=>{const {jsPDF}=window.jspdf;const pdf=new jsPDF();pdf.addImage(c.toDataURL(),"PNG",10,10,190,0);pdf.save("LFM_Report.pdf");});}
+function deleteData(id) {
+  if (confirm("ဤအလှူစာရင်းကို ဖျက်မှာ သေချာပါသလား?")) {
+    db.ref("donations/" + id).remove()
+      .then(() => {
+        console.log("Data deleted successfully");
+      })
+      .catch((error) => {
+        console.error("Delete error:", error);
+        alert("ဖျက်ခြင်း မအောင်မြင်ပါ");
+      });
+  }
+}
+
+/* EXPORT FUNCTIONS */
+function exportPNG() {
+  showTable();
+  setTimeout(() => {
+    html2canvas(tableBox).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'LFM_Donations.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }, 500);
+}
+
+function exportPDF() {
+  showTable();
+  setTimeout(() => {
+    html2canvas(tableBox).then(canvas => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      pdf.save('LFM_Donations_Report.pdf');
+    });
+  }, 500);
+}
+
+/* HELPER FUNCTIONS */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatNumber(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/* INITIAL SETUP */
+window.onload = function() {
+  // Check if user is already logged in
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      role = "admin";
+      enter();
+    }
+  });
+};
 </script>
 </body>
 </html>
