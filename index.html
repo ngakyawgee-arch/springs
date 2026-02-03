@@ -596,6 +596,93 @@
             background: var(--primary);
             color: white;
         }
+
+        /* Facebook Login Style */
+        .login-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 400px;
+            margin: 20px auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .fb-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .fb-logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #1877f2;
+        }
+
+        .fb-input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .fb-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .fb-btn:hover {
+            background: #166fe5;
+        }
+
+        .fb-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .fb-link a {
+            color: #1877f2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .separator span {
+            padding: 0 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .create-account {
+            background: #42b72a;
+            color: white;
+        }
+
+        .create-account:hover {
+            background: #36a420;
+        }
     </style>
 </head>
 <body>
@@ -641,36 +728,68 @@
                 <h1 class="app-title">✊ ဖိုးစောင့်တောင်မီးအိမ်</h1>
                 <p class="app-subtitle">တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</p>
                 <div style="margin-top: 10px; font-size: 0.8em; opacity: 0.7;">
-                    <span id="versionInfo">v1.3.0</span>
+                    <span id="versionInfo">v1.4.0</span>
                     • 
                     <span id="connectionStatus">🟢 Online</span>
                 </div>
             </div>
             
-            <div class="card">
-                <h3>🔐 အကောင့်ဝင်ရန်</h3>
-                <div id="loginTypeTabs" class="tab-nav mb-3">
-                    <button class="tab-btn active" onclick="showLoginType('admin')">Admin</button>
-                    <button class="tab-btn" onclick="showLoginType('member')">Member</button>
+            <div class="login-box">
+                <div class="fb-header">
+                    <div class="fb-logo">f</div>
+                    <h2 style="color: #333; margin-bottom: 10px;">မင်္ဂလာပါ</h2>
+                    <p style="color: #666; font-size: 14px;">ကျေးဇူးပြု၍ အကောင့်ဝင်ရန် သို့မဟုတ် အကောင့်အသစ်ဖွင့်ပါ</p>
                 </div>
                 
-                <div id="adminLoginForm">
-                    <input id="email" type="email" placeholder="အီးမေးလ်" autocomplete="email">
-                    <input id="password" type="password" placeholder="စကားဝှက်" autocomplete="current-password">
+                <div id="loginForm">
+                    <input type="email" id="loginEmail" class="fb-input" placeholder="အီးမေးလ် သို့မဟုတ် ဖုန်းနံပါတ်">
+                    <input type="password" id="loginPassword" class="fb-input" placeholder="စကားဝှက်">
+                    
+                    <button onclick="login()" class="fb-btn">ဝင်မည်</button>
+                    
+                    <div class="fb-link">
+                        <a href="#" onclick="showForgotPassword()">စကားဝှက်မေ့နေပါသလား?</a>
+                    </div>
                 </div>
                 
-                <div id="memberLoginForm" class="hide">
-                    <input id="memberEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
-                    <input id="memberPassword" type="password" placeholder="စကားဝှက်" autocomplete="current-password">
+                <div class="separator">
+                    <span>သို့မဟုတ်</span>
                 </div>
                 
-                <button onclick="login()" class="btn-primary">ဝင်မည်</button>
+                <button onclick="showRegisterForm()" class="fb-btn create-account">အကောင့်အသစ်ဖွင့်မည်</button>
                 
-                <div style="text-align: center; margin-top: 15px;">
-                    <small class="text-muted">Member account မရှိသေးပါက</small><br>
-                    <button onclick="showMemberRegistration()" class="btn-small" style="background: transparent; color: var(--primary); margin-top: 5px;">
-                        အကောင့်အသစ်ဖွင့်မည်
-                    </button>
+                <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
+                    <p>ဝင်ရောက်ခြင်းဖြင့် သင်၏ဒေတာများကို လုံခြုံစွာသိမ်းဆည်းမည်ကို သဘောတူပါသည်</p>
+                </div>
+            </div>
+            
+            <div id="registerForm" class="hide">
+                <div class="card">
+                    <h3>📝 အကောင့်အသစ်ဖွင့်ရန်</h3>
+                    <input id="regName" placeholder="အမည်အပြည့်အစုံ" autocomplete="name">
+                    <input id="regEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
+                    <input id="regPhone" type="tel" placeholder="ဖုန်းနံပါတ်" autocomplete="tel">
+                    <input id="regPassword" type="password" placeholder="စကားဝှက် (အနည်းဆုံး ၆ လုံး)" autocomplete="new-password">
+                    <input id="regConfirmPassword" type="password" placeholder="စကားဝှက် ထပ်မံရိုက်ပါ" autocomplete="new-password">
+                    <textarea id="regAddress" placeholder="နေရပ်လိပ်စာ" rows="2"></textarea>
+                    
+                    <div class="d-flex justify-between mt-3">
+                        <button onclick="showLoginForm()" class="btn-secondary">နောက်သို့</button>
+                        <button onclick="registerUser()" class="btn-primary">အကောင့်ဖွင့်မည်</button>
+                    </div>
+                    
+                    <div id="regStatus" class="mt-3"></div>
+                </div>
+            </div>
+            
+            <div id="forgotPasswordForm" class="hide">
+                <div class="card">
+                    <h3>🔐 စကားဝှက်ပြန်လည်ရယူရန်</h3>
+                    <input id="resetEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
+                    <div class="d-flex justify-between mt-3">
+                        <button onclick="showLoginForm()" class="btn-secondary">နောက်သို့</button>
+                        <button onclick="resetPassword()" class="btn-primary">ပို့မည်</button>
+                    </div>
                 </div>
             </div>
             
@@ -695,41 +814,6 @@
                 <button onclick="checkConnection()" class="btn-secondary mb-2">ချိတ်ဆက်မှုစစ်ဆေးရန်</button>
                 <button onclick="clearCache()" class="btn-secondary mb-2">Cache ရှင်းလင်းရန်</button>
                 <button onclick="exportBackup()" class="btn-success">Backup ထုတ်ယူရန်</button>
-            </div>
-        </div>
-        
-        <!-- Member Registration Page -->
-        <div id="memberRegistrationPage" class="page hide">
-            <div class="app-header">
-                <h1>👥 Member အကောင့်အသစ်</h1>
-                <p class="app-subtitle">အကောင့်ဖွင့်ရန် အချက်အလက်များဖြည့်ပါ</p>
-            </div>
-            
-            <div class="card">
-                <h3>📝 အကောင့်အသစ်ဖွင့်ရန်</h3>
-                <input id="regName" placeholder="အမည်အပြည့်အစုံ" autocomplete="name">
-                <input id="regEmail" type="email" placeholder="အီးမေးလ်" autocomplete="email">
-                <input id="regPhone" type="tel" placeholder="ဖုန်းနံပါတ်" autocomplete="tel">
-                <input id="regPassword" type="password" placeholder="စကားဝှက်" autocomplete="new-password">
-                <input id="regConfirmPassword" type="password" placeholder="စကားဝှက် ထပ်မံရိုက်ပါ" autocomplete="new-password">
-                <textarea id="regAddress" placeholder="နေရပ်လိပ်စာ" rows="2"></textarea>
-                
-                <div class="d-flex justify-between mt-3">
-                    <button onclick="showLoginPage()" class="btn-secondary">နောက်သို့</button>
-                    <button onclick="submitMemberRegistration()" class="btn-primary">အကောင့်ဖွင့်မည်</button>
-                </div>
-                
-                <div id="regStatus" class="mt-3"></div>
-            </div>
-            
-            <div class="card">
-                <h3>ℹ️ သတိပြုရန်</h3>
-                <ul style="padding-left: 20px; opacity: 0.8; font-size: 0.9em;">
-                    <li>Member အကောင့်သည် Admin ကအတည်ပြုမှသာ အသုံးပြုနိုင်မည်</li>
-                    <li>အကောင့်အခြေအနေကို Admin ကသတ်မှတ်ပေးမည်</li>
-                    <li>အီးမေးလ်နှင့် ဖုန်းနံပါတ် တစ်ခုစီကို အကောင့်တစ်ခုတည်းသာ အသုံးပြုနိုင်သည်</li>
-                    <li>စကားဝှက်ကို အနည်းဆုံး ၆ လုံးထား၍ ခိုင်မာစွာရွေးချယ်ပါ</li>
-                </ul>
             </div>
         </div>
         
@@ -766,10 +850,6 @@
             <span class="nav-icon">📋</span>
             <span>စာရင်း</span>
         </button>
-        <button class="nav-btn" onclick="showTab('members')" id="membersBtn">
-            <span class="nav-icon">👥</span>
-            <span>Members</span>
-        </button>
         <button class="nav-btn" onclick="showTab('export')">
             <span class="nav-icon">📤</span>
             <span>Export</span>
@@ -784,7 +864,7 @@
         // ====================
         // APP CONFIGURATION
         // ====================
-        const APP_VERSION = "1.3.0";
+        const APP_VERSION = "1.4.0";
         const APP_NAME = "ဖိုးစောင့်တောင်မီးအိမ်";
         
         // ====================
@@ -821,7 +901,6 @@
         // DOM ELEMENTS
         // ====================
         const loginPage = document.getElementById('loginPage');
-        const memberRegistrationPage = document.getElementById('memberRegistrationPage');
         const mainApp = document.getElementById('mainApp');
         const bottomNav = document.getElementById('bottomNav');
         const contentArea = document.getElementById('contentArea');
@@ -829,7 +908,6 @@
         const syncStatus = document.getElementById('syncStatus');
         const installPrompt = document.getElementById('installPrompt');
         const donateBtn = document.getElementById('donateBtn');
-        const membersBtn = document.getElementById('membersBtn');
         const supportBtn = document.getElementById('supportBtn');
         const versionInfo = document.getElementById('versionInfo');
         const connectionStatus = document.getElementById('connectionStatus');
@@ -867,49 +945,20 @@
             // Load public summary
             loadPublicSummary();
             
-            // Check if user is already logged in from localStorage
+            // Check if user is already logged in
             const savedUserData = localStorage.getItem('userData');
             if (savedUserData) {
                 try {
                     const data = JSON.parse(savedUserData);
-                    if (data.role === 'member' && data.status === 'approved') {
-                        // Auto-login for approved members
-                        userRole = 'member';
-                        userData = data;
-                        showMainApp();
-                    } else if (data.email) {
-                        // Check Firebase auth state for admin
-                        auth.onAuthStateChanged((user) => {
-                            if (user && user.email === data.email) {
-                                currentUser = user;
-                                userRole = 'admin';
-                                userData = data;
-                                showMainApp();
-                            }
-                        });
+                    userData = data;
+                    
+                    // Check if user is admin or member
+                    if (data.email && data.password) {
+                        // Try auto login
+                        await autoLogin(data.email, data.password);
                     }
                 } catch (e) {
                     console.log('Error loading saved user data:', e);
-                }
-            }
-            
-            // Service Worker Registration
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.register('sw.js');
-                    console.log('Service Worker registered:', registration);
-                    
-                    // Check for updates
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showNotification('App အသစ်ရရှိပါပြီ။ ကျေးဇူးပြု၍ refresh လုပ်ပါ။', 'info');
-                            }
-                        });
-                    });
-                } catch (error) {
-                    console.error('Service Worker registration failed:', error);
                 }
             }
             
@@ -970,27 +1019,6 @@
             const status = navigator.onLine ? 'အင်တာနက် ချိတ်ဆက်မှု ကောင်းပါသည်' : 'အင်တာနက် ချိတ်ဆက်မှု မရှိပါ';
             showNotification(status, navigator.onLine ? 'success' : 'warning');
             vibrate();
-        }
-        
-        // ====================
-        // LOGIN TYPE SELECTION
-        // ====================
-        function showLoginType(type) {
-            const adminForm = document.getElementById('adminLoginForm');
-            const memberForm = document.getElementById('memberLoginForm');
-            const tabs = document.querySelectorAll('.tab-btn');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            if (type === 'admin') {
-                adminForm.classList.remove('hide');
-                memberForm.classList.add('hide');
-                document.querySelector('[onclick="showLoginType(\'admin\')"]').classList.add('active');
-            } else {
-                adminForm.classList.add('hide');
-                memberForm.classList.remove('hide');
-                document.querySelector('[onclick="showLoginType(\'member\')"]').classList.add('active');
-            }
         }
         
         // ====================
@@ -1128,37 +1156,29 @@
         }
         
         // ====================
-        // PAGE NAVIGATION
-        // ====================
-        function showLoginPage() {
-            memberRegistrationPage.classList.add('hide');
-            loginPage.classList.remove('hide');
-        }
-        
-        function showMemberRegistration() {
-            loginPage.classList.add('hide');
-            memberRegistrationPage.classList.remove('hide');
-        }
-        
-        // ====================
         // LOGIN FUNCTIONS
         // ====================
-        async function login() {
-            const isAdminMode = !document.getElementById('adminLoginForm').classList.contains('hide');
-            
-            if (isAdminMode) {
-                await adminLogin();
-            } else {
-                await memberLogin();
+        async function autoLogin(email, password) {
+            try {
+                const member = await findMember(email, password);
+                if (member) {
+                    userRole = member.role || 'member';
+                    userData = member;
+                    showMainApp();
+                    return true;
+                }
+            } catch (error) {
+                console.log('Auto login failed:', error);
             }
+            return false;
         }
         
-        async function adminLogin() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
             
             if (!email || !password) {
-                showNotification('ကျေးဇူးပြု၍ ဖြည့်ပါ', 'warning');
+                showNotification('ကျေးဇူးပြု၍ အီးမေးလ်နှင့် စကားဝှက်ထည့်ပါ', 'warning');
                 vibrate();
                 return;
             }
@@ -1166,58 +1186,67 @@
             showLoading('ဝင်ရောက်နေပါသည်...');
             
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-                userRole = 'admin';
-                userData = {
-                    email: currentUser.email,
-                    uid: currentUser.uid,
-                    role: 'admin',
-                    lastLogin: Date.now()
-                };
+                // Try Firebase admin login first
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    currentUser = userCredential.user;
+                    userRole = 'admin';
+                    userData = {
+                        email: currentUser.email,
+                        uid: currentUser.uid,
+                        role: 'admin',
+                        name: 'Admin',
+                        lastLogin: Date.now()
+                    };
+                    
+                    saveToLocalStorage('userData', userData);
+                    showMainApp();
+                    showNotification('Admin အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
+                    vibrate([50, 30, 50]);
+                    hideLoading();
+                    return;
+                } catch (firebaseError) {
+                    console.log('Firebase login failed, trying member login...');
+                }
                 
-                saveToLocalStorage('userData', userData);
-                showMainApp();
-                showNotification('Admin အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
-                vibrate([50, 30, 50]);
+                // Try member login
+                const member = await findMember(email, password);
+                if (member) {
+                    if (member.status !== 'approved') {
+                        showNotification('အကောင့်ကို Admin မှ အတည်မပြုရသေးပါ', 'warning');
+                        hideLoading();
+                        return;
+                    }
+                    
+                    userRole = member.role || 'member';
+                    userData = {
+                        ...member,
+                        lastLogin: Date.now()
+                    };
+                    
+                    saveToLocalStorage('userData', userData);
+                    showMainApp();
+                    showNotification('Member အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
+                    vibrate([50, 30, 50]);
+                } else {
+                    showNotification('အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်', 'error');
+                }
                 
             } catch (error) {
                 console.error('Login error:', error);
-                
-                let message = 'ဝင်ရောက်မှု မအောင်မြင်ပါ';
-                if (error.code === 'auth/wrong-password') {
-                    message = 'စကားဝှက် မှားယွင်းနေပါသည်';
-                } else if (error.code === 'auth/user-not-found') {
-                    message = 'အသုံးပြုသူမတွေ့ပါ';
-                } else if (error.code === 'auth/network-request-failed') {
-                    message = 'အင်တာနက်ချိတ်ဆက်မှု ပြဿနာရှိပါသည်';
-                }
-                
-                showNotification(message, 'error');
+                showNotification('ဝင်ရောက်မှု မအောင်မြင်ပါ', 'error');
                 vibrate([200, 100, 200]);
             }
             
             hideLoading();
         }
         
-        async function memberLogin() {
-            const email = document.getElementById('memberEmail').value.trim();
-            const password = document.getElementById('memberPassword').value;
+        async function findMember(email, password) {
+            let member = null;
             
-            if (!email || !password) {
-                showNotification('ကျေးဇူးပြု၍ ဖြည့်ပါ', 'warning');
-                vibrate();
-                return;
-            }
-            
-            showLoading('ဝင်ရောက်နေပါသည်...');
-            
-            try {
-                // Check both online and offline members
-                let member = null;
-                
-                if (navigator.onLine) {
-                    // Check Firebase
+            // Check Firebase
+            if (navigator.onLine) {
+                try {
                     const snapshot = await db.ref('members').orderByChild('email').equalTo(email).once('value');
                     snapshot.forEach(child => {
                         const data = child.val();
@@ -1226,51 +1255,24 @@
                             member.id = child.key;
                         }
                     });
+                } catch (error) {
+                    console.error('Error fetching member:', error);
                 }
-                
-                // Check offline members
-                if (!member) {
-                    const offlineMember = offlineMembers.find(m => 
-                        m.email === email && m.password === password && m.status === 'approved');
-                    if (offlineMember) {
-                        member = offlineMember;
-                    }
-                }
-                
-                if (!member) {
-                    showNotification('အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်', 'error');
-                    hideLoading();
-                    return;
-                }
-                
-                if (member.status !== 'approved') {
-                    showNotification('အကောင့်ကို Admin မှ အတည်မပြုရသေးပါ', 'warning');
-                    hideLoading();
-                    return;
-                }
-                
-                userRole = 'member';
-                userData = {
-                    ...member,
-                    role: 'member',
-                    lastLogin: Date.now()
-                };
-                
-                saveToLocalStorage('userData', userData);
-                showMainApp();
-                showNotification('Member အကောင့်သို့ ဝင်ရောက်ပြီးပါပြီ', 'success');
-                vibrate([50, 30, 50]);
-                
-            } catch (error) {
-                console.error('Member login error:', error);
-                showNotification('ဝင်ရောက်မှု မအောင်မြင်ပါ', 'error');
-                vibrate([200, 100, 200]);
             }
             
-            hideLoading();
+            // Check offline members
+            if (!member) {
+                const offlineMember = offlineMembers.find(m => 
+                    m.email === email && m.password === password);
+                if (offlineMember) {
+                    member = offlineMember;
+                }
+            }
+            
+            return member;
         }
         
-        async function submitMemberRegistration() {
+        async function registerUser() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
@@ -1296,6 +1298,25 @@
             showLoading('အကောင့်ဖွင့်နေပါသည်...');
             
             try {
+                // Check if email already exists
+                let emailExists = false;
+                
+                if (navigator.onLine) {
+                    const snapshot = await db.ref('members').orderByChild('email').equalTo(email).once('value');
+                    emailExists = snapshot.exists();
+                }
+                
+                // Check offline members
+                if (!emailExists) {
+                    emailExists = offlineMembers.some(m => m.email === email);
+                }
+                
+                if (emailExists) {
+                    showNotification('ဤအီးမေးလ်ဖြင့် အကောင့်ရှိပြီးသားဖြစ်သည်', 'error');
+                    hideLoading();
+                    return;
+                }
+                
                 const memberData = {
                     name: name,
                     email: email,
@@ -1323,7 +1344,7 @@
                 
                 if (saved) {
                     showNotification('အကောင့်ဖွင့်ပြီးပါပြီ။ Admin မှ အတည်ပြုပြီးမှသာ အသုံးပြုနိုင်မည်။', 'success');
-                    showLoginPage();
+                    showLoginForm();
                     
                     // Clear form
                     document.getElementById('regName').value = '';
@@ -1342,9 +1363,60 @@
             hideLoading();
         }
         
+        async function resetPassword() {
+            const email = document.getElementById('resetEmail').value.trim();
+            
+            if (!email) {
+                showNotification('ကျေးဇူးပြု၍ အီးမေးလ်ထည့်ပါ', 'warning');
+                return;
+            }
+            
+            showLoading('စကားဝှက်ပြန်လည်ရယူနေပါသည်...');
+            
+            try {
+                // Check if it's an admin account
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    showNotification('စကားဝှက်ပြန်လည်ရယူရန် လင့်ခ်ကို အီးမေးလ်သို့ ပို့ပြီးပါပြီ', 'success');
+                    showLoginForm();
+                    hideLoading();
+                    return;
+                } catch (firebaseError) {
+                    console.log('Not a Firebase account, checking members...');
+                }
+                
+                // For members, show message
+                showNotification('Member account များအတွက် စကားဝှက်ပြန်လည်ရယူရန် Admin ကိုဆက်သွယ်ပါ', 'info');
+                showLoginForm();
+                
+            } catch (error) {
+                console.error('Reset password error:', error);
+                showNotification('စကားဝှက်ပြန်လည်ရယူမှု မအောင်မြင်ပါ', 'error');
+            }
+            
+            hideLoading();
+        }
+        
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hide');
+            document.getElementById('registerForm').classList.add('hide');
+            document.getElementById('forgotPasswordForm').classList.add('hide');
+        }
+        
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hide');
+            document.getElementById('registerForm').classList.remove('hide');
+            document.getElementById('forgotPasswordForm').classList.add('hide');
+        }
+        
+        function showForgotPassword() {
+            document.getElementById('loginForm').classList.add('hide');
+            document.getElementById('registerForm').classList.add('hide');
+            document.getElementById('forgotPasswordForm').classList.remove('hide');
+        }
+        
         function showMainApp() {
             loginPage.classList.add('hide');
-            memberRegistrationPage.classList.add('hide');
             mainApp.classList.remove('hide');
             bottomNav.classList.remove('hide');
             
@@ -1353,32 +1425,29 @@
             const roleText = document.getElementById('roleText');
             const userInfo = document.getElementById('userInfo');
             
-            if (userRole === 'admin' && currentUser) {
-                const username = currentUser.email.split('@')[0];
+            if (userRole === 'admin') {
+                const username = userData.email ? userData.email.split('@')[0] : 'Admin';
                 welcomeText.textContent = `မင်္ဂလာပါ ${username}`;
                 userInfo.innerHTML = `
-                    <span>✉️ ${currentUser.email}</span>
+                    <span>✉️ ${userData.email || 'Admin'}</span>
                     <span style="margin-left: 15px;">👑 Admin</span>
                 `;
-            } else if (userRole === 'member') {
+                roleText.textContent = '👑 Admin Panel';
+                
+                // Show all buttons for admin
+                donateBtn.style.display = 'flex';
+                supportBtn.style.display = 'flex';
+            } else {
                 welcomeText.textContent = `မင်္ဂလာပါ ${userData.name || 'Member'}`;
                 userInfo.innerHTML = `
                     <span>👥 Member Account</span>
                     <span style="margin-left: 15px;">${new Date().toLocaleDateString('my-MM')}</span>
                 `;
-            }
-            
-            roleText.textContent = userRole === 'admin' ? '👑 Admin Panel' : '👥 Member View';
-            
-            // Hide/show buttons based on role
-            if (userRole === 'member') {
+                roleText.textContent = '👥 Member View';
+                
+                // Hide certain buttons for members
                 donateBtn.style.display = 'none';
-                membersBtn.style.display = 'none';
                 supportBtn.style.display = 'none';
-            } else {
-                donateBtn.style.display = 'flex';
-                membersBtn.style.display = 'flex';
-                supportBtn.style.display = 'flex';
             }
             
             // Show default tab
@@ -1466,14 +1535,9 @@
                         <div class="card">
                             <h3>➕ အလှူအသစ်ထည့်ရန်</h3>
                             <div class="filter-group mb-3">
-                                <select id="weekSelection" onchange="loadWeekDonations()">
-                                    <option value="${currentWeek}">အပတ် ${currentWeek}</option>
-                                    ${Array.from({length: 10}, (_, i) => `
-                                        <option value="${currentWeek - i - 1}">အပတ် ${currentWeek - i - 1}</option>
-                                    `).join('')}
-                                </select>
-                                <button onclick="currentWeek = getCurrentWeek(); document.getElementById('weekSelection').value = currentWeek; loadWeekDonations()" class="btn-small">
-                                    လက်ရှိအပတ်
+                                <input type="number" id="weekNumber" placeholder="အပတ်နံပါတ် (ဥပမာ: ${currentWeek})" value="${currentWeek}" style="margin-bottom: 0;">
+                                <button onclick="currentWeek = parseInt(document.getElementById('weekNumber').value) || getCurrentWeek(); loadWeekDonations()" class="btn-small">
+                                    ပြရန်
                                 </button>
                             </div>
                             <input id="donorName" placeholder="အလှူရှင်အမည်" autocomplete="name">
@@ -1513,14 +1577,9 @@
                         <div class="card">
                             <h3>🚚 ထောက်ပို့လှူဒါန်းငွေ</h3>
                             <div class="filter-group mb-3">
-                                <select id="supportWeekSelection" onchange="loadWeekSupports()">
-                                    <option value="${currentSupportWeek}">အပတ် ${currentSupportWeek}</option>
-                                    ${Array.from({length: 10}, (_, i) => `
-                                        <option value="${currentSupportWeek - i - 1}">အပတ် ${currentSupportWeek - i - 1}</option>
-                                    `).join('')}
-                                </select>
-                                <button onclick="currentSupportWeek = getCurrentWeek(); document.getElementById('supportWeekSelection').value = currentSupportWeek; loadWeekSupports()" class="btn-small">
-                                    လက်ရှိအပတ်
+                                <input type="number" id="supportWeekNumber" placeholder="အပတ်နံပါတ် (ဥပမာ: ${currentSupportWeek})" value="${currentSupportWeek}" style="margin-bottom: 0;">
+                                <button onclick="currentSupportWeek = parseInt(document.getElementById('supportWeekNumber').value) || getCurrentWeek(); loadWeekSupports()" class="btn-small">
+                                    ပြရန်
                                 </button>
                             </div>
                             <input id="supportOrganization" placeholder="အဖွဲ့စည်းအမည်">
@@ -1574,49 +1633,6 @@
                         </div>
                     `;
                     setTimeout(() => loadDonationsList(), 100);
-                    break;
-                    
-                case 'members':
-                    if (userRole !== 'admin') {
-                        content = `
-                            <div class="card">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">❌</div>
-                                    <h4>ဝင်ရောက်ခွင့်မရှိပါ</h4>
-                                    <p>ဤ feature ကို Admin သာလျှင် အသုံးပြုနိုင်သည်</p>
-                                </div>
-                            </div>
-                        `;
-                        break;
-                    }
-                    content = `
-                        <div class="card">
-                            <h3>👥 Member Management</h3>
-                            <div class="search-container">
-                                <input type="text" id="memberSearch" placeholder="Member အမည်ဖြင့်ရှာမည်" oninput="searchMembers()">
-                            </div>
-                            
-                            <div class="filter-group">
-                                <select id="memberStatusFilter" onchange="loadMembers()">
-                                    <option value="all">အားလုံး</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="rejected">Rejected</option>
-                                </select>
-                                <select id="memberSort" onchange="loadMembers()">
-                                    <option value="newest">နောက်ဆုံးမှစ၍</option>
-                                    <option value="oldest">အဟောင်းမှစ၍</option>
-                                    <option value="name">အမည်အတိုင်း</option>
-                                </select>
-                            </div>
-                            
-                            <div id="membersList" style="max-height: 400px; overflow-y: auto;">
-                                <div class="spinner"></div>
-                            </div>
-                            <div id="membersSummary" style="margin-top: 15px;"></div>
-                        </div>
-                    `;
-                    setTimeout(() => loadMembers(), 100);
                     break;
                     
                 case 'export':
@@ -1746,10 +1762,16 @@
             const place = document.getElementById('donorPlace').value.trim();
             const amount = parseInt(document.getElementById('donorAmount').value);
             const note = document.getElementById('donorNote').value.trim();
-            const week = parseInt(document.getElementById('weekSelection').value) || currentWeek;
+            const week = parseInt(document.getElementById('weekNumber').value) || currentWeek;
             
             if (!name || !place || !amount || amount <= 0) {
                 showNotification('ကျေးဇူးပြု၍ လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ', 'warning');
+                vibrate();
+                return;
+            }
+            
+            if (!week || week < 1 || week > 52) {
+                showNotification('ကျေးဇူးပြု၍ မှန်ကန်သော အပတ်နံပါတ်ထည့်ပါ (1-52)', 'warning');
                 vibrate();
                 return;
             }
@@ -1762,7 +1784,7 @@
                 week: week,
                 weekInfo: getWeekDates(week),
                 timestamp: Date.now(),
-                enteredBy: currentUser ? currentUser.email : (userRole === 'member' ? userData.email : 'unknown'),
+                enteredBy: userRole === 'admin' ? 'Admin' : userData.name || 'Member',
                 synced: navigator.onLine
             };
             
@@ -1778,10 +1800,6 @@
                     // Save offline
                     const offlineId = saveOfflineDonation(donation);
                     showNotification('Offline mode တွင် သိမ်းဆည်းပြီးပါပြီ', 'warning');
-                    
-                    // Update UI
-                    document.querySelector('#homeConnectionStatus').textContent = '🔴 Offline';
-                    document.querySelector('#homeConnectionStatus').className = 'text-danger';
                 }
                 
                 // Clear form
@@ -1819,7 +1837,7 @@
         async function loadWeekDonations() {
             try {
                 const container = document.getElementById('weekDonationsList');
-                const week = parseInt(document.getElementById('weekSelection').value) || currentWeek;
+                const week = parseInt(document.getElementById('weekNumber').value) || currentWeek;
                 const weekInfo = getWeekDates(week);
                 
                 let donations = [];
@@ -1900,10 +1918,16 @@
             const location = document.getElementById('supportLocation').value.trim();
             const activity = document.getElementById('supportActivity').value.trim();
             const note = document.getElementById('supportNote').value.trim();
-            const week = parseInt(document.getElementById('supportWeekSelection').value) || currentSupportWeek;
+            const week = parseInt(document.getElementById('supportWeekNumber').value) || currentSupportWeek;
             
             if (!organization || !amount || amount <= 0 || !location || !activity) {
                 showNotification('ကျေးဇူးပြု၍ လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ', 'warning');
+                vibrate();
+                return;
+            }
+            
+            if (!week || week < 1 || week > 52) {
+                showNotification('ကျေးဇူးပြု၍ မှန်ကန်သော အပတ်နံပါတ်ထည့်ပါ (1-52)', 'warning');
                 vibrate();
                 return;
             }
@@ -1917,7 +1941,7 @@
                 week: week,
                 weekInfo: getWeekDates(week),
                 timestamp: Date.now(),
-                enteredBy: currentUser ? currentUser.email : (userRole === 'member' ? userData.email : 'unknown'),
+                enteredBy: userRole === 'admin' ? 'Admin' : userData.name || 'Member',
                 synced: navigator.onLine
             };
             
@@ -1964,7 +1988,7 @@
         async function loadWeekSupports() {
             try {
                 const container = document.getElementById('weekSupportsList');
-                const week = parseInt(document.getElementById('supportWeekSelection').value) || currentSupportWeek;
+                const week = parseInt(document.getElementById('supportWeekNumber').value) || currentSupportWeek;
                 const weekInfo = getWeekDates(week);
                 
                 let supports = [];
@@ -3094,7 +3118,6 @@
                 loginPage.classList.remove('hide');
                 mainApp.classList.add('hide');
                 bottomNav.classList.add('hide');
-                memberRegistrationPage.classList.add('hide');
             }
         }
         
