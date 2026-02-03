@@ -1,316 +1,560 @@
 <!DOCTYPE html>
-<html lang="my" dir="ltr">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✊ ဖိုးစောင့်တောင်မီးအိမ် v1.4.2</title>
-    <link rel="manifest" href="data:application/manifest+json,{
-        'name': 'ဖိုးစောင့်တောင်မီးအိမ်',
-        'short_name': 'PSTMH',
-        'start_url': '.',
-        'display': 'standalone',
-        'background_color': '#f5f5f5',
-        'theme_color': '#28a745'
-    }">
+    <title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e8f4d">
+    <meta name="description" content="တော်လှန်ရေး အလှူရှင်မှတ်တမ်း - Offline သုံးနိုင်သော App">
+    
+    <!-- Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
     <style>
-        body { font-family: 'Noto Sans Myanmar', sans-serif; margin: 0; padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
-        .container { max-width: 500px; margin: auto; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h1, h2, h3 { text-align: center; }
-        input, select, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #218838; }
-        button.danger { background: #dc3545; }
-        button.danger:hover { background: #c82333; }
-        button.edit { background: #ffc107; color: #212529; width: auto; margin: 2px; padding: 5px 10px; font-size: 14px; }
-        .status { padding: 10px; border-radius: 8px; margin: 10px 0; text-align: center; }
-        .online { background: #d4edda; color: #155724; }
-        .offline { background: #f8d7da; color: #721c24; }
-        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .success { background: #d1ecf1; color: #0c5460; }
-        .list { max-height: 250px; overflow-y: auto; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; background: #f8f9fa; margin: 5px 0; border-radius: 5px; }
-        .hidden { display: none; }
-        .tab { display: inline-block; padding: 10px 15px; background: #007bff; color: white; border-radius: 20px; margin: 5px; cursor: pointer; font-size: 14px; }
-        .tab.active { background: #0056b3; }
-        #search { background: #e9ecef; }
-        .totals { background: #e7f3ff; padding: 15px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold; }
+        :root {
+            --primary: #1e8f4d;
+            --primary-dark: #167a3f;
+            --dark: #0d0d0d;
+            --card: #1a1a1a;
+            --card-light: #222222;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+        }
+        body {
+            background: var(--dark);
+            color: white;
+            font-family: 'Noto Sans Myanmar', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .hide { display: none !important; }
+        .app-container { padding: 15px; padding-bottom: 90px; }
+        .app-header {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .app-title { color: var(--primary); font-size: 1.8rem; margin: 0; }
+        .card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 1rem;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #444; color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #333;
+        }
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .nav-btn.active { color: var(--primary); }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            max-width: 90%;
+        }
+        .d-flex { display: flex; gap: 12px; }
+        .justify-between { justify-content: space-between; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>✊ ဖိုးစောင့်တောင်မီးအိမ်</h1>
-        <p style="text-align: center;">တော်လှန်ရေး အလှူရှင်မှတ်တမ်း • v1.4.2</p>
-        <div id="status" class="status online">🟢 Online</div>
 
-        <!-- Auth -->
-        <div id="auth-screen">
-            <h2>မင်္ဂလာပါ</h2>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="စကားဝှက်">
-            <button onclick="login()">အကောင့်ဝင်ရန်</button>
-            <button onclick="register()">📝 အကောင့်အသစ်ဖွင့်ရန်</button>
-            <div id="auth-msg"></div>
+<div class="app-container">
+
+    <!-- Login Page -->
+    <div id="loginPage">
+        <div class="app-header">
+            <h1 class="app-title">✊ ဖိုးစောင့်တောင်မီးအိမ်</h1>
+            <p>တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</p>
         </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="hidden">
-            <div style="text-align: center;">
-                <span class="tab active" data-tab="incoming">📥 လက်ခံ အလှူ စာရင်း</span>
-                <span class="tab" data-tab="outgoing">📤 ထောက်ပို့ အလှူ စာရင်း</span>
-                <span class="tab" data-tab="settings">⚙️ ဆက်တင်</span>
-            </div>
+        <div class="card">
+            <h3>အကောင့်ဝင်ရန်</h3>
+            <input id="loginEmail" placeholder="အီးမေးလ်" type="email">
+            <input id="loginPassword" placeholder="စကားဝှက်" type="password">
+            <button class="btn-primary" onclick="login()">ဝင်မည်</button>
+            <button class="btn-secondary" onclick="showRegisterForm()">အကောင့်အသစ်ဖွင့်ရန်</button>
+        </div>
 
-            <!-- Incoming Tab -->
-            <div id="incoming-tab">
-                <h3>📥 လက်ခံ အလှူ စာရင်း</h3>
-                <div class="totals">
-                    စုစုပေါင်း: <span id="in-total-donors">0</span> ဦး • <span id="in-total-amount">0</span> ကျပ်<br>
-                    နောက်ဆုံး: <span id="in-last-amount">-</span>
-                </div>
-                <input type="text" id="in-search" placeholder="ရှာရန်..." oninput="filterList('incoming', this.value)">
-                <div class="list" id="in-list"></div>
-                <h4>➕ အသစ်ထည့်ရန်</h4>
-                <input type="text" id="in-name" placeholder="အလှူရှင်နာမည်">
-                <input type="number" id="in-amount" placeholder="ငွေပမာဏ">
-                <input type="text" id="in-batch" placeholder="ဘတ်">
-                <button onclick="addRecord('incoming')">💾 ထည့်ရန်</button>
-            </div>
-
-            <!-- Outgoing Tab (New!) -->
-            <div id="outgoing-tab" class="hidden">
-                <h3>📤 ထောက်ပို့ အလှူ စာရင်း</h3>
-                <div class="totals">
-                    စုစုပေါင်း: <span id="out-total-donors">0</span> ဦး • <span id="out-total-amount">0</span> ကျပ်<br>
-                    နောက်ဆုံး: <span id="out-last-amount">-</span>
-                </div>
-                <input type="text" id="out-search" placeholder="ရှာရန်..." oninput="filterList('outgoing', this.value)">
-                <div class="list" id="out-list"></div>
-                <h4>➕ ထောက်ပို့ အသစ်ထည့်ရန်</h4>
-                <input type="text" id="out-recipient" placeholder="လက်ခံသူ နာမည်">
-                <input type="number" id="out-amount" placeholder="ငွေပမာဏ">
-                <input type="date" id="out-date">
-                <textarea id="out-note" placeholder="မှတ်စု"></textarea>
-                <button onclick="addRecord('outgoing')">💾 ထည့်ရန်</button>
-            </div>
-
-            <!-- Settings -->
-            <div id="settings-tab" class="hidden">
-                <h3>⚙️ ဆက်တင်</h3>
-                <button onclick="exportData('all')">📥 All Data Export</button>
-                <button onclick="exportData('incoming')">📥 Incoming Export</button>
-                <button onclick="exportData('outgoing')">📥 Outgoing Export</button>
-                <button class="danger" onclick="clearData()">🗑️ ဒေတာ ရှင်းရန်</button>
-                <button onclick="logout()">🚪 အကောင့်ထွက်</button>
-                <div id="settings-msg"></div>
-            </div>
+        <div id="registerForm" class="card hide">
+            <h3>အကောင့်အသစ်ဖွင့်ရန်</h3>
+            <input id="regName" placeholder="အမည်အပြည့်အစုံ">
+            <input id="regEmail" type="email" placeholder="အီးမေးလ်">
+            <input id="regPhone" type="tel" placeholder="ဖုန်းနံပါတ်">
+            <input id="regPassword" type="password" placeholder="စကားဝှက်">
+            <button class="btn-primary" onclick="registerUser()">ဖွင့်မည်</button>
+            <button class="btn-secondary" onclick="showLoginForm()">နောက်သို့</button>
         </div>
     </div>
 
-    <script>
-        let editingId = null;  // For update
+    <!-- Main App -->
+    <div id="mainApp" class="hide">
+        <div class="app-header">
+            <h1 id="welcomeText">မင်္ဂလာပါ</h1>
+            <p id="roleText"></p>
+        </div>
 
-        // Offline
-        window.addEventListener('online', () => updateStatus('🟢 Online'));
-        window.addEventListener('offline', () => updateStatus('🔴 Offline'));
+        <div id="contentArea"></div>
+    </div>
 
-        function updateStatus(msg) {
-            document.getElementById('status').textContent = msg;
-            document.getElementById('status').className = `status ${msg.includes('Online') ? 'online' : 'offline'}`;
-        }
+</div>
 
-        // Auth
-        function getUser() {
-            return JSON.parse(localStorage.getItem('user') || '{}');
-        }
+<!-- Bottom Navigation -->
+<div id="bottomNav" class="bottom-nav hide">
+    <button class="nav-btn active" onclick="showTab('home')">🏠 ပင်မ</button>
+    <button class="nav-btn" onclick="showTab('donate')">➕ အလှူထည့်</button>
+    <button class="nav-btn" onclick="showTab('support')">🚚 ထောက်ပို့</button>
+    <button class="nav-btn" onclick="showTab('list')">📋 စာရင်း</button>
+    <button class="nav-btn" onclick="logout()">🚪 ထွက်မည်</button>
+</div>
 
-        function saveUser(user) {
-            localStorage.setItem('user', JSON.stringify(user));
-        }
+<!-- Notification -->
+<div id="notificationContainer"></div>
 
-        function register() {
-            const email = document.getElementById('email').value, pw = document.getElementById('password').value;
-            if (!email || !pw) return showMsg('auth-msg', 'Email & စကားဝှက် ရေးပါ', 'error');
-            const user = { email, incoming: [], outgoing: [] };
-            saveUser(user);
-            showMsg('auth-msg', 'Register ပြီး! Login လုပ်ပါ', 'success');
-        }
+<script>
+// ────────────────────────────────────────────────
+// CONFIG
+// ────────────────────────────────────────────────
+const APP_NAME = "ဖိုးစောင့်တောင်မီးအိမ်";
+const APP_VERSION = "1.5.0-fix";
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const user = getUser();
-            if (user.email === email) {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadAll();
-            } else {
-                showMsg('auth-msg', 'Email မရှိ။ Register လုပ်ပါ', 'error');
+const firebaseConfig = {
+    apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+    authDomain: "lamp-88a25.firebaseapp.com",
+    databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "lamp-88a25",
+    storageBucket: "lamp-88a25.appspot.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let currentUser = null;
+let userRole = '';
+let userData = {};
+let currentTab = 'home';
+
+// ────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────
+let offlineDonations = JSON.parse(localStorage.getItem('offlineDonations') || '[]');
+let offlineSupports  = JSON.parse(localStorage.getItem('offlineSupports')  || '[]');
+
+// ────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    loadOfflineData();
+    checkAuthState();
+});
+
+// ────────────────────────────────────────────────
+// AUTH
+// ────────────────────────────────────────────────
+function checkAuthState() {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            userRole = 'admin';
+            showMainApp();
+        } else {
+            const saved = localStorage.getItem('userData');
+            if (saved) {
+                try {
+                    userData = JSON.parse(saved);
+                    autoLogin(userData.email, userData.password || '');
+                } catch(e) {}
             }
+            showLoginPage();
         }
+    });
+}
 
-        // Data
-        function addRecord(type) {
-            const prefix = type === 'incoming' ? 'in-' : 'out-';
-            const name = document.getElementById(prefix + 'name' || prefix + 'recipient').value;
-            const amount = parseInt(document.getElementById(prefix + 'amount').value);
-            if (!name || !amount) return showMsg(type + '-tab', 'နာမည်နှင့် ပမာဏ ရေးပါ', 'error');
-
-            const user = getUser();
-            const record = {
-                id: editingId || Date.now(),
-                name: name,
-                amount,
-                ...(type === 'incoming' ? { batch: document.getElementById(prefix + 'batch').value } : {
-                    date: document.getElementById(prefix + 'date').value || new Date().toLocaleDateString('my-MM'),
-                    note: document.getElementById(prefix + 'note').value
-                })
-            };
-
-            if (editingId) {
-                const list = user[type];
-                const idx = list.findIndex(r => r.id === editingId);
-                list[idx] = record;
-                editingId = null;
-                showMsg(type + '-tab', 'Update ပြီး!', 'success');
-            } else {
-                user[type].unshift(record);
-                showMsg(type + '-tab', 'ထည့်ပြီး!', 'success');
+async function autoLogin(email, password) {
+    try {
+        const snapshot = await db.ref('members').orderByChild('email').equalTo(email).once('value');
+        let member = null;
+        snapshot.forEach(child => {
+            const data = child.val();
+            if (data.password === password && data.status === 'approved') {
+                member = { ...data, id: child.key };
             }
-            saveUser(user);
-            clearForm(type);
-            loadTab(type);
+        });
+        if (member) {
+            userData = member;
+            userRole = 'member';
+            showMainApp();
         }
+    } catch(e) {
+        console.error("Auto login failed", e);
+    }
+}
 
-        function editRecord(type, id) {
-            editingId = id;
-            const user = getUser();
-            const record = user[type].find(r => r.id === id);
-            const prefix = type === 'incoming' ? 'in-' : 'out-';
-            document.getElementById(prefix + 'name' || prefix + 'recipient').value = record.name;
-            document.getElementById(prefix + 'amount').value = record.amount;
-            if (type === 'incoming') document.getElementById(prefix + 'batch').value = record.batch || '';
-            else {
-                document.getElementById(prefix + 'date').value = record.date;
-                document.getElementById(prefix + 'note').value = record.note || '';
+async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw = document.getElementById('loginPassword').value;
+
+    if (!email || !pw) return showNotification("အီးမေးလ်နှင့် စကားဝှက် ဖြည့်ပါ", "warning");
+
+    try {
+        // Admin အရင်စမ်း
+        try {
+            await auth.signInWithEmailAndPassword(email, pw);
+            userRole = 'admin';
+            showMainApp();
+            return;
+        } catch(e) {}
+
+        // Member စမ်း
+        const snapshot = await db.ref('members').orderByChild('email').equalTo(email).once('value');
+        let found = false;
+        snapshot.forEach(child => {
+            const data = child.val();
+            if (data.password === pw && data.status === 'approved') {
+                userData = { ...data, id: child.key };
+                userRole = 'member';
+                localStorage.setItem('userData', JSON.stringify(userData));
+                found = true;
             }
-            showMsg(type + '-tab', 'Edit mode. သိမ်းရန် နှိပ်ပါ', 'success');
-        }
-
-        function clearForm(type) {
-            const prefix = type === 'incoming' ? 'in-' : 'out-';
-            ['name', 'recipient', 'amount', 'batch', 'date', 'note'].forEach(id => {
-                const el = document.getElementById(prefix + id);
-                if (el) el.value = '';
-            });
-        }
-
-        function loadTab(type) {
-            const user = getUser();
-            const list = user[type] || [];
-            const totalDonors = list.length;
-            const totalAmount = list.reduce((sum, r) => sum + r.amount, 0);
-            const last = list[0];
-
-            if (type === 'incoming') {
-                document.getElementById('in-total-donors').textContent = totalDonors;
-                document.getElementById('in-total-amount').textContent = totalAmount.toLocaleString();
-                document.getElementById('in-last-amount').textContent = last ? last.amount + ' ကျပ်' : '-';
-                document.getElementById('in-list').innerHTML = list.map(r => `
-                    <div class="item">
-                        <span>${r.name} (${r.batch || '-'})</span>
-                        <div>
-                            <span>${r.amount.toLocaleString()} ကျပ်</span>
-                            <button class="edit" onclick="editRecord('incoming', ${r.id})">✏️ လဲ</button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                document.getElementById('out-total-donors').textContent = totalDonors;
-                document.getElementById('out-total-amount').textContent = totalAmount.toLocaleString();
-                document.getElementById('out-last-amount').textContent = last ? last.amount + ' ကျပ်' : '-';
-                document.getElementById('out-list').innerHTML = list.map(r => `
-                    <div class="item">
-                        <span>${r.name} (${r.date})</span>
-                        <div>
-                            <span>${r.amount.toLocaleString()} ကျပ်</span>
-                            <button class="edit" onclick="editRecord('outgoing', ${r.id})">✏️ လဲ</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function loadAll() {
-            loadTab('incoming');
-            loadTab('outgoing');
-        }
-
-        function filterList(type, query) {
-            // Simple filter (implement if needed)
-            loadTab(type);  // Reload to apply search in future
-        }
-
-        // Export Fixed
-        function exportData(type) {
-            const user = getUser();
-            let data = user;
-            if (type === 'incoming') data = { incoming: user.incoming };
-            else if (type === 'outgoing') data = { outgoing: user.outgoing };
-
-            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute('href', dataStr);
-            downloadAnchor.setAttribute('download', `${type}-donations-${Date.now()}.json`);
-            downloadAnchor.click();
-
-            // Fallback: Copy to clipboard
-            navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
-                showMsg('settings-tab', `${type} Export ပြီး! (Download သို့ Copy လုပ်ပြီး)`, 'success');
-            }).catch(() => showMsg('settings-tab', 'Copy မရဘူး။ Download ကြည့်ပါ', 'error'));
-        }
-
-        function clearData() {
-            if (confirm('အားလုံး ရှင်းမှတ်မှာ! OK?')) {
-                localStorage.removeItem('user');
-                loadAll();
-                logout();
-                showMsg('settings-tab', 'ရှင်းပြီး!', 'success');
-            }
-        }
-
-        function logout() {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-        }
-
-        function showMsg(id, msg, type) {
-            const el = document.getElementById(id).querySelector('.error, .success') || document.getElementById(id);
-            el.textContent = msg;
-            el.className = type;
-        }
-
-        // Tab Switch
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                const tabType = e.target.dataset.tab;
-                document.getElementById('incoming-tab').classList.toggle('hidden', tabType !== 'incoming');
-                document.getElementById('outgoing-tab').classList.toggle('hidden', tabType !== 'outgoing');
-                document.getElementById('settings-tab').classList.toggle('hidden', tabType !== 'settings');
-                if (tabType === 'incoming' || tabType === 'outgoing') loadTab(tabType);
-            });
         });
 
-        // Init
-        updateStatus(navigator.onLine ? '🟢 Online' : '🔴 Offline');
-        const user = getUser();
-        if (user.email) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            loadAll();
+        if (found) {
+            showMainApp();
+        } else {
+            showNotification("အကောင့်မမှန်ပါ", "error");
         }
-    </script>
+    } catch(e) {
+        showNotification("ဝင်ရောက်မှု မအောင်မြင်ပါ", "error");
+    }
+}
+
+async function registerUser() {
+    const name    = document.getElementById('regName').value.trim();
+    const email   = document.getElementById('regEmail').value.trim();
+    const phone   = document.getElementById('regPhone').value.trim();
+    const pw      = document.getElementById('regPassword').value;
+
+    if (!name || !email || !pw) {
+        return showNotification("လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ", "warning");
+    }
+
+    try {
+        const exists = await db.ref('members').orderByChild('email').equalTo(email).once('value');
+        if (exists.exists()) {
+            return showNotification("ဤအီးမေးလ်ဖြင့် အကောင့်ရှိပြီးပါပြီ", "warning");
+        }
+
+        const memberData = {
+            name, email, phone,
+            password: pw,
+            status: 'pending',
+            role: 'member',
+            registeredAt: Date.now()
+        };
+
+        await db.ref('members').push(memberData);
+        showNotification("အကောင့်ဖွင့်ပြီးပါပြီ။ Admin အတည်ပြုရန် စောင့်ပါ", "success");
+        showLoginForm();
+    } catch(e) {
+        showNotification("အကောင့်ဖွင့်မှု မအောင်မြင်ပါ", "error");
+        console.error(e);
+    }
+}
+
+// ────────────────────────────────────────────────
+// UI Navigation
+// ────────────────────────────────────────────────
+function showLoginPage() {
+    document.getElementById('loginPage').classList.remove('hide');
+    document.getElementById('mainApp').classList.add('hide');
+    document.getElementById('bottomNav').classList.add('hide');
+}
+
+function showMainApp() {
+    document.getElementById('loginPage').classList.add('hide');
+    document.getElementById('mainApp').classList.remove('hide');
+    document.getElementById('bottomNav').classList.remove('hide');
+
+    document.getElementById('welcomeText').textContent = 
+        userRole === 'admin' ? `မင်္ဂလာပါ Admin` : `မင်္ဂလာပါ ${userData.name || ''}`;
+    document.getElementById('roleText').textContent = 
+        userRole === 'admin' ? '👑 Admin Panel' : '👥 Member';
+
+    showTab('home');
+}
+
+function showTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.nav-btn[onclick="showTab('${tab}')"]`)?.classList.add('active');
+
+    const area = document.getElementById('contentArea');
+    let html = '';
+
+    switch(tab) {
+        case 'home':
+            html = `
+                <div class="card">
+                    <h3>🏠 ပင်မစာမျက်နှာ</h3>
+                    <p>စုစုပေါင်း အလှူပမာဏ ── တွက်နေပါသည်...</p>
+                    <p>နောက်ဆုံး အလှူ ── ဖတ်နေပါသည်...</p>
+                </div>
+            `;
+            break;
+
+        case 'donate':
+            if (userRole !== 'admin') {
+                html = '<div class="card"><h3>Admin သာ အလှူထည့်နိုင်ပါသည်</h3></div>';
+                break;
+            }
+            html = `
+                <div class="card">
+                    <h3>➕ အလှူအသစ်ထည့်ရန်</h3>
+                    <input id="donorName" placeholder="အလှူရှင် အမည်" required>
+                    <input id="donorPlace" placeholder="နေရပ် / မြို့">
+                    <input id="donorAmount" type="number" placeholder="ပမာဏ (ဘတ်)" required>
+                    <textarea id="donorNote" placeholder="မှတ်ချက်" rows="3"></textarea>
+                    <div class="d-flex justify-between">
+                        <button class="btn-secondary" onclick="showTab('home')">နောက်သို့</button>
+                        <button class="btn-primary" onclick="saveDonation()">သိမ်းမည်</button>
+                    </div>
+                    <div id="donationStatus" class="mt-3"></div>
+                </div>
+            `;
+            break;
+
+        case 'support':
+            if (userRole !== 'admin') {
+                html = '<div class="card"><h3>Admin သာ ထောက်ပို့ထည့်နိုင်ပါသည်</h3></div>';
+                break;
+            }
+            html = `
+                <div class="card">
+                    <h3>🚚 ထောက်ပို့အသစ်ထည့်ရန်</h3>
+                    <input id="supportOrg" placeholder="အဖွဲ့အစည်း / အဖွဲ့အမည်">
+                    <input id="supportAmount" type="number" placeholder="ပမာဏ (ဘတ်)">
+                    <input id="supportLocation" placeholder="တည်နေရာ">
+                    <textarea id="supportActivity" placeholder="လှုပ်ရှားမှု အသေးစိတ်" rows="3"></textarea>
+                    <div class="d-flex justify-between">
+                        <button class="btn-secondary" onclick="showTab('home')">နောက်သို့</button>
+                        <button class="btn-primary" onclick="saveSupport()">သိမ်းမည်</button>
+                    </div>
+                    <div id="supportStatus" class="mt-3"></div>
+                </div>
+            `;
+            break;
+
+        case 'list':
+            html = `
+                <div class="card">
+                    <h3>📋 စာရင်းအားလုံး</h3>
+                    <p>လာမည့်ဗားရှင်းတွင် အသေးစိတ်စာရင်း ပြပေးပါမည်</p>
+                </div>
+            `;
+            break;
+
+        default:
+            html = '<div class="card"><h3>မရှိသေးသော စာမျက်နှာ</h3></div>';
+    }
+
+    area.innerHTML = html;
+}
+
+// ────────────────────────────────────────────────
+// SAVE FUNCTIONS
+// ────────────────────────────────────────────────
+async function saveDonation() {
+    const name   = document.getElementById('donorName')?.value.trim();
+    const place  = document.getElementById('donorPlace')?.value.trim();
+    const amount = parseFloat(document.getElementById('donorAmount')?.value) || 0;
+    const note   = document.getElementById('donorNote')?.value.trim();
+
+    if (!name || amount <= 0) {
+        return showNotification("အမည်နှင့် ပမာဏ ဖြည့်ပါ", "warning");
+    }
+
+    const donation = {
+        name, place, amount, note,
+        week: getCurrentWeek(),
+        timestamp: Date.now(),
+        synced: false,
+        recordedBy: userRole === 'admin' ? 'admin' : (userData.name || 'member')
+    };
+
+    const status = document.getElementById('donationStatus');
+    status.innerHTML = '<span class="text-warning">သိမ်းနေပါသည်...</span>';
+
+    try {
+        if (navigator.onLine) {
+            await db.ref('donations').push(donation);
+            status.innerHTML = '<span class="text-success">သိမ်းပြီးပါပြီ ✓</span>';
+        } else {
+            donation.id = 'off_' + Date.now();
+            offlineDonations.push(donation);
+            localStorage.setItem('offlineDonations', JSON.stringify(offlineDonations));
+            status.innerHTML = '<span class="text-warning">Offline သိမ်းပြီး၊ အင်တာနက်ရလျှင် sync လုပ်ပါမည်</span>';
+        }
+
+        clearDonationForm();
+    } catch(e) {
+        status.innerHTML = `<span class="text-danger">သိမ်းမရပါ — ${e.message}</span>`;
+        console.error(e);
+    }
+}
+
+function clearDonationForm() {
+    ['donorName','donorPlace','donorAmount','donorNote'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+async function saveSupport() {
+    const org      = document.getElementById('supportOrg')?.value.trim();
+    const amount   = parseFloat(document.getElementById('supportAmount')?.value) || 0;
+    const location = document.getElementById('supportLocation')?.value.trim();
+    const activity = document.getElementById('supportActivity')?.value.trim();
+
+    if (!org || amount <= 0) {
+        return showNotification("အဖွဲ့အမည်နှင့် ပမာဏ ဖြည့်ပါ", "warning");
+    }
+
+    const support = {
+        organization: org,
+        amount, location, activity,
+        week: getCurrentWeek(),
+        timestamp: Date.now(),
+        synced: false,
+        recordedBy: userRole === 'admin' ? 'admin' : (userData.name || 'member')
+    };
+
+    const status = document.getElementById('supportStatus');
+    status.innerHTML = '<span class="text-warning">သိမ်းနေပါသည်...</span>';
+
+    try {
+        if (navigator.onLine) {
+            await db.ref('supports').push(support);
+            status.innerHTML = '<span class="text-success">သိမ်းပြီးပါပြီ ✓</span>';
+        } else {
+            support.id = 'sup_off_' + Date.now();
+            offlineSupports.push(support);
+            localStorage.setItem('offlineSupports', JSON.stringify(offlineSupports));
+            status.innerHTML = '<span class="text-warning">Offline သိမ်းပြီး၊ sync စောင့်နေပါသည်</span>';
+        }
+
+        clearSupportForm();
+    } catch(e) {
+        status.innerHTML = `<span class="text-danger">သိမ်းမရပါ — ${e.message}</span>`;
+        console.error(e);
+    }
+}
+
+function clearSupportForm() {
+    ['supportOrg','supportAmount','supportLocation','supportActivity'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function getCurrentWeek() {
+    const d = new Date();
+    const start = new Date(d.getFullYear(), 0, 1);
+    const days = Math.floor((d - start) / 86400000);
+    return Math.ceil((days + start.getDay() + 1) / 7);
+}
+
+// ────────────────────────────────────────────────
+// UTILITY
+// ────────────────────────────────────────────────
+function showNotification(msg, type = 'info') {
+    const div = document.createElement('div');
+    div.className = `notification text-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'warning'}`;
+    div.textContent = msg;
+    document.getElementById('notificationContainer').appendChild(div);
+    setTimeout(() => div.remove(), 4000);
+}
+
+function showLoginForm() {
+    document.getElementById('registerForm').classList.add('hide');
+    document.getElementById('loginPage').querySelector('.card:not(.hide)').classList.remove('hide');
+}
+
+function showRegisterForm() {
+    document.getElementById('registerForm').classList.remove('hide');
+    document.getElementById('loginPage').querySelectorAll('.card:not(#registerForm)').forEach(el => el.classList.add('hide'));
+}
+
+function logout() {
+    if (!confirm("ထွက်မည်လား?")) return;
+    auth.signOut();
+    localStorage.removeItem('userData');
+    showLoginPage();
+}
+
+function loadOfflineData() {
+    offlineDonations = JSON.parse(localStorage.getItem('offlineDonations') || '[]');
+    offlineSupports  = JSON.parse(localStorage.getItem('offlineSupports')  || '[]');
+}
+</script>
 </body>
 </html>
