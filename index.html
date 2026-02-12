@@ -2,7 +2,7 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <title>LFM - Weekly Management</title>
+    <title>LFM - Weekly Manager Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        :root { --primary: #1e8f4d; --dark: #0d0d0d; --card: #1a1a1a; --text: #ffffff; }
+        :root { --primary: #1e8f4d; --dark: #0d0d0d; --card: #1a1a1a; --text: #ffffff; --danger: #e74c3c; --edit: #3498db; }
         body { background: var(--dark); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 80px; }
         .hide { display: none !important; }
         .page { padding: 15px; }
@@ -30,7 +30,12 @@
         th, td { border: 1px solid #444; padding: 10px; text-align: left; font-size: 13px; }
         th { background: #222; color: var(--primary); }
         
-        #exportArea { padding: 20px; background: #1a1a1a; border-radius: 8px; }
+        .action-btns { display: flex; gap: 5px; }
+        .btn-sm { padding: 5px 8px; border-radius: 4px; border: none; font-size: 11px; color: white; cursor: pointer; }
+        .btn-edit { background: var(--edit); }
+        .btn-del { background: var(--danger); }
+
+        #exportArea { padding: 20px; background: #1a1a1a; }
         .summary-box { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
     </style>
 </head>
@@ -47,42 +52,32 @@
 
     <div id="mainApp" class="hide">
         <div id="addTab" class="page">
-            <h3>📝 စာရင်းအသစ်သွင်းရန်</h3>
+            <h3 id="formTitle">📝 စာရင်းအသစ်သွင်းရန်</h3>
             <div class="card">
+                <input type="hidden" id="editKey">
                 <label>အလှူရှင်အမည်</label>
                 <input type="text" id="donorName" placeholder="အမည်">
                 
                 <label>အလှူငွေ (ဘတ်)</label>
                 <input type="number" id="amount" placeholder="0.00">
                 
-                <label>အပတ်စဉ် ရွေးချယ်ရန်</label>
-                <select id="weekSelect">
-                    <option value="Week-1">အပတ်စဉ် (၁)</option>
-                    <option value="Week-2">အပတ်စဉ် (၂)</option>
-                    <option value="Week-3">အပတ်စဉ် (၃)</option>
-                    <option value="Week-4">အပတ်စဉ် (၄)</option>
-                    <option value="Week-5">အပတ်စဉ် (၅)</option>
-                </select>
+                <label>အပတ်စဉ် ရွေးချယ်ရန် (၁-၁၀၀)</label>
+                <select id="weekSelect"></select>
 
                 <label>ရက်စွဲ</label>
                 <input type="date" id="entryDate">
                 
-                <button class="btn btn-save" onclick="saveData()">စာရင်းသွင်းမည်</button>
+                <button class="btn btn-save" id="saveBtn" onclick="saveData()">စာရင်းသိမ်းဆည်းမည်</button>
+                <button class="btn hide" id="cancelBtn" onclick="resetForm()" style="background:#555; color:white;">မပြင်တော့ပါ (Cancel)</button>
             </div>
         </div>
 
         <div id="listTab" class="page hide">
-            <h3>📋 အပတ်စဉ်အလိုက်စာရင်း</h3>
+            <h3>📋 စာရင်းစီမံခန့်ခွဲမှု</h3>
             <div class="card">
-                <label>ကြည့်ရှုလိုသည့် အပတ်စဉ်ကို ရွေးပါ</label>
-                <select id="filterWeek" onchange="loadData()">
-                    <option value="Week-1">အပတ်စဉ် (၁)</option>
-                    <option value="Week-2">အပတ်စဉ် (၂)</option>
-                    <option value="Week-3">အပတ်စဉ် (၃)</option>
-                    <option value="Week-4">အပတ်စဉ် (၄)</option>
-                    <option value="Week-5">အပတ်စဉ် (၅)</option>
-                </select>
-                <button class="btn btn-png" onclick="exportAsPNG()">📷 PNG ပုံထုတ်ယူမည်</button>
+                <label>အပတ်စဉ်အလိုက် စစ်ထုတ်ရန်</label>
+                <select id="filterWeek" onchange="loadData()"></select>
+                <button class="btn btn-png" onclick="exportAsPNG()">📷 PNG ပုံထုတ်မည်</button>
             </div>
             
             <div id="exportArea">
@@ -93,9 +88,9 @@
                 <table id="recordTable">
                     <thead>
                         <tr>
-                            <th>ရက်စွဲ</th>
                             <th>အမည်</th>
                             <th>ပမာဏ</th>
+                            <th class="no-export">ပြင်/ဖျက်</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -122,6 +117,17 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // Generate Week 1 to 100
+        const weekSelects = [document.getElementById('weekSelect'), document.getElementById('filterWeek')];
+        weekSelects.forEach(select => {
+            for (let i = 1; i <= 100; i++) {
+                let opt = document.createElement('option');
+                opt.value = `Week-${i}`;
+                opt.innerHTML = `အပတ်စဉ် (${i})`;
+                select.appendChild(opt);
+            }
+        });
+
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('loginPage').classList.add('hide');
@@ -129,9 +135,6 @@
                 document.getElementById('bottomNav').classList.remove('hide');
                 document.getElementById('entryDate').valueAsDate = new Date();
                 loadData();
-            } else {
-                document.getElementById('loginPage').classList.remove('hide');
-                document.getElementById('mainApp').classList.add('hide');
             }
         });
 
@@ -139,10 +142,10 @@
             const e = document.getElementById('email').value;
             const p = document.getElementById('password').value;
             try { await auth.signInWithEmailAndPassword(e, p); } 
-            catch (err) { alert("Email သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်"); }
+            catch (err) { alert("အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားနေပါသည်"); }
         }
 
-        function logout() { auth.signOut().then(() => location.reload()); }
+        function logout() { if(confirm("အကောင့်ထွက်မလား?")) auth.signOut().then(() => location.reload()); }
 
         function switchTab(tabId, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hide'));
@@ -151,8 +154,9 @@
             el.classList.add('active');
         }
 
-        // Save with Weekly Category
+        // SAVE or UPDATE Data
         function saveData() {
+            const key = document.getElementById('editKey').value;
             const name = document.getElementById('donorName').value;
             const amt = document.getElementById('amount').value;
             const week = document.getElementById('weekSelect').value;
@@ -160,21 +164,24 @@
 
             if(!name || !amt) return alert("အချက်အလက်ဖြည့်ပါ");
 
-            // Save under a specific week node for better organization
-            db.ref('weekly_donations/' + week).push({
-                donorName: name,
-                amount: parseFloat(amt),
-                date: date,
-                timestamp: Date.now()
-            }).then(() => {
-                alert(week + " အတွက် စာရင်းသွင်းပြီးပါပြီ");
-                document.getElementById('donorName').value = '';
-                document.getElementById('amount').value = '';
-                loadData();
-            });
+            const data = { donorName: name, amount: parseFloat(amt), date: date };
+
+            if(key) {
+                // Update existing
+                db.ref('weekly_donations/' + week + '/' + key).update(data).then(() => {
+                    alert("ပြင်ဆင်ပြီးပါပြီ");
+                    resetForm();
+                });
+            } else {
+                // Add new
+                db.ref('weekly_donations/' + week).push(data).then(() => {
+                    alert("စာရင်းသွင်းပြီးပါပြီ");
+                    resetForm();
+                });
+            }
         }
 
-        // Load and Filter Data
+        // LOAD DATA with Edit/Delete Buttons
         function loadData() {
             const selectedWeek = document.getElementById('filterWeek').value;
             document.getElementById('displayWeek').innerText = selectedWeek;
@@ -185,32 +192,69 @@
                 let total = 0;
 
                 snapshot.forEach(child => {
-                    const data = child.val();
+                    const val = child.val();
+                    const key = child.key;
                     const row = `<tr>
-                        <td>${data.date}</td>
-                        <td>${data.donorName}</td>
-                        <td>${data.amount} ဘတ်</td>
+                        <td>${val.donorName}</td>
+                        <td>${val.amount}</td>
+                        <td class="action-btns no-export">
+                            <button class="btn-sm btn-edit" onclick="editRecord('${selectedWeek}', '${key}')">ပြင်</button>
+                            <button class="btn-sm btn-del" onclick="deleteRecord('${selectedWeek}', '${key}')">ဖျက်</button>
+                        </td>
                     </tr>`;
                     tbody.insertAdjacentHTML('beforeend', row);
-                    total += data.amount;
+                    total += val.amount;
                 });
                 document.getElementById('totalAmt').innerText = total;
             });
         }
 
-        // Export as PNG (Specific to selected week)
+        // EDIT Function
+        function editRecord(week, key) {
+            db.ref('weekly_donations/' + week + '/' + key).once('value', snapshot => {
+                const data = snapshot.val();
+                document.getElementById('editKey').value = key;
+                document.getElementById('donorName').value = data.donorName;
+                document.getElementById('amount').value = data.amount;
+                document.getElementById('weekSelect').value = week;
+                document.getElementById('entryDate').value = data.date;
+                
+                document.getElementById('formTitle').innerText = "✏️ စာရင်းပြင်ဆင်ရန်";
+                document.getElementById('saveBtn').innerText = "Update (ပြင်မည်)";
+                document.getElementById('cancelBtn').classList.remove('hide');
+                switchTab('addTab', document.querySelectorAll('.nav-item')[0]);
+            });
+        }
+
+        // DELETE Function
+        function deleteRecord(week, key) {
+            if(confirm("ဤစာရင်းကို ဖျက်ရန် သေချာပါသလား?")) {
+                db.ref('weekly_donations/' + week + '/' + key).remove()
+                .then(() => alert("ဖျက်ပြီးပါပြီ"));
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editKey').value = '';
+            document.getElementById('donorName').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('formTitle').innerText = "📝 စာရင်းအသစ်သွင်းရန်";
+            document.getElementById('saveBtn').innerText = "စာရင်းသိမ်းဆည်းမည်";
+            document.getElementById('cancelBtn').classList.add('hide');
+            loadData();
+        }
+
         function exportAsPNG() {
-            const area = document.getElementById('exportArea');
-            const week = document.getElementById('filterWeek').value;
-            
-            html2canvas(area, { 
-                backgroundColor: "#1a1a1a",
-                scale: 2 // Higher quality
-            }).then(canvas => {
+            // Hide action buttons during export
+            const actions = document.querySelectorAll('.no-export');
+            actions.forEach(a => a.style.display = 'none');
+
+            html2canvas(document.getElementById('exportArea'), { backgroundColor: "#1a1a1a" }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `LFM_${week}_Report.png`;
-                link.href = canvas.toDataURL("image/png");
+                link.download = `LFM_Report_${document.getElementById('filterWeek').value}.png`;
+                link.href = canvas.toDataURL();
                 link.click();
+                actions.forEach(a => a.style.display = ''); // Show them back
             });
         }
     </script>
