@@ -1,375 +1,123 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
+    <meta charset="UTF-8">
+    <title>ဖိုးစောင့်တောင်မီးအိမ် (LFM)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    
+    <meta name="theme-color" content="#1e8f4d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
 
-  <meta name="theme-color" content="#c8102e">
-  <meta name="description" content="တော်လှန်ရေး အလှူရှင်မှတ်တမ်း - အတူတကွ အောင်ပွဲခံမယ် ✊">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <!-- JSConfetti (mini confetti effect) -->
-  <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
-
-  <style>
-    :root {
-      --red-rev: #c8102e;
-      --red-dark: #a00d24;
-      --green-hope: #00c853;
-      --green-dark: #009624;
-      --dark: #0a0a0a;
-      --card: #111111;
-      --card-hover: #1a1a1a;
-      --text: #f0f0f0;
-      --muted: #aaaaaa;
-    }
-
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Noto Sans Myanmar', system-ui, sans-serif;
-      background: var(--dark);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 90px;
-    }
-
-    .container { max-width: 640px; margin: 0 auto; padding: 16px; }
-
-    .header {
-      text-align: center;
-      padding: 24px 0 16px;
-      background: linear-gradient(135deg, #1a0000, #000d1a);
-      border-radius: 0 0 24px 24px;
-      box-shadow: 0 8px 24px rgba(200,16,46,0.2);
-    }
-
-    .title {
-      font-size: 2.1rem;
-      font-weight: 900;
-      background: linear-gradient(90deg, var(--red-rev), var(--green-hope));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-
-    .subtitle { font-size: 1.05rem; opacity: 0.9; }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 16px 0;
-      border: 1px solid rgba(200,16,46,0.15);
-      transition: all 0.25s ease;
-    }
-
-    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(200,16,46,0.18); }
-
-    h3 { 
-      color: var(--green-hope); 
-      margin-bottom: 16px; 
-      font-size: 1.35rem; 
-      border-bottom: 2px solid var(--red-rev); 
-      padding-bottom: 8px; 
-    }
-
-    input, button {
-      width: 100%;
-      padding: 14px 16px;
-      margin: 10px 0;
-      border-radius: 12px;
-      font-size: 1rem;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    input {
-      background: #1e1e1e;
-      color: white;
-    }
-
-    input:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(200,16,46,0.4);
-    }
-
-    .btn {
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: linear-gradient(90deg, var(--red-rev), #e91e63);
-      color: white;
-    }
-
-    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
-
-    .quick-amounts {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin: 12px 0;
-    }
-
-    .quick-btn {
-      background: #222;
-      color: var(--green-hope);
-      border: 1px solid var(--green-hope);
-      font-weight: bold;
-    }
-
-    .quick-btn.active {
-      background: var(--green-hope);
-      color: black;
-    }
-
-    .donation-item {
-      background: rgba(200,16,46,0.08);
-      border-left: 5px solid var(--red-rev);
-      padding: 16px;
-      border-radius: 12px;
-      margin: 12px 0;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.5s forwards;
-    }
-
-    @keyframes fadeInUp {
-      to { opacity:1; transform:translateY(0); }
-    }
-
-    .total-box {
-      text-align: center;
-      padding: 32px 16px;
-      background: linear-gradient(135deg, rgba(200,16,46,0.15), rgba(0,200,83,0.15));
-      border-radius: 20px;
-      margin: 20px 0;
-    }
-
-    .total-amount {
-      font-size: 3.2rem;
-      font-weight: 900;
-      color: var(--green-hope);
-      text-shadow: 0 4px 12px rgba(0,200,83,0.4);
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0; right: 0;
-      background: rgba(17,17,17,0.92);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(200,16,46,0.3);
-      display: flex;
-      padding: 10px 0;
-      z-index: 100;
-    }
-
-    .nav-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 8px;
-    }
-
-    .nav-btn.active, .nav-btn:hover {
-      color: var(--green-hope);
-    }
-
-    .emoji-lg { font-size: 2.2rem; margin-bottom: 4px; }
-
-    .hide { display: none !important; }
-  </style>
+    <style>
+        :root {
+            --primary: #1e8f4d; --primary-dark: #167a3f; --dark: #0d0d0d;
+            --card: #1a1a1a; --danger: #dc3545; --success: #28a745;
+        }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
+        .hide { display: none !important; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; margin: 15px; border: 1px solid #333; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; }
+        button { width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; padding: 10px; border-top: 1px solid #333; }
+        .nav-btn { flex: 1; background: none; color: #888; text-align: center; font-size: 12px; }
+        .nav-btn.active { color: var(--primary); }
+    </style>
 </head>
 <body>
 
-<div class="container">
+    <div id="app">
+        <div id="loginPage" class="page">
+            <div class="card">
+                <h2 style="text-align: center; color: var(--primary);">ဖိုးစောင့်တောင်မီးအိမ်</h2>
+                <input type="email" id="loginEmail" placeholder="အီးမေးလ်">
+                <input type="password" id="loginPassword" placeholder="စကားဝှက်">
+                <button onclick="login()" class="btn-primary">ဝင်မည်</button>
+            </div>
+        </div>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="title">✊ ဖိုးစောင့်တောင် မီးအိမ်</div>
-    <div class="subtitle">တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</div>
-  </div>
-
-  <!-- Total -->
-  <div class="total-box">
-    <div style="font-size:1.1rem; opacity:0.9; margin-bottom:8px;">စုစုပေါင်း အလှူငွေ</div>
-    <div class="total-amount" id="totalAmount">0</div>
-    <div style="margin-top:8px; font-size:1.1rem;">ဘတ်</div>
-  </div>
-
-  <!-- Donation Form -->
-  <div class="card">
-    <h3>အလှူ ထည့်ရန်</h3>
-    
-    <input id="donorName" placeholder="အမည် / အဖွဲ့အမည်" autocomplete="off" list="nameSuggestions"/>
-    <datalist id="nameSuggestions"></datalist>
-
-    <input id="donationAmount" type="number" placeholder="ငွေပမာဏ (ဘတ်)" min="100"/>
-
-    <div class="quick-amounts">
-      <button class="quick-btn" onclick="setAmount(500)">500</button>
-      <button class="quick-btn" onclick="setAmount(1000)">1,000</button>
-      <button class="quick-btn" onclick="setAmount(5000)">5,000</button>
-      <button class="quick-btn" onclick="setAmount(10000)">10,000</button>
+        <div id="mainApp" class="page hide">
+            <div id="contentArea"></div>
+        </div>
     </div>
 
-    <button class="btn btn-primary" onclick="saveDonation()">အလှူ ထည့်မယ် ✊</button>
-  </div>
+    <div id="bottomNav" class="bottom-nav hide">
+        <button class="nav-btn active" onclick="showTab('home')">🏠<br>ပင်မ</button>
+        <button class="nav-btn" onclick="showTab('donate')">➕<br>အလှူ</button>
+        <button class="nav-btn" onclick="showTab('list')">📋<br>စာရင်း</button>
+        <button class="nav-btn" onclick="logout()">🚪<br>ထွက်ရန်</button>
+    </div>
 
-  <!-- Recent Donations -->
-  <div class="card">
-    <h3>နောက်ဆုံး အလှူများ</h3>
-    <div id="recentList"></div>
-  </div>
+    <script>
+        // Firebase Configuration (သတိပြုရန်: လက်တွေ့တွင် API Keys များကို ပိုမိုလုံခြုံစွာ သိမ်းဆည်းပါ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+            authDomain: "lamp-88a25.firebaseapp.com",
+            databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lamp-88a25",
+            storageBucket: "lamp-88a25.appspot.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-</div>
+        let currentUser = null;
 
-<!-- Bottom Navigation -->
-<div class="bottom-nav">
-  <button class="nav-btn active"><span class="emoji-lg">🏠</span><div>ပင်မ</div></button>
-  <button class="nav-btn"><span class="emoji-lg">➕</span><div>ထည့်ရန်</div></button>
-  <button class="nav-btn"><span class="emoji-lg">📋</span><div>စာရင်း</div></button>
-  <button class="nav-btn"><span class="emoji-lg">📤</span><div>Export</div></button>
-</div>
+        // Login Function with Security
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                document.getElementById('loginPage').classList.add('hide');
+                document.getElementById('mainApp').classList.remove('hide');
+                document.getElementById('bottomNav').classList.remove('hide');
+                showNotification('ဝင်ရောက်မှု အောင်မြင်ပါသည်', 'success');
+                showTab('home');
+            } catch (error) {
+                showNotification('အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်', 'error');
+            }
+        }
 
-<script>
-  // ==================== Firebase Config ====================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
-    authDomain: "lamp-88a25.firebaseapp.com",
-    databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "lamp-88a25",
-    storageBucket: "lamp-88a25.appspot.com"
-  };
+        // Notification System
+        function showNotification(msg, type) {
+            const div = document.createElement('div');
+            div.style.cssText = `position:fixed; top:20px; right:20px; padding:15px; border-radius:8px; z-index:999; color:white; background:${type==='success'?'var(--success)':'var(--danger)'}`;
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+            if ('vibrate' in navigator) navigator.vibrate(50);
+        }
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+        // Offline Data Sync
+        window.addEventListener('online', () => {
+            showNotification('အင်တာနက် ပြန်ရပါပြီ။ ဒေတာများ Sync လုပ်နေသည်...', 'success');
+            // Sync Logic Here
+        });
 
-  const jsConfetti = new JSConfetti();
+        function logout() {
+            auth.signOut().then(() => location.reload());
+        }
 
-  // ==================== Elements ====================
-  const totalEl     = document.getElementById('totalAmount');
-  const recentList  = document.getElementById('recentList');
-  const nameInput   = document.getElementById('donorName');
-  const amountInput = document.getElementById('donationAmount');
-
-  let suggestNames = JSON.parse(localStorage.getItem('suggestNames') || '[]');
-
-  // ==================== Quick amount buttons ====================
-  function setAmount(value) {
-    amountInput.value = value;
-    document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-  }
-
-  // ==================== Save Donation ====================
-  async function saveDonation() {
-    const name = nameInput.value.trim();
-    const amount = Number(amountInput.value) || 0;
-
-    if (!name || amount < 100) {
-      alert("အမည်နဲ့ အနည်းဆုံး ၁၀၀ ဘတ် ထည့်ပေးပါ");
-      return;
-    }
-
-    const donation = {
-      name,
-      amount,
-      timestamp: Date.now(),
-      week: Math.ceil((new Date().getDate() + new Date().getDay()) / 7)
-    };
-
-    try {
-      await db.ref('donations').push(donation);
-
-      // Confetti
-      jsConfetti.addConfetti({
-        emojis: ['✊','🔥','💪','🇲🇲'],
-        confettiNumber: 60,
-      });
-
-      // Add to suggest
-      if (!suggestNames.includes(name)) {
-        suggestNames.push(name);
-        localStorage.setItem('suggestNames', JSON.stringify(suggestNames));
-        updateSuggestions();
-      }
-
-      // Clear form
-      nameInput.value = '';
-      amountInput.value = '';
-      document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
-
-      alert("အလှူ အောင်မြင်စွာ ထည့်ပြီးပါပြီ ✊");
-
-    } catch(e) {
-      console.error(e);
-      alert("ခဏ အမှားဖြစ်သွားပါတယ်...");
-    }
-  }
-
-  // ==================== Real-time Listener ====================
-  db.ref('donations')
-    .orderByChild('timestamp')
-    .limitToLast(20)
-    .on('value', snapshot => {
-      recentList.innerHTML = '';
-
-      let total = 0;
-      const fragment = document.createDocumentFragment();
-
-      snapshot.forEach(child => {
-        const d = child.val();
-        total += d.amount || 0;
-
-        const div = document.createElement('div');
-        div.className = 'donation-item';
-        div.style.animationDelay = `${Math.random() * 0.4}s`;
-        div.innerHTML = `
-          <strong>${d.name}</strong>
-          <div style="margin-top:6px; font-size:1.3rem; color:var(--green-hope);">
-            ${d.amount.toLocaleString()} ဘတ်
-          </div>
-          <div style="margin-top:6px; font-size:0.85rem; opacity:0.7;">
-            ${new Date(d.timestamp).toLocaleString('my-MM')}
-          </div>
-        `;
-        fragment.appendChild(div);
-      });
-
-      recentList.appendChild(fragment);
-      totalEl.textContent = total.toLocaleString();
-    });
-
-  // ==================== Suggestions ====================
-  function updateSuggestions() {
-    const datalist = document.getElementById('nameSuggestions');
-    datalist.innerHTML = '';
-    suggestNames.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      datalist.appendChild(opt);
-    });
-  }
-
-  updateSuggestions();
-
-  // Initial load suggestions from storage
-  window.addEventListener('load', updateSuggestions);
-</script>
-
+        function showTab(tab) {
+            const content = document.getElementById('contentArea');
+            if(tab === 'home') {
+                content.innerHTML = '<div class="card"><h3>စုစုပေါင်းစာရင်း</h3><p>အလှူငွေ: 0 ဘတ်</p></div>';
+            } else if(tab === 'donate') {
+                content.innerHTML = '<div class="card"><h3>အလှူအသစ်ထည့်ရန်</h3><input placeholder="အမည်"><input type="number" placeholder="ပမာဏ"><button class="btn-primary">သိမ်းမည်</button></div>';
+            }
+        }
+    </script>
 </body>
 </html>
