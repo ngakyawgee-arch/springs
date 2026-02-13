@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        :root { --primary: #1e8f4d; --dark: #0d0d0d; --card: #1a1a1a; --text: #ffffff; --danger: #e74c3c; --edit: #3498db; }
+        :root { --primary: #1e8f4d; --dark: #0d0d0d; --card: #1a1a1a; --text: #ffffff; --danger: #e74c3c; --edit: #3498db; --report-bg: #f4f4f4; }
         body { background: var(--dark); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 80px; }
         .hide { display: none !important; }
         .page { padding: 15px; }
@@ -22,21 +22,51 @@
         .btn-save { background: var(--primary); color: white; }
         .btn-png { background: #e67e22; color: white; }
         
+        /* Bottom Navigation */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #888; font-size: 11px; }
         .nav-item.active { color: var(--primary); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1a1a1a; }
-        th, td { border: 1px solid #444; padding: 10px; text-align: left; font-size: 13px; }
-        th { background: #222; color: var(--primary); }
-        
+        /* Report Styles (Based on Image) */
+        #exportArea { 
+            padding: 30px 20px; 
+            background: var(--report-bg); 
+            color: #333; 
+            text-align: center; 
+            border-radius: 4px;
+        }
+        .report-header h1 { color: var(--primary); margin: 0; font-size: 32px; }
+        .report-header h2 { color: #666; margin: 5px 0; font-size: 18px; font-weight: normal; }
+        .report-header p { color: #888; margin: 5px 0; font-size: 14px; }
+
+        .summary-card {
+            background: #e8e8e8;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .total-amount { color: var(--primary); font-size: 36px; font-weight: bold; margin: 0; }
+        .total-label { color: #666; font-size: 16px; margin: 5px 0; }
+        .donor-count { 
+            background: var(--primary); 
+            color: white; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            display: inline-block; 
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
+        .report-table th { background: var(--primary); color: white; padding: 12px 8px; font-size: 14px; }
+        .report-table td { padding: 12px 8px; border-bottom: 1px solid #ddd; font-size: 14px; color: #333; }
+        .footer-tag { font-size: 10px; color: #aaa; margin-top: 20px; }
+
+        /* Actions (Hidden in Export) */
         .action-btns { display: flex; gap: 5px; }
         .btn-sm { padding: 5px 8px; border-radius: 4px; border: none; font-size: 11px; color: white; cursor: pointer; }
         .btn-edit { background: var(--edit); }
         .btn-del { background: var(--danger); }
-
-        #exportArea { padding: 20px; background: #1a1a1a; }
-        .summary-box { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -55,46 +85,48 @@
             <h3 id="formTitle">📝 စာရင်းအသစ်သွင်းရန်</h3>
             <div class="card">
                 <input type="hidden" id="editKey">
-                <label>အလှူရှင်အမည်</label>
-                <input type="text" id="donorName" placeholder="အမည်">
-                
-                <label>အလှူငွေ (ဘတ်)</label>
-                <input type="number" id="amount" placeholder="0.00">
-                
-                <label>အပတ်စဉ် ရွေးချယ်ရန် (၁-၁၀၀)</label>
+                <input type="text" id="donorName" placeholder="အလှူရှင်အမည်">
+                <input type="number" id="amount" placeholder="အလှူငွေ (ဘတ်)">
                 <select id="weekSelect"></select>
-
-                <label>ရက်စွဲ</label>
                 <input type="date" id="entryDate">
-                
                 <button class="btn btn-save" id="saveBtn" onclick="saveData()">စာရင်းသိမ်းဆည်းမည်</button>
-                <button class="btn hide" id="cancelBtn" onclick="resetForm()" style="background:#555; color:white;">မပြင်တော့ပါ (Cancel)</button>
+                <button class="btn hide" id="cancelBtn" onclick="resetForm()" style="background:#555;">မပြင်တော့ပါ</button>
             </div>
         </div>
 
         <div id="listTab" class="page hide">
-            <h3>📋 စာရင်းစီမံခန့်ခွဲမှု</h3>
             <div class="card">
-                <label>အပတ်စဉ်အလိုက် စစ်ထုတ်ရန်</label>
+                <label>အပတ်စဉ် ရွေးပါ</label>
                 <select id="filterWeek" onchange="loadData()"></select>
                 <button class="btn btn-png" onclick="exportAsPNG()">📷 PNG ပုံထုတ်မည်</button>
             </div>
             
             <div id="exportArea">
-                <div class="summary-box">
-                    <span id="displayWeek">Week-1</span>
-                    <span>စုစုပေါင်း: <span id="totalAmt">0</span> ဘတ်</span>
+                <div class="report-header">
+                    <h1>ဖိုးစောင့်တောင်မီးအိမ်</h1>
+                    <h2>တော်လှန်ရေး အလှူရှင်မှတ်တမ်း</h2>
+                    <p>ရက်စွဲ: <span id="reportDate">--/--/----</span></p>
                 </div>
-                <table id="recordTable">
+
+                <div class="summary-card">
+                    <p class="total-amount"><span id="totalAmt">0</span> ဘတ်</p>
+                    <p class="total-label">စုစုပေါင်းအလှူငွေ</p>
+                    <div class="donor-count">အလှူရှင် <span id="donorCount">0</span> ဦး</div>
+                </div>
+
+                <table class="report-table">
                     <thead>
                         <tr>
+                            <th>နံပါတ်</th>
                             <th>အမည်</th>
                             <th>ပမာဏ</th>
+                            <th>ရက်စွဲ</th>
                             <th class="no-export">ပြင်/ဖျက်</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
+                <div class="footer-tag">Generated by ဖိုးစောင့်တောင်မီးအိမ် v1.3.0</div>
             </div>
         </div>
     </div>
@@ -106,6 +138,7 @@
     </nav>
 
     <script>
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
             authDomain: "lamp-88a25.firebaseapp.com",
@@ -141,11 +174,10 @@
         async function login() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('password').value;
-            try { await auth.signInWithEmailAndPassword(e, p); } 
-            catch (err) { alert("အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားနေပါသည်"); }
+            try { await auth.signInWithEmailAndPassword(e, p); } catch (err) { alert("အမှားဖြစ်နေပါသည်"); }
         }
 
-        function logout() { if(confirm("အကောင့်ထွက်မလား?")) auth.signOut().then(() => location.reload()); }
+        function logout() { if(confirm("ထွက်မှာလား?")) auth.signOut().then(() => location.reload()); }
 
         function switchTab(tabId, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hide'));
@@ -154,7 +186,6 @@
             el.classList.add('active');
         }
 
-        // SAVE or UPDATE Data
         function saveData() {
             const key = document.getElementById('editKey').value;
             const name = document.getElementById('donorName').value;
@@ -162,41 +193,35 @@
             const week = document.getElementById('weekSelect').value;
             const date = document.getElementById('entryDate').value;
 
-            if(!name || !amt) return alert("အချက်အလက်ဖြည့်ပါ");
+            if(!name || !amt) return alert("ဖြည့်ပါ");
 
             const data = { donorName: name, amount: parseFloat(amt), date: date };
 
             if(key) {
-                // Update existing
-                db.ref('weekly_donations/' + week + '/' + key).update(data).then(() => {
-                    alert("ပြင်ဆင်ပြီးပါပြီ");
-                    resetForm();
-                });
+                db.ref('weekly_donations/' + week + '/' + key).update(data).then(() => { alert("ပြင်ပြီးပါပြီ"); resetForm(); });
             } else {
-                // Add new
-                db.ref('weekly_donations/' + week).push(data).then(() => {
-                    alert("စာရင်းသွင်းပြီးပါပြီ");
-                    resetForm();
-                });
+                db.ref('weekly_donations/' + week).push(data).then(() => { alert("သွင်းပြီးပါပြီ"); resetForm(); });
             }
         }
 
-        // LOAD DATA with Edit/Delete Buttons
         function loadData() {
             const selectedWeek = document.getElementById('filterWeek').value;
-            document.getElementById('displayWeek').innerText = selectedWeek;
+            document.getElementById('reportDate').innerText = new Date().toLocaleDateString('my-MM');
 
             db.ref('weekly_donations/' + selectedWeek).on('value', snapshot => {
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = '';
-                let total = 0;
+                let total = 0; let count = 0;
 
                 snapshot.forEach(child => {
+                    count++;
                     const val = child.val();
                     const key = child.key;
                     const row = `<tr>
+                        <td>${count}</td>
                         <td>${val.donorName}</td>
-                        <td>${val.amount}</td>
+                        <td>${val.amount.toLocaleString()} ဘတ်</td>
+                        <td>${val.date}</td>
                         <td class="action-btns no-export">
                             <button class="btn-sm btn-edit" onclick="editRecord('${selectedWeek}', '${key}')">ပြင်</button>
                             <button class="btn-sm btn-del" onclick="deleteRecord('${selectedWeek}', '${key}')">ဖျက်</button>
@@ -205,11 +230,11 @@
                     tbody.insertAdjacentHTML('beforeend', row);
                     total += val.amount;
                 });
-                document.getElementById('totalAmt').innerText = total;
+                document.getElementById('totalAmt').innerText = total.toLocaleString();
+                document.getElementById('donorCount').innerText = count;
             });
         }
 
-        // EDIT Function
         function editRecord(week, key) {
             db.ref('weekly_donations/' + week + '/' + key).once('value', snapshot => {
                 const data = snapshot.val();
@@ -218,20 +243,14 @@
                 document.getElementById('amount').value = data.amount;
                 document.getElementById('weekSelect').value = week;
                 document.getElementById('entryDate').value = data.date;
-                
-                document.getElementById('formTitle').innerText = "✏️ စာရင်းပြင်ဆင်ရန်";
-                document.getElementById('saveBtn').innerText = "Update (ပြင်မည်)";
+                document.getElementById('formTitle').innerText = "✏️ ပြင်ဆင်ရန်";
                 document.getElementById('cancelBtn').classList.remove('hide');
                 switchTab('addTab', document.querySelectorAll('.nav-item')[0]);
             });
         }
 
-        // DELETE Function
         function deleteRecord(week, key) {
-            if(confirm("ဤစာရင်းကို ဖျက်ရန် သေချာပါသလား?")) {
-                db.ref('weekly_donations/' + week + '/' + key).remove()
-                .then(() => alert("ဖျက်ပြီးပါပြီ"));
-            }
+            if(confirm("ဖျက်မှာလား?")) db.ref('weekly_donations/' + week + '/' + key).remove();
         }
 
         function resetForm() {
@@ -239,22 +258,23 @@
             document.getElementById('donorName').value = '';
             document.getElementById('amount').value = '';
             document.getElementById('formTitle').innerText = "📝 စာရင်းအသစ်သွင်းရန်";
-            document.getElementById('saveBtn').innerText = "စာရင်းသိမ်းဆည်းမည်";
             document.getElementById('cancelBtn').classList.add('hide');
             loadData();
         }
 
         function exportAsPNG() {
-            // Hide action buttons during export
             const actions = document.querySelectorAll('.no-export');
             actions.forEach(a => a.style.display = 'none');
 
-            html2canvas(document.getElementById('exportArea'), { backgroundColor: "#1a1a1a" }).then(canvas => {
+            html2canvas(document.getElementById('exportArea'), { 
+                scale: 3, // High resolution
+                backgroundColor: "#f4f4f4" 
+            }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `LFM_Report_${document.getElementById('filterWeek').value}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
-                actions.forEach(a => a.style.display = ''); // Show them back
+                actions.forEach(a => a.style.display = '');
             });
         }
     </script>
