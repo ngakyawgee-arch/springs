@@ -2,7 +2,7 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <title>LFM - Weekly Manager Pro (Final Fixed)</title>
+    <title>LFM - Weekly Manager Pro (Full Version)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -33,27 +33,28 @@
         .btn-save { background: var(--primary); color: white; }
         .btn-expense { background: #ea580c; color: white; }
         
-        /* Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #020617; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #1e293b; }
-        .nav-item { text-align: center; font-size: 11px; color: #64748b; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--primary); font-weight: bold; transform: scale(1.1); }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #020617; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #1e293b; z-index: 100; }
+        .nav-item { text-align: center; font-size: 11px; color: #64748b; cursor: pointer; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
 
         /* Stats */
         .balance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .bal-card { background: #1e293b; padding: 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
 
         /* --- Export Template Design --- */
-        #exportExpenseArea { 
+        #exportArea { 
             position: fixed; left: -9999px; top: 0; width: 550px; 
             background: #ffffff; color: #1e293b; padding: 0;
         }
-        .exp-header { background: #10b981; color: white; padding: 40px 20px; text-align: center; border-bottom: 5px solid #059669; }
+        .exp-header { background: #f8fafc; padding: 30px; text-align: center; border-bottom: 2px solid #27ae60; }
+        .exp-logo { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #27ae60; margin-bottom: 10px; }
         .exp-body { padding: 30px; background: white; }
-        .exp-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #e2e8f0; padding: 15px 5px; }
+        .exp-row { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 12px 5px; }
         .exp-label { color: #64748b; font-weight: 500; }
-        .exp-value { color: #0f172a; font-weight: 700; font-size: 17px; }
-        .exp-amount-wrap { margin-top: 30px; background: #f0fdf4; padding: 25px; border-radius: 15px; text-align: center; border: 2px solid #dcfce7; }
-        .exp-footer { padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; background: #f8fafc; }
+        .exp-value { color: #0f172a; font-weight: 700; }
+        .exp-note-box { margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px; font-size: 14px; color: #475569; }
+        .exp-footer { padding: 15px; text-align: center; font-size: 11px; color: #94a3b8; background: #f8fafc; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -61,15 +62,14 @@
     <div id="toast" class="toast"></div>
 
     <div id="loginPage" class="page">
-        <div style="text-align: center; margin-top: 80px; margin-bottom: 40px;">
-            <div style="font-size: 60px; margin-bottom: 10px;">🛡️</div>
-            <h1 style="margin: 0; letter-spacing: 1px;">LFM PRO</h1>
-            <p style="color: #64748b;">Financial Management System</p>
+        <div style="text-align: center; margin-top: 60px; margin-bottom: 40px;">
+            <h1 style="margin: 0; color: var(--primary);">LFM Pro</h1>
+            <p style="color: #64748b;">အပတ်စဉ် ထောက်ပို့စီမံခန့်ခွဲမှု</p>
         </div>
         <div class="card">
             <input type="email" id="email" placeholder="အီးမေးလ်">
             <input type="password" id="password" placeholder="လျှို့ဝှက်နံပါတ်">
-            <button class="btn btn-save" onclick="login()">အကောင့်ဝင်မည်</button>
+            <button class="btn btn-save" onclick="login()">LOGIN</button>
         </div>
     </div>
 
@@ -78,16 +78,29 @@
             <div class="balance-grid">
                 <div class="bal-card">
                     <small style="color: #94a3b8;">အလှူငွေစုစုပေါင်း</small>
-                    <div id="globalIncome" style="color:#22c55e; font-weight:800; font-size: 1.1em; margin-top:4px;">0</div>
+                    <div id="globalIncome" style="color:#22c55e; font-weight:800;">0</div>
                 </div>
                 <div class="bal-card">
                     <small style="color: #94a3b8;">အသုံးစရိတ်</small>
-                    <div id="globalExpense" style="color:#ef4444; font-weight:800; font-size: 1.1em; margin-top:4px;">0</div>
+                    <div id="globalExpense" style="color:#ef4444; font-weight:800;">0</div>
                 </div>
             </div>
-            <div class="card" style="text-align:center; background: linear-gradient(to right, #1e293b, #0f172a);">
+            
+            <div class="card" style="background: rgba(39, 174, 96, 0.1); border: 1px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <small style="color: var(--primary);">သတ်မှတ်ဘတ်ဂျက် (Budget)</small>
+                    <button onclick="setBudget()" style="background: none; border: 1px solid var(--primary); color: white; border-radius: 5px; font-size: 10px; cursor: pointer;">ပြင်မည်</button>
+                </div>
+                <div id="budgetValue" style="font-size: 22px; font-weight: bold; margin: 5px 0;">0 ဘတ်</div>
+                <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; margin-top: 5px;">
+                    <div id="budgetBar" style="height: 100%; width: 0%; background: var(--primary); border-radius: 4px; transition: 0.5s;"></div>
+                </div>
+                <small id="budgetStatus" style="font-size: 11px; color: #94a3b8; display: block; margin-top: 5px;">အသုံးပြုမှု: 0%</small>
+            </div>
+
+            <div class="card" style="text-align:center; background: #020617;">
                 <small style="color: #94a3b8;">လက်ကျန်ငွေ</small>
-                <div id="netBalance" style="font-size:26px; font-weight:900; margin-top:5px;">0 ဘတ်</div>
+                <div id="netBalance" style="font-size:26px; font-weight:900;">0 ဘတ်</div>
             </div>
         </div>
 
@@ -100,72 +113,54 @@
                 <input type="date" id="incomeDate">
                 <button class="btn btn-save" onclick="saveIncome()">ဒေတာသိမ်းမည်</button>
             </div>
+            <div id="incomeHistoryList"></div>
         </div>
 
         <div id="expenseTab" class="page hide">
             <h3>🚚 ထောက်ပို့စရိတ်မှတ်တမ်း</h3>
             <div class="card">
-                <input type="text" id="expOrg" placeholder="လက်ခံသည့်အဖွဲ့အမည်">
-                <input type="text" id="expActivity" placeholder="လှုပ်ရှားမှုအမျိုးအစား">
-                <input type="text" id="expRegion" placeholder="ဒေသ/နေရာ">
-                <input type="number" id="expAmount" placeholder="လှူဒါန်းငွေ (ဘတ်)">
+                <input type="text" id="expOrg" placeholder="အဖွဲ့အမည်">
+                <input type="text" id="expActivity" placeholder="လှုပ်ရှားမှု">
+                <input type="text" id="expRegion" placeholder="ဒေသ">
+                <input type="number" id="expAmount" placeholder="ပမာဏ (ဘတ်)">
                 <input type="date" id="expDate">
-                <textarea id="expNote" rows="2" placeholder="အခြားမှတ်ချက်များ..."></textarea>
+                <textarea id="expNote" rows="2" placeholder="မှတ်ချက်..."></textarea>
                 <button class="btn btn-expense" onclick="saveExpense()">မှတ်တမ်းတင်မည်</button>
             </div>
         </div>
 
         <div id="historyTab" class="page hide">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <h3>📜 မှတ်တမ်းဟောင်းများ</h3>
-                <span id="historyCount" style="background:#334155; padding:4px 10px; border-radius:20px; font-size:12px;">0</span>
-            </div>
+            <h3>📜 ထောက်ပို့မှတ်တမ်းများ</h3>
             <input type="text" id="historySearch" placeholder="အဖွဲ့အမည်ဖြင့် ရှာဖွေရန်..." onkeyup="filterHistory()">
             <div id="expenseHistoryList"></div>
         </div>
     </div>
 
-    <div id="exportExpenseArea">
+    <div id="exportArea">
         <div class="exp-header">
-            <div style="letter-spacing: 3px; font-size: 13px; opacity: 0.9;">LFM ASSISTANCE</div>
-            <div style="font-size: 30px; font-weight: 900; margin-top: 5px;">ထောက်ပို့လှူဒါန်းမှု</div>
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/7QBEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAACgcAigAIkZCTUQzMDAwMDI3NDAyMDAwMGI1Y2UwMDAwNGUxNzAxMDAA/9sAQwADAgICAgIDAgICAwMDAwQGBAQEBAQIBgYFBgkICgoJCAkJCgwPDAoLDgsJCQ0RDQ4PEBAREAoMEhMSEBMPEBAQ/9sAQwEDAwMEAwQIBAQIEAsJCxAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ/8AAEQgAwADAAwEiAAIRAQMRAf/EAB4AAAICAwEBAQEAAAAAAAAAAAAHBggBBQkEAwIK/8QAPhAAAQQBAwIEBAQDBwMEAwAAAQIDBAUGAAcREiEIEzFBFCIyURUjYYEWQnEkM1JykaGxCUNiFzRTZGOCwf/EABwBAQACAwEBAQAAAAAAAAAAAAABBQIEBgcDCP/EABoBAQEBAQEBAQAAAAAAAAAAAAABAgMEBQb/2gAMAWABAU视觉效果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" class="exp-logo">
+            <h2 style="margin: 5px 0; color: #27ae60;">ဖိုးစောင့်တောင်မီးအိမ်</h2>
+            <p id="exportTitle" style="margin: 0; font-size: 14px; font-weight: bold; color: #475569;">ထောက်ပို့လှူဒါန်းခြင်းမှတ်တမ်း</p>
         </div>
         <div class="exp-body">
-            <div class="exp-row">
-                <span class="exp-label">လက်ခံသူ/အဖွဲ့</span>
-                <span class="exp-value" id="outOrg"></span>
-            </div>
-            <div class="exp-row">
-                <span class="exp-label">လှုပ်ရှားမှု</span>
-                <span class="exp-value" id="outAct"></span>
-            </div>
-            <div class="exp-row">
-                <span class="exp-label">ဒေသ</span>
-                <span class="exp-value" id="outReg"></span>
-            </div>
-            <div class="exp-row">
-                <span class="exp-label">ရက်စွဲ</span>
-                <span class="exp-value" id="outDate"></span>
-            </div>
-            <div class="exp-amount-wrap">
-                <div style="color: #10b981; font-weight: bold; font-size: 14px;">လှူဒါန်းငွေစုစုပေါင်း</div>
-                <div style="font-size: 34px; font-weight: 900; color: #1e293b; margin-top: 5px;"><span id="outAmt"></span> <small style="font-size: 15px;">THB</small></div>
+            <div id="exportFields"></div>
+            <div id="exportNoteArea" class="exp-note-box hide">
+                <small>မှတ်ချက်။</small><br>
+                <span id="outNote"></span>
             </div>
         </div>
-        <div class="exp-footer">
-            ဤမှတ်တမ်းကို LFM Weekly Manager မှ ထုတ်ပေးပါသည်။
-        </div>
+        <div class="exp-footer">LFM Weekly Manager Pro • ၂၀၂၆ စာရင်းမှတ်တမ်း</div>
     </div>
 
     <nav id="bottomNav" class="bottom-nav hide">
         <div class="nav-item active" onclick="switchTab('incomeTab', this)">💰<br>အလှူရှင်</div>
         <div class="nav-item" onclick="switchTab('expenseTab', this)">🚚<br>ထောက်ပို့</div>
-        <div class="nav-item" onclick="historyClick(this)">📜<br>မှတ်တမ်း</div>
+        <div class="nav-item" onclick="switchTab('historyTab', this)">📜<br>မှတ်တမ်း</div>
         <div class="nav-item" onclick="logout()">🚪<br>ထွက်ရန်</div>
     </nav>
 
     <script>
-        // အသစ်ရရှိထားသော Firebase Config
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
             authDomain: "lamp-88a25.firebaseapp.com",
@@ -182,8 +177,9 @@
 
         let totalInc = 0;
         let totalExp = 0;
+        let currentBudget = 0;
 
-        // Auto Weeks
+        // Init Weeks
         const ws = document.getElementById('incomeWeek');
         for (let i = 1; i <= 100; i++) {
             let o = document.createElement('option');
@@ -194,19 +190,66 @@
         function showToast(m, type="success") {
             const t = document.getElementById('toast');
             t.textContent = m;
-            t.style.background = type === "success" ? "#10b981" : "#ef4444";
+            t.style.background = type === "success" ? "#27ae60" : "#e74c3c";
             t.style.display = "block";
             setTimeout(() => t.style.display = "none", 2500);
         }
 
+        // Budget Function
+        function setBudget() {
+            const b = prompt("ဘတ်ဂျက်ပမာဏ သတ်မှတ်ပါ (ဘတ်):", currentBudget);
+            if (b !== null) {
+                db.ref('settings/budget').set(parseFloat(b));
+            }
+        }
+
+        function updateBudgetUI() {
+            document.getElementById('budgetValue').textContent = currentBudget.toLocaleString() + " ဘတ်";
+            const percent = currentBudget > 0 ? Math.min((totalExp / currentBudget) * 100, 100) : 0;
+            document.getElementById('budgetBar').style.width = percent + "%";
+            document.getElementById('budgetStatus').textContent = `အသုံးပြုမှု: ${percent.toFixed(1)}%`;
+            document.getElementById('budgetBar').style.background = percent > 90 ? "#e74c3c" : "#27ae60";
+        }
+
         function syncData() {
+            // Budget Listener
+            db.ref('settings/budget').on('value', s => {
+                currentBudget = s.val() || 0;
+                updateBudgetUI();
+            });
+
+            // Income Listener & History
             db.ref('weekly_donations').on('value', s => {
                 totalInc = 0;
-                s.forEach(w => { w.forEach(c => { totalInc += parseFloat(c.val().amount || 0); }); });
+                const list = document.getElementById('incomeHistoryList');
+                list.innerHTML = '<h4>မကြာသေးမီက အလှူရှင်များ</h4>';
+                let arr = [];
+                s.forEach(w => { 
+                    w.forEach(c => { 
+                        const v = c.val();
+                        totalInc += parseFloat(v.amount || 0);
+                        arr.push({id: c.key, week: w.key, ...v});
+                    }); 
+                });
+                arr.reverse().slice(0, 10).forEach(item => {
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="card" style="font-size:13px; padding:12px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span><b>${item.donorName}</b></span>
+                                <span>${parseFloat(item.amount).toLocaleString()} ဘတ်</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#64748b; margin-top:5px;">
+                                <small>${item.week} | ${item.date}</small>
+                                <button onclick="exportDonorPNG('${item.week}','${item.id}')" style="background:none; border:none; color:var(--primary); cursor:pointer;">📷 PNG</button>
+                            </div>
+                        </div>
+                    `);
+                });
                 document.getElementById('globalIncome').textContent = totalInc.toLocaleString();
                 updateNet();
             });
 
+            // Expense Listener
             db.ref('expenses').on('value', s => {
                 totalExp = 0;
                 const list = document.getElementById('expenseHistoryList');
@@ -219,38 +262,36 @@
                 });
                 arr.reverse().forEach(item => {
                     list.insertAdjacentHTML('beforeend', `
-                        <div class="card" style="border-right: 4px solid #ea580c;">
-                            <div style="display:flex; justify-content: space-between;">
-                                <b style="color:#22c55e; font-size:1.1em;">${item.org}</b>
-                                <span style="font-size:12px; color:#64748b;">${item.date}</span>
-                            </div>
-                            <div style="margin: 8px 0; font-size:14px; color:#cbd5e1;">${item.activity} - ${item.region}</div>
-                            <div style="font-weight:bold; font-size:16px;">${parseFloat(item.amount).toLocaleString()} ဘတ်</div>
-                            <div style="display:flex; gap:8px; margin-top:12px;">
-                                <button class="btn btn-save" style="flex:1; padding:8px; font-size:12px;" onclick="exportPNG('${item.id}')">📷 ပုံထုတ်ရန်</button>
-                                <button class="btn" style="flex:1; padding:8px; font-size:12px; background:#334155; color:white;" onclick="delExp('${item.id}')">ဖျက်မည်</button>
+                        <div class="card" style="border-left: 4px solid #ea580c;">
+                            <b>${item.org}</b><br>
+                            <small>${item.activity} (${item.region})</small><br>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                                <span><b>${parseFloat(item.amount).toLocaleString()} ဘတ်</b></span>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn btn-save" style="padding:5px 10px; font-size:12px; margin:0;" onclick="exportExpensePNG('${item.id}')">📷 PNG</button>
+                                    <button class="btn" style="background:#444; color:white; padding:5px 10px; font-size:12px; margin:0;" onclick="delExp('${item.id}')">🗑️</button>
+                                </div>
                             </div>
                         </div>
                     `);
                 });
                 document.getElementById('globalExpense').textContent = totalExp.toLocaleString();
-                document.getElementById('historyCount').textContent = arr.length;
                 updateNet();
+                updateBudgetUI();
             });
         }
 
         function updateNet() {
             const net = totalInc - totalExp;
-            const nEl = document.getElementById('netBalance');
-            nEl.textContent = net.toLocaleString() + " ဘတ်";
-            nEl.style.color = net >= 0 ? "#22c55e" : "#ef4444";
+            document.getElementById('netBalance').textContent = net.toLocaleString() + " ဘတ်";
+            document.getElementById('netBalance').style.color = net >= 0 ? "#22c55e" : "#ef4444";
         }
 
+        // Auth
         async function login() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('password').value;
-            try { await auth.signInWithEmailAndPassword(e, p); } 
-            catch { showToast("အချက်အလက်မှားယွင်းနေသည်", "error"); }
+            try { await auth.signInWithEmailAndPassword(e, p); } catch { showToast("Login မှားယွင်းနေပါသည်", "error"); }
         }
 
         auth.onAuthStateChanged(u => {
@@ -271,10 +312,7 @@
             el.classList.add('active');
         }
 
-        function historyClick(el) {
-            switchTab('historyTab', el);
-        }
-
+        // Database Ops
         function saveIncome() {
             const name = document.getElementById('donorName').value;
             const amt = document.getElementById('incomeAmount').value;
@@ -295,47 +333,4 @@
                 region: document.getElementById('expRegion').value,
                 date: document.getElementById('expDate').value,
                 note: document.getElementById('expNote').value
-            }).then(() => {
-                showToast("မှတ်တမ်းတင်ပြီး");
-                ['expOrg','expActivity','expRegion','expAmount','expNote'].forEach(i => document.getElementById(i).value='');
-            });
-        }
-
-        function delExp(id) {
-            if(confirm("ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?")) db.ref(`expenses/${id}`).remove();
-        }
-
-        function filterHistory() {
-            const q = document.getElementById('historySearch').value.toLowerCase();
-            document.querySelectorAll('#expenseHistoryList .card').forEach(c => {
-                c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none";
-            });
-        }
-
-        function exportPNG(id) {
-            showToast("ပုံထုတ်နေသည်...");
-            db.ref(`expenses/${id}`).once('value', s => {
-                const v = s.val();
-                document.getElementById('outOrg').textContent = v.org;
-                document.getElementById('outAct').textContent = v.activity || '-';
-                document.getElementById('outReg').textContent = v.region || '-';
-                document.getElementById('outAmt').textContent = parseFloat(v.amount).toLocaleString();
-                document.getElementById('outDate').textContent = v.date;
-
-                const area = document.getElementById('exportExpenseArea');
-                area.style.left = "0";
-                html2canvas(area, { scale: 2 }).then(cv => {
-                    const l = document.createElement('a');
-                    l.download = `LFM_${v.org}_${v.date}.png`;
-                    l.href = cv.toDataURL();
-                    l.click();
-                    area.style.left = "-9999px";
-                    showToast("အောင်မြင်စွာ ထုတ်ယူပြီး");
-                });
-            });
-        }
-
-        function logout() { if(confirm("ထွက်ရန် သေချာသလား?")) auth.signOut().then(() => location.reload()); }
-    </script>
-</body>
-</html>
+            }).then
