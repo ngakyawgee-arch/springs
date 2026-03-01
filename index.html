@@ -42,8 +42,18 @@
         .balance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .bal-card { background: #1e293b; padding: 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
 
+        /* Table Styles */
+        .table-container { overflow-x: auto; margin-top: 15px; border-radius: 16px; background: #1e293b; padding: 5px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
+        th { background: #2d3a4f; color: white; padding: 12px 8px; font-weight: 600; text-align: left; }
+        td { padding: 10px 8px; border-bottom: 1px solid #334155; color: #e2e8f0; }
+        tr:last-child td { border-bottom: none; }
+        .donor-total-row { background: #27ae6033; font-weight: bold; border-top: 2px solid #27ae60; }
+        .donor-total-row td { color: #22c55e; }
+        .btn-small { padding: 6px 12px; font-size: 12px; margin: 2px; width: auto; }
+
         /* --- Export Template Design --- */
-        #exportExpenseArea { 
+        #exportExpenseArea, #exportIncomeArea { 
             position: fixed; left: -9999px; top: 0; width: 550px; 
             background: #ffffff; color: #1e293b; padding: 0;
         }
@@ -54,6 +64,11 @@
         .exp-value { color: #0f172a; font-weight: 700; font-size: 17px; }
         .exp-amount-wrap { margin-top: 30px; background: #f0fdf4; padding: 25px; border-radius: 15px; text-align: center; border: 2px solid #dcfce7; }
         .exp-footer { padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; background: #f8fafc; }
+
+        /* Income Table Export */
+        .income-export-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .income-export-table th { background: #10b981; color: white; padding: 12px; }
+        .income-export-table td { padding: 10px; border: 1px solid #e2e8f0; color: #1e293b; }
     </style>
 </head>
 <body>
@@ -99,6 +114,24 @@
                 <select id="incomeWeek"></select>
                 <input type="date" id="incomeDate">
                 <button class="btn btn-save" onclick="saveIncome()">ဒေတာသိမ်းမည်</button>
+            </div>
+            
+            <h3>📊 အလှူငွေဇယားချုပ်</h3>
+            <div class="card" style="padding: 10px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select id="filterWeek" style="flex: 2;" onchange="renderIncomeTable()">
+                        <option value="">အားလုံး</option>
+                    </select>
+                    <button class="btn btn-save btn-small" style="flex: 1; margin:0;" onclick="exportIncomeTablePNG()">📷 ဇယားပုံထုတ်</button>
+                </div>
+                <div id="incomeTableContainer" class="table-container">
+                    <table id="incomeTable">
+                        <thead>
+                            <tr><th>အပတ်</th><th>အလှူရှင်</th><th>ငွေပမာဏ</th><th>ရက်စွဲ</th><th>လုပ်ဆောင်ချက်</th></tr>
+                        </thead>
+                        <tbody id="incomeTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -157,6 +190,28 @@
         </div>
     </div>
 
+    <div id="exportIncomeArea">
+        <div class="exp-header">
+            <div style="letter-spacing: 3px; font-size: 13px; opacity: 0.9;">LFM DONATION</div>
+            <div style="font-size: 30px; font-weight: 900; margin-top: 5px;">အလှူငွေစာရင်းချုပ်</div>
+        </div>
+        <div class="exp-body">
+            <table class="income-export-table" id="incomeExportTable">
+                <thead>
+                    <tr><th>အပတ်</th><th>အလှူရှင်</th><th>ငွေပမာဏ</th><th>ရက်စွဲ</th></tr>
+                </thead>
+                <tbody id="incomeExportBody"></tbody>
+            </table>
+            <div class="exp-amount-wrap">
+                <div style="color: #10b981; font-weight: bold; font-size: 14px;">စုစုပေါင်းအလှူငွေ</div>
+                <div style="font-size: 34px; font-weight: 900; color: #1e293b; margin-top: 5px;"><span id="outIncomeTotal"></span> <small style="font-size: 15px;">THB</small></div>
+            </div>
+        </div>
+        <div class="exp-footer">
+            ဤမှတ်တမ်းကို LFM Weekly Manager မှ ထုတ်ပေးပါသည်။
+        </div>
+    </div>
+
     <nav id="bottomNav" class="bottom-nav hide">
         <div class="nav-item active" onclick="switchTab('incomeTab', this)">💰<br>အလှူရှင်</div>
         <div class="nav-item" onclick="switchTab('expenseTab', this)">🚚<br>ထောက်ပို့</div>
@@ -165,7 +220,7 @@
     </nav>
 
     <script>
-        // အသစ်ရရှိထားသော Firebase Config
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
             authDomain: "lamp-88a25.firebaseapp.com",
@@ -182,13 +237,19 @@
 
         let totalInc = 0;
         let totalExp = 0;
+        let incomeData = []; // Store all income data for table
 
         // Auto Weeks
         const ws = document.getElementById('incomeWeek');
+        const filterWeek = document.getElementById('filterWeek');
         for (let i = 1; i <= 100; i++) {
             let o = document.createElement('option');
             o.value = `Week-${i}`; o.textContent = `အပတ်စဉ် ${i}`;
             ws.appendChild(o);
+            
+            let f = document.createElement('option');
+            f.value = `Week-${i}`; f.textContent = `အပတ်စဉ် ${i}`;
+            filterWeek.appendChild(f);
         }
 
         function showToast(m, type="success") {
@@ -199,14 +260,65 @@
             setTimeout(() => t.style.display = "none", 2500);
         }
 
+        function renderIncomeTable() {
+            const filter = document.getElementById('filterWeek').value;
+            const tbody = document.getElementById('incomeTableBody');
+            tbody.innerHTML = '';
+            let filteredData = filter ? incomeData.filter(item => item.week === filter) : incomeData;
+            
+            filteredData.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.week}</td>
+                    <td>${item.donorName}</td>
+                    <td>${parseFloat(item.amount).toLocaleString()} ဘတ်</td>
+                    <td>${item.date}</td>
+                    <td><button class="btn btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteIncome('${item.week}', '${item.id}')">ဖျက်</button></td>
+                `;
+            });
+            
+            // Add total row
+            if (filteredData.length > 0) {
+                const total = filteredData.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+                const totalRow = tbody.insertRow();
+                totalRow.className = 'donor-total-row';
+                totalRow.innerHTML = `<td colspan="2" style="text-align:right;">စုစုပေါင်း</td><td>${total.toLocaleString()} ဘတ်</td><td colspan="2"></td>`;
+            }
+        }
+
+        function deleteIncome(week, id) {
+            if(confirm("ဤအလှူငွေကို ဖျက်ရန် သေချာပါသလား?")) {
+                db.ref(`weekly_donations/${week}/${id}`).remove();
+            }
+        }
+
         function syncData() {
+            // Income data
             db.ref('weekly_donations').on('value', s => {
                 totalInc = 0;
-                s.forEach(w => { w.forEach(c => { totalInc += parseFloat(c.val().amount || 0); }); });
+                incomeData = [];
+                s.forEach(w => { 
+                    const week = w.key;
+                    w.forEach(c => { 
+                        const val = c.val();
+                        totalInc += parseFloat(val.amount || 0);
+                        incomeData.push({
+                            id: c.key,
+                            week: week,
+                            donorName: val.donorName,
+                            amount: val.amount,
+                            date: val.date
+                        });
+                    }); 
+                });
+                // Sort by date (newest first)
+                incomeData.sort((a, b) => (a.date < b.date) ? 1 : -1);
                 document.getElementById('globalIncome').textContent = totalInc.toLocaleString();
+                renderIncomeTable();
                 updateNet();
             });
 
+            // Expense data
             db.ref('expenses').on('value', s => {
                 totalExp = 0;
                 const list = document.getElementById('expenseHistoryList');
@@ -280,62 +392,4 @@
             const amt = document.getElementById('incomeAmount').value;
             const week = document.getElementById('incomeWeek').value;
             const date = document.getElementById('incomeDate').value;
-            if(!name || !amt) return showToast("ဖြည့်သွင်းရန် လိုအပ်သည်", "error");
-            db.ref(`weekly_donations/${week}`).push({ donorName: name, amount: amt, date })
-            .then(() => { showToast("သိမ်းဆည်းပြီး"); document.getElementById('donorName').value=''; document.getElementById('incomeAmount').value=''; });
-        }
-
-        function saveExpense() {
-            const org = document.getElementById('expOrg').value;
-            const amt = document.getElementById('expAmount').value;
-            if(!org || !amt) return showToast("ဖြည့်သွင်းရန် လိုအပ်သည်", "error");
-            db.ref('expenses').push({
-                org, amount: amt, 
-                activity: document.getElementById('expActivity').value,
-                region: document.getElementById('expRegion').value,
-                date: document.getElementById('expDate').value,
-                note: document.getElementById('expNote').value
-            }).then(() => {
-                showToast("မှတ်တမ်းတင်ပြီး");
-                ['expOrg','expActivity','expRegion','expAmount','expNote'].forEach(i => document.getElementById(i).value='');
-            });
-        }
-
-        function delExp(id) {
-            if(confirm("ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?")) db.ref(`expenses/${id}`).remove();
-        }
-
-        function filterHistory() {
-            const q = document.getElementById('historySearch').value.toLowerCase();
-            document.querySelectorAll('#expenseHistoryList .card').forEach(c => {
-                c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none";
-            });
-        }
-
-        function exportPNG(id) {
-            showToast("ပုံထုတ်နေသည်...");
-            db.ref(`expenses/${id}`).once('value', s => {
-                const v = s.val();
-                document.getElementById('outOrg').textContent = v.org;
-                document.getElementById('outAct').textContent = v.activity || '-';
-                document.getElementById('outReg').textContent = v.region || '-';
-                document.getElementById('outAmt').textContent = parseFloat(v.amount).toLocaleString();
-                document.getElementById('outDate').textContent = v.date;
-
-                const area = document.getElementById('exportExpenseArea');
-                area.style.left = "0";
-                html2canvas(area, { scale: 2 }).then(cv => {
-                    const l = document.createElement('a');
-                    l.download = `LFM_${v.org}_${v.date}.png`;
-                    l.href = cv.toDataURL();
-                    l.click();
-                    area.style.left = "-9999px";
-                    showToast("အောင်မြင်စွာ ထုတ်ယူပြီး");
-                });
-            });
-        }
-
-        function logout() { if(confirm("ထွက်ရန် သေချာသလား?")) auth.signOut().then(() => location.reload()); }
-    </script>
-</body>
-</html>
+            
