@@ -2,228 +2,52 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <title>LFM ရွှေရောင်အနာဂတ် ✦ ငွေစာရင်းစီမံခန့်ခွဲမှု</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>✨ ဖိုးစောင့်တောင်မီးအိမ် - လစဉ်အလှူရှင်စာရင်း</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
     
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Pyidaungsu&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- HTML2Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Pyidaungsu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         :root {
             --primary: #c9a227;
             --primary-light: #f5d47a;
             --primary-dark: #9e7b1f;
-            --secondary: #7c3aed;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --dark-1: #0a0f1e;
-            --dark-2: #141b2b;
-            --dark-3: #1e293b;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --gradient-gold: linear-gradient(135deg, #c9a227 0%, #f5d47a 50%, #c9a227 100%);
-            --gradient-dark: linear-gradient(135deg, #0a0f1e 0%, #1e293b 100%);
-            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            --blur: blur(20px);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes pulse-gold {
-            0%, 100% { box-shadow: 0 0 30px rgba(201, 162, 39, 0.3); }
-            50% { box-shadow: 0 0 50px rgba(201, 162, 39, 0.6); }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+            --success: #4CAF50;
+            --danger: #f44336;
+            --dark: #0a0f1e;
+            --dark-light: #1e293b;
+            --text: #ffffff;
+            --text-light: #94a3b8;
+            --gradient-gold: linear-gradient(135deg, #c9a227, #f5d47a, #c9a227);
         }
 
         body {
-            background: var(--dark-1);
-            color: var(--text-primary);
-            font-family: 'Padauk', 'Pyidaungsu', sans-serif;
+            background: var(--dark);
+            color: var(--text);
             min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Background Animation */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--gradient-gold);
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: float 8s infinite ease-in-out;
-        }
-
-        .circle-1 {
-            width: 400px;
-            height: 400px;
-            top: -100px;
-            right: -100px;
-            animation-delay: 0s;
-        }
-
-        .circle-2 {
-            width: 300px;
-            height: 300px;
-            bottom: -50px;
-            left: -50px;
-            background: linear-gradient(135deg, #7c3aed, #3b82f6);
-            animation-delay: -2s;
-        }
-
-        .circle-3 {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #10b981, #c9a227);
-            animation-delay: -4s;
+            padding: 20px;
         }
 
         /* Main Container */
-        #app {
-            min-height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Splash Screen */
-        #splashScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--dark-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-
-        .splash-content {
-            text-align: center;
-            animation: scaleIn 1s ease;
-        }
-
-        .splash-icon {
-            font-size: 80px;
-            color: var(--primary);
-            margin-bottom: 20px;
-            animation: float 3s infinite ease-in-out;
-            filter: drop-shadow(0 0 30px var(--primary));
-        }
-
-        .splash-title {
-            font-size: 32px;
-            font-weight: bold;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        .splash-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .splash-progress {
-            width: 200px;
-            height: 4px;
-            background: var(--dark-3);
-            border-radius: 2px;
-            margin: 30px auto 0;
-            overflow: hidden;
-        }
-
-        .splash-progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--gradient-gold);
-            transition: width 2s ease;
-        }
-
-        /* Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 25px;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 30px 60px -15px rgba(201, 162, 39, 0.3);
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         /* Login Page */
@@ -232,19 +56,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
         }
 
         .login-card {
-            max-width: 400px;
-            width: 100%;
-            background: rgba(20, 27, 43, 0.95);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
+            background: var(--dark-light);
             padding: 40px 30px;
-            box-shadow: var(--shadow-lg);
-            animation: scaleIn 0.5s ease;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
         }
 
         .login-header {
@@ -252,224 +73,86 @@
             margin-bottom: 30px;
         }
 
-        .login-icon {
+        .login-header i {
             font-size: 60px;
             color: var(--primary);
             margin-bottom: 15px;
-            filter: drop-shadow(0 0 20px var(--primary));
-            animation: float 3s infinite ease-in-out;
         }
 
-        .login-title {
-            font-size: 28px;
-            font-weight: bold;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .login-header h2 {
+            color: var(--primary);
             margin-bottom: 5px;
         }
 
-        .login-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* Input Groups */
         .input-group {
             margin-bottom: 20px;
         }
 
-        .input-label {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 8px;
-            margin-left: 5px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            color: var(--primary);
-            font-size: 16px;
-            z-index: 1;
-        }
-
-        .input-field {
+        .input-group input {
             width: 100%;
-            padding: 16px 20px 16px 50px;
-            background: var(--dark-3);
+            padding: 15px;
+            background: #2a3545;
             border: 2px solid transparent;
-            border-radius: 20px;
-            color: var(--text-primary);
+            border-radius: 15px;
+            color: white;
             font-size: 16px;
-            font-family: 'Padauk', sans-serif;
-            transition: all 0.3s ease;
         }
 
-        .input-field:focus {
+        .input-group input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(201, 162, 39, 0.3);
-            background: var(--dark-2);
+            background: #1e293b;
         }
 
-        .input-field::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.5;
-        }
-
-        /* Buttons */
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             font-size: 16px;
             font-weight: bold;
-            font-family: 'Padauk', sans-serif;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn:hover::before {
-            left: 100%;
+            transition: 0.3s;
+            margin-top: 10px;
         }
 
         .btn-primary {
             background: var(--gradient-gold);
-            color: var(--dark-1);
-            box-shadow: 0 10px 30px -5px var(--primary);
+            color: var(--dark);
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px -5px var(--primary);
+            box-shadow: 0 10px 30px var(--primary);
         }
 
         .btn-secondary {
-            background: var(--dark-3);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
+            background: #2a3545;
+            color: white;
+            border: 1px solid var(--primary);
         }
 
-        .btn-secondary:hover {
-            background: var(--dark-2);
-            border-color: var(--primary);
+        /* Main App */
+        #mainApp {
+            display: none;
         }
 
-        .btn-google {
-            background: white;
-            color: var(--dark-1);
+        .header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--dark-light);
+            border-radius: 20px;
+            border: 1px solid var(--primary);
         }
 
-        .btn-google i {
-            color: #ea4335;
+        .header h1 {
+            color: var(--primary);
+            font-size: 24px;
         }
 
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 20px 0;
-            color: var(--text-secondary);
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .divider span {
-            padding: 0 10px;
-            font-size: 12px;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(20, 27, 43, 0.95);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
-            padding: 10px;
-            display: flex;
-            justify-content: space-around;
-            z-index: 100;
-            box-shadow: var(--shadow-lg);
-            animation: slideIn 0.5s ease;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            border-radius: 30px;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .nav-item span {
-            font-size: 11px;
-        }
-
-        .nav-item.active {
-            background: var(--gradient-gold);
-            color: var(--dark-1);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -5px var(--primary);
-        }
-
-        /* Pages */
-        .page {
-            padding: 20px 20px 100px 20px;
-            max-width: 600px;
-            margin: 0 auto;
-            animation: scaleIn 0.3s ease;
-        }
-
-        .hide {
-            display: none !important;
-        }
-
-        /* Balance Cards */
         .balance-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -478,114 +161,110 @@
         }
 
         .balance-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
+            background: var(--dark-light);
             padding: 20px;
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #2a3545;
         }
 
-        .balance-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
+        .balance-card .label {
+            color: var(--text-light);
+            margin-bottom: 10px;
         }
 
-        .balance-label {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .balance-amount {
+        .balance-card .amount {
             font-size: 24px;
             font-weight: bold;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary);
         }
 
         .balance-card.total {
             grid-column: span 2;
             background: var(--gradient-gold);
-            text-align: center;
         }
 
-        .balance-card.total .balance-label,
-        .balance-card.total .balance-amount {
-            color: var(--dark-1);
-            -webkit-text-fill-color: var(--dark-1);
-            background: none;
+        .balance-card.total .amount {
+            color: var(--dark);
         }
 
-        /* Feature Cards */
-        .feature-grid {
+        .menu-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin: 20px 0;
         }
 
-        .feature-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px -10px rgba(201, 162, 39, 0.3);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--gradient-gold);
+        .menu-item {
+            background: var(--dark-light);
+            padding: 25px;
             border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #2a3545;
+            transition: 0.3s;
+        }
+
+        .menu-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .menu-item i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .back-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 30px;
-            color: var(--dark-1);
-            transform: rotate(0deg);
-            transition: transform 0.5s ease;
+            gap: 15px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            color: var(--primary);
         }
 
-        .feature-card:hover .feature-icon {
-            transform: rotate(360deg);
+        .form-card {
+            background: var(--dark-light);
+            padding: 25px;
+            border-radius: 20px;
         }
 
-        .feature-title {
+        .form-card input,
+        .form-card select,
+        .form-card textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #2a3545;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            color: white;
             font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--text-primary);
         }
 
-        .feature-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
+        .form-card input:focus,
+        .form-card select:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         /* Table Styles */
         .table-container {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
+            background: var(--dark-light);
+            border-radius: 20px;
             padding: 15px;
-            margin-top: 20px;
             overflow-x: auto;
+            margin-top: 20px;
         }
 
         table {
@@ -597,530 +276,454 @@
             text-align: left;
             padding: 15px 10px;
             color: var(--primary);
-            font-weight: bold;
-            border-bottom: 2px solid var(--glass-border);
+            border-bottom: 2px solid #2a3545;
         }
 
         td {
             padding: 12px 10px;
-            border-bottom: 1px solid var(--glass-border);
-            color: var(--text-secondary);
+            border-bottom: 1px solid #2a3545;
+            color: var(--text-light);
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        tr:hover td {
-            background: rgba(201, 162, 39, 0.1);
-            color: var(--text-primary);
+        .export-btn {
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Certificate Export Area */
+        #certificateArea {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 600px;
+            background: white;
+            color: #1e293b;
+            padding: 0;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+
+        .certificate-header {
+            background: var(--gradient-gold);
+            padding: 50px 30px;
+            text-align: center;
+            border-bottom: 5px solid #9e7b1f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate-header::before {
+            content: '✦';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 40px;
+            color: rgba(255,255,255,0.2);
+        }
+
+        .certificate-header::after {
+            content: '✦';
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 40px;
+            color: rgba(255,255,255,0.2);
+        }
+
+        .certificate-header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #0a0f1e;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .certificate-header h2 {
+            font-size: 24px;
+            color: #0a0f1e;
+            font-weight: 600;
+        }
+
+        .certificate-header p {
+            font-size: 18px;
+            color: #0a0f1e;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .certificate-body {
+            padding: 40px;
+            background: white;
+        }
+
+        .certificate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border: 2px solid #c9a227;
+        }
+
+        .certificate-table th {
+            background: #c9a227;
+            color: #0a0f1e;
+            padding: 15px;
+            font-size: 16px;
+            text-align: center;
+            border: 1px solid #9e7b1f;
+        }
+
+        .certificate-table td {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .certificate-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .certificate-table tr:hover {
+            background: #fef3c7;
+        }
+
+        .certificate-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 3px double #c9a227;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0a0f1e;
+            font-style: italic;
+        }
+
+        .certificate-stamp {
+            text-align: right;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .certificate-stamp .date {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* History Cards */
+        .history-card {
+            background: var(--dark-light);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .history-card .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .history-card .details {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .history-card .amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .card-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-export {
+            background: var(--primary);
+            color: var(--dark);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
         }
 
         /* Toast */
         #toast {
             position: fixed;
-            bottom: 100px;
-            left: 20px;
-            right: 20px;
-            background: var(--gradient-gold);
-            color: var(--dark-1);
-            padding: 15px 20px;
-            border-radius: 30px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--dark);
+            padding: 15px 30px;
+            border-radius: 50px;
             font-weight: bold;
-            box-shadow: var(--shadow-lg);
-            z-index: 1000;
             display: none;
-            text-align: center;
-            animation: slideIn 0.3s ease;
-            max-width: 400px;
-            margin: 0 auto;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        /* Export Templates */
-        #exportExpenseArea,
-        #exportIncomeArea {
-            position: fixed;
-            left: -9999px;
-            top: 0;
-            width: 500px;
-            background: white;
-            color: var(--dark-1);
-            border-radius: 40px;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
+        .hide {
+            display: none !important;
         }
 
-        .export-header {
-            background: var(--gradient-gold);
-            padding: 40px 30px;
-            text-align: center;
+        .search-box {
+            margin-bottom: 20px;
         }
 
-        .export-header h2 {
-            font-size: 28px;
-            margin: 10px 0;
+        .search-box input {
+            width: 100%;
+            padding: 15px;
+            background: #2a3545;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
         }
 
-        .export-body {
-            padding: 30px;
-        }
-
-        .export-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-
-        .export-label {
-            color: #64748b;
-        }
-
-        .export-value {
-            font-weight: bold;
-            color: var(--dark-1);
-        }
-
-        .export-total {
-            background: #fef3c7;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .export-total .amount {
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--primary-dark);
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--glass-border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 30px 20px;
-            }
-            
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .balance-amount {
-                font-size: 20px;
-            }
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
     </style>
 </head>
 <body>
-    <div class="bg-animation">
-        <div class="bg-circle circle-1"></div>
-        <div class="bg-circle circle-2"></div>
-        <div class="bg-circle circle-3"></div>
-    </div>
-
-    <!-- Splash Screen -->
-    <div id="splashScreen">
-        <div class="splash-content">
-            <i class="fas fa-coins splash-icon"></i>
-            <h1 class="splash-title">LFM</h1>
-            <p class="splash-subtitle">ရွှေရောင်အနာဂတ်</p>
-            <div class="splash-progress">
-                <div class="splash-progress-bar" id="splashProgress"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="app">
+    <div class="container">
         <!-- Login Page -->
         <div id="loginPage">
-            <div class="login-card animate__animated animate__fadeIn">
+            <div class="login-card">
                 <div class="login-header">
-                    <i class="fas fa-coins login-icon"></i>
-                    <h2 class="login-title">ကြိုဆိုပါတယ်</h2>
-                    <p class="login-subtitle">သင့်ငွေကြေးကို စမတ်ကျကျ စီမံခန့်ခွဲပါ</p>
+                    <i class="fas fa-mosque"></i>
+                    <h2>ဖိုးစောင့်တောင်မီးအိမ်</h2>
+                    <p style="color: var(--text-light);">အလှူရှင်စာရင်းစီမံခန့်ခွဲရေး</p>
                 </div>
-
                 <div class="input-group">
-                    <label class="input-label">အီးမေးလ်</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="email" class="input-field" placeholder="example@email.com" value="test@lfm.com">
-                    </div>
+                    <input type="email" id="email" placeholder="အီးမေးလ်" value="admin@lfm.com">
                 </div>
-
                 <div class="input-group">
-                    <label class="input-label">စကားဝှက်</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="password" class="input-field" placeholder="••••••••" value="123456">
-                    </div>
+                    <input type="password" id="password" placeholder="စကားဝှက်" value="123456">
                 </div>
-
-                <button class="btn btn-primary" onclick="handleLogin()" id="loginBtn">
-                    <i class="fas fa-sign-in-alt" style="margin-right: 10px;"></i>
-                    အကောင့်ဝင်မည်
-                </button>
-
-                <div class="divider">
-                    <span>သို့မဟုတ်</span>
-                </div>
-
-                <button class="btn btn-secondary" onclick="handleSignUp()" id="signupBtn">
-                    <i class="fas fa-user-plus" style="margin-right: 10px;"></i>
-                    အကောင့်အသစ်ဖွင့်မည်
-                </button>
-
-                <button class="btn btn-google" onclick="handleGoogleLogin()" id="googleBtn">
-                    <i class="fab fa-google"></i>
-                    Google ဖြင့်ဝင်မည်
-                </button>
-
-                <div id="loginError" style="color: var(--danger); text-align: center; margin-top: 15px; font-size: 14px; display: none;"></div>
+                <button class="btn btn-primary" onclick="login()">အကောင့်ဝင်မည်</button>
+                <button class="btn btn-secondary" onclick="signup()">အကောင့်အသစ်ဖွင့်မည်</button>
+                <div id="loginError" style="color: var(--danger); text-align: center; margin-top: 15px; display: none;"></div>
             </div>
         </div>
 
         <!-- Main App -->
-        <div id="mainApp" class="hide">
-            <!-- Dashboard Page -->
-            <div id="dashboardPage" class="page">
-                <div style="margin-bottom: 30px;">
-                    <h1 style="font-size: 24px; margin-bottom: 5px;">ငွေစာရင်းချုပ်</h1>
-                    <p style="color: var(--text-secondary);" id="welcomeMessage">ကြိုဆိုပါတယ်</p>
-                </div>
+        <div id="mainApp">
+            <!-- Header -->
+            <div class="header">
+                <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
+                <i class="fas fa-sign-out-alt" onclick="logout()" style="cursor: pointer; color: var(--primary);"></i>
+            </div>
 
+            <!-- Dashboard -->
+            <div id="dashboardPage" class="page active">
                 <div class="balance-grid">
                     <div class="balance-card">
-                        <div class="balance-label">
-                            <i class="fas fa-arrow-down" style="color: var(--success);"></i>
-                            ဝင်ငွေ
-                        </div>
-                        <div class="balance-amount" id="totalIncome">0</div>
+                        <div class="label">စုစုပေါင်းအလှူငွေ</div>
+                        <div class="amount" id="totalIncome">0 ဘတ်</div>
                     </div>
                     <div class="balance-card">
-                        <div class="balance-label">
-                            <i class="fas fa-arrow-up" style="color: var(--danger);"></i>
-                            ထွက်ငွေ
-                        </div>
-                        <div class="balance-amount" id="totalExpense">0</div>
+                        <div class="label">စုစုပေါင်းအသုံးစရိတ်</div>
+                        <div class="amount" id="totalExpense">0 ဘတ်</div>
                     </div>
                 </div>
-
-                <div class="balance-card total" style="margin-bottom: 30px;">
-                    <div class="balance-label">
-                        <i class="fas fa-wallet"></i>
-                        လက်ကျန်ငွေ
-                    </div>
-                    <div class="balance-amount" id="netBalance">0</div>
+                <div class="balance-card total">
+                    <div class="label">လက်ကျန်ငွေ</div>
+                    <div class="amount" id="netBalance">0 ဘတ်</div>
                 </div>
 
-                <h3 style="margin-bottom: 15px;">အမြန်လုပ်ဆောင်ရန်</h3>
-                <div class="feature-grid">
-                    <div class="feature-card" onclick="switchToPage('incomePage')">
-                        <div class="feature-icon">
-                            <i class="fas fa-hand-holding-heart"></i>
-                        </div>
-                        <div class="feature-title">အလှူငွေသွင်း</div>
-                        <div class="feature-desc">အလှူရှင်အသစ်ထည့်ရန်</div>
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="showPage('incomePage')">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>အလှူငွေထည့်</span>
                     </div>
-                    <div class="feature-card" onclick="switchToPage('expensePage')">
-                        <div class="feature-icon">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <div class="feature-title">ထောက်ပို့စရိတ်</div>
-                        <div class="feature-desc">အသုံးစရိတ်မှတ်တမ်းတင်ရန်</div>
+                    <div class="menu-item" onclick="showPage('expensePage')">
+                        <i class="fas fa-truck"></i>
+                        <span>ထောက်ပို့စရိတ်</span>
                     </div>
-                    <div class="feature-card" onclick="switchToPage('incomeTablePage')">
-                        <div class="feature-icon">
-                            <i class="fas fa-table"></i>
-                        </div>
-                        <div class="feature-title">အလှူငွေဇယား</div>
-                        <div class="feature-desc">အလှူရှင်စာရင်းကြည့်ရန်</div>
+                    <div class="menu-item" onclick="showPage('donorListPage')">
+                        <i class="fas fa-list"></i>
+                        <span>အလှူရှင်စာရင်း</span>
                     </div>
-                    <div class="feature-card" onclick="switchToPage('historyPage')">
-                        <div class="feature-icon">
-                            <i class="fas fa-history"></i>
-                        </div>
-                        <div class="feature-title">မှတ်တမ်း</div>
-                        <div class="feature-desc">ထောက်ပို့မှတ်တမ်းများ</div>
+                    <div class="menu-item" onclick="showPage('historyPage')">
+                        <i class="fas fa-history"></i>
+                        <span>မှတ်တမ်း</span>
                     </div>
                 </div>
             </div>
 
             <!-- Income Page -->
-            <div id="incomePage" class="page hide">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="switchToPage('dashboardPage')"></i>
-                    <h2 style="font-size: 20px;">အလှူငွေထည့်ရန်</h2>
+            <div id="incomePage" class="page">
+                <div class="back-btn" onclick="showPage('dashboardPage')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>အလှူငွေထည့်ရန်</span>
+                </div>
+                <div class="form-card">
+                    <input type="text" id="donorName" placeholder="အလှူရှင်အမည်">
+                    <input type="number" id="incomeAmount" placeholder="ပမာဏ (ဘတ်)">
+                    <select id="incomeMonth">
+                        <option value="ဇန်နဝါရီ">ဇန်နဝါရီ</option>
+                        <option value="ဖေဖော်ဝါရီ">ဖေဖော်ဝါရီ</option>
+                        <option value="မတ်">မတ်</option>
+                        <option value="ဧပြီ">ဧပြီ</option>
+                        <option value="မေ">မေ</option>
+                        <option value="ဇွန်">ဇွန်</option>
+                        <option value="ဇူလိုင်">ဇူလိုင်</option>
+                        <option value="သြဂုတ်">သြဂုတ်</option>
+                        <option value="စက်တင်ဘာ">စက်တင်ဘာ</option>
+                        <option value="အောက်တိုဘာ">အောက်တိုဘာ</option>
+                        <option value="နိုဝင်ဘာ">နိုဝင်ဘာ</option>
+                        <option value="ဒီဇင်ဘာ">ဒီဇင်ဘာ</option>
+                    </select>
+                    <input type="date" id="incomeDate">
+                    <button class="btn btn-primary" onclick="saveIncome()">သိမ်းဆည်းမည်</button>
+                </div>
+            </div>
+
+            <!-- Donor List Page -->
+            <div id="donorListPage" class="page">
+                <div class="back-btn" onclick="showPage('dashboardPage')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>အလှူရှင်စာရင်း</span>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <select id="filterMonth" style="flex: 2; padding: 15px; background: #2a3545; border: 2px solid transparent; border-radius: 15px; color: white;">
+                        <option value="">လစဉ်ရွေးရန်</option>
+                        <option value="ဇန်နဝါရီ">ဇန်နဝါရီ</option>
+                        <option value="ဖေဖော်ဝါရီ">ဖေဖော်ဝါရီ</option>
+                        <option value="မတ်">မတ်</option>
+                        <option value="ဧပြီ">ဧပြီ</option>
+                        <option value="မေ">မေ</option>
+                        <option value="ဇွန်">ဇွန်</option>
+                        <option value="ဇူလိုင်">ဇူလိုင်</option>
+                        <option value="သြဂုတ်">သြဂုတ်</option>
+                        <option value="စက်တင်ဘာ">စက်တင်ဘာ</option>
+                        <option value="အောက်တိုဘာ">အောက်တိုဘာ</option>
+                        <option value="နိုဝင်ဘာ">နိုဝင်ဘာ</option>
+                        <option value="ဒီဇင်ဘာ">ဒီဇင်ဘာ</option>
+                    </select>
+                    <button class="btn-primary" style="flex: 1; padding: 15px;" onclick="exportCertificate()">
+                        <i class="fas fa-certificate"></i> Certificate
+                    </button>
                 </div>
 
-                <div class="glass-card">
-                    <div class="input-group">
-                        <label class="input-label">အလှူရှင်အမည်</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" id="donorName" class="input-field" placeholder="ဥပမာ - ဦးမောင်မောင်">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">ပမာဏ (ဘတ်)</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-coins input-icon"></i>
-                            <input type="number" id="incomeAmount" class="input-field" placeholder="1000">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">အပတ်စဉ်</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-calendar-week input-icon"></i>
-                            <select id="incomeWeek" class="input-field" style="appearance: none;">
-                                <!-- JS will populate -->
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">ရက်စွဲ</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-calendar input-icon"></i>
-                            <input type="date" id="incomeDate" class="input-field">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" onclick="saveIncome()">
-                        <i class="fas fa-save" style="margin-right: 10px;"></i>
-                        သိမ်းဆည်းမည်
-                    </button>
+                <div class="table-container">
+                    <table id="donorTable">
+                        <thead>
+                            <tr>
+                                <th>နံပါတ်</th>
+                                <th>အလှူရှင်အမည်</th>
+                                <th>ပမာဏ</th>
+                                <th>လ</th>
+                                <th>ရက်စွဲ</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="donorTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
             <!-- Expense Page -->
-            <div id="expensePage" class="page hide">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="switchToPage('dashboardPage')"></i>
-                    <h2 style="font-size: 20px;">ထောက်ပို့စရိတ်မှတ်တမ်း</h2>
+            <div id="expensePage" class="page">
+                <div class="back-btn" onclick="showPage('dashboardPage')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>ထောက်ပို့စရိတ်မှတ်တမ်း</span>
                 </div>
-
-                <div class="glass-card">
-                    <div class="input-group">
-                        <label class="input-label">လက်ခံသည့်အဖွဲ့</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-building input-icon"></i>
-                            <input type="text" id="expOrg" class="input-field" placeholder="အဖွဲ့အမည်">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">လှုပ်ရှားမှု</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-running input-icon"></i>
-                            <input type="text" id="expActivity" class="input-field" placeholder="ဥပမာ - စားနပ်ရိက္ခာ">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">ဒေသ</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-map-marker-alt input-icon"></i>
-                            <input type="text" id="expRegion" class="input-field" placeholder="ဥပမာ - မြဝတီ">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">ပမာဏ (ဘတ်)</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-coins input-icon"></i>
-                            <input type="number" id="expAmount" class="input-field" placeholder="5000">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">ရက်စွဲ</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-calendar input-icon"></i>
-                            <input type="date" id="expDate" class="input-field">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">မှတ်ချက်</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-sticky-note input-icon"></i>
-                            <textarea id="expNote" class="input-field" rows="3" placeholder="အသေးစိတ်မှတ်ချက်များ..."></textarea>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" onclick="saveExpense()">
-                        <i class="fas fa-save" style="margin-right: 10px;"></i>
-                        မှတ်တမ်းတင်မည်
-                    </button>
-                </div>
-            </div>
-
-            <!-- Income Table Page -->
-            <div id="incomeTablePage" class="page hide">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="switchToPage('dashboardPage')"></i>
-                    <h2 style="font-size: 20px;">အလှူငွေဇယား</h2>
-                </div>
-
-                <div class="glass-card" style="padding: 20px;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <select id="filterWeek" class="input-field" style="flex: 2;" onchange="renderIncomeTable()">
-                            <option value="">အားလုံး</option>
-                        </select>
-                        <button class="btn btn-primary" style="flex: 1; margin: 0;" onclick="exportIncomeTable()">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                    </div>
-
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>အပတ်</th>
-                                    <th>အလှူရှင်</th>
-                                    <th>ပမာဏ</th>
-                                    <th>ရက်စွဲ</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="incomeTableBody"></tbody>
-                        </table>
-                    </div>
+                <div class="form-card">
+                    <input type="text" id="expOrg" placeholder="လက်ခံသည့်အဖွဲ့">
+                    <input type="text" id="expActivity" placeholder="လှုပ်ရှားမှု">
+                    <input type="text" id="expRegion" placeholder="ဒေသ">
+                    <input type="number" id="expAmount" placeholder="ပမာဏ (ဘတ်)">
+                    <input type="date" id="expDate">
+                    <textarea id="expNote" rows="3" placeholder="မှတ်ချက်"></textarea>
+                    <button class="btn btn-primary" onclick="saveExpense()">သိမ်းဆည်းမည်</button>
                 </div>
             </div>
 
             <!-- History Page -->
-            <div id="historyPage" class="page hide">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="switchToPage('dashboardPage')"></i>
-                    <h2 style="font-size: 20px;">ထောက်ပို့မှတ်တမ်း</h2>
+            <div id="historyPage" class="page">
+                <div class="back-btn" onclick="showPage('dashboardPage')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>ထောက်ပို့မှတ်တမ်း</span>
                 </div>
-
-                <div class="glass-card" style="padding: 20px;">
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <i class="fas fa-search input-icon"></i>
-                            <input type="text" id="historySearch" class="input-field" placeholder="ရှာဖွေရန်..." onkeyup="filterHistory()">
-                        </div>
-                    </div>
-
-                    <div id="expenseHistoryList" style="margin-top: 20px;"></div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchHistory" placeholder="ရှာဖွေရန်..." onkeyup="filterHistory()">
                 </div>
-            </div>
-        </div>
-
-        <!-- Bottom Navigation -->
-        <div id="bottomNav" class="bottom-nav hide">
-            <div class="nav-item active" onclick="switchToPage('dashboardPage')">
-                <i class="fas fa-home"></i>
-                <span>ပင်မ</span>
-            </div>
-            <div class="nav-item" onclick="switchToPage('incomePage')">
-                <i class="fas fa-hand-holding-heart"></i>
-                <span>အလှူ</span>
-            </div>
-            <div class="nav-item" onclick="switchToPage('expensePage')">
-                <i class="fas fa-truck"></i>
-                <span>ထောက်ပို့</span>
-            </div>
-            <div class="nav-item" onclick="switchToPage('historyPage')">
-                <i class="fas fa-history"></i>
-                <span>မှတ်တမ်း</span>
-            </div>
-            <div class="nav-item" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>ထွက်ရန်</span>
-            </div>
-        </div>
-
-        <!-- Toast -->
-        <div id="toast"></div>
-
-        <!-- Export Templates -->
-        <div id="exportExpenseArea">
-            <div class="export-header">
-                <i class="fas fa-hand-holding-heart" style="font-size: 40px;"></i>
-                <h2>LFM ထောက်ပို့မှတ်တမ်း</h2>
-            </div>
-            <div class="export-body">
-                <div class="export-row">
-                    <span class="export-label">လက်ခံသူ</span>
-                    <span class="export-value" id="outOrg"></span>
-                </div>
-                <div class="export-row">
-                    <span class="export-label">လှုပ်ရှားမှု</span>
-                    <span class="export-value" id="outAct"></span>
-                </div>
-                <div class="export-row">
-                    <span class="export-label">ဒေသ</span>
-                    <span class="export-value" id="outReg"></span>
-                </div>
-                <div class="export-row">
-                    <span class="export-label">ရက်စွဲ</span>
-                    <span class="export-value" id="outDate"></span>
-                </div>
-                <div class="export-total">
-                    <div style="font-size: 14px; color: #666;">လှူဒါန်းငွေ</div>
-                    <div class="amount"><span id="outAmt"></span> ဘတ်</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="exportIncomeArea">
-            <div class="export-header">
-                <i class="fas fa-table" style="font-size: 40px;"></i>
-                <h2>LFM အလှူငွေစာရင်း</h2>
-            </div>
-            <div class="export-body">
-                <table style="width: 100%; margin-bottom: 20px;">
-                    <thead>
-                        <tr>
-                            <th>အပတ်</th>
-                            <th>အလှူရှင်</th>
-                            <th>ပမာဏ</th>
-                            <th>ရက်စွဲ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="incomeExportBody"></tbody>
-                </table>
-                <div class="export-total">
-                    <div style="font-size: 14px; color: #666;">စုစုပေါင်း</div>
-                    <div class="amount"><span id="outIncomeTotal"></span> ဘတ်</div>
-                </div>
+                
+                <div id="historyList"></div>
             </div>
         </div>
     </div>
 
+    <!-- Certificate Export Area -->
+    <div id="certificateArea">
+        <div class="certificate-header">
+            <h1>✨ ဖိုးစောင့်တောင်မီးအိမ် ✨</h1>
+            <h2>လစဉ်အလှူရှင်စာရင်း</h2>
+            <p id="certificateMonth">လစဉ်ရွေးချယ်ထားသည်</p>
+        </div>
+        
+        <div class="certificate-body">
+            <table class="certificate-table" id="certificateTable">
+                <thead>
+                    <tr>
+                        <th>နံပါတ်</th>
+                        <th>အလှူရှင်အမည်</th>
+                        <th>ပမာဏ (ဘတ်)</th>
+                        <th>ရက်စွဲ</th>
+                    </tr>
+                </thead>
+                <tbody id="certificateTableBody"></tbody>
+            </table>
+            
+            <div class="certificate-footer">
+                ဤမှတ်တမ်းကို LFM အဖွဲ့မှ ထုတ်ပေးသည်
+            </div>
+            
+            <div class="certificate-stamp">
+                <div class="date">ထုတ်ပေးရက်စွဲ: <span id="certificateDate"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
     <script>
-        // Firebase Configuration
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
             authDomain: "lamp-88a25.firebaseapp.com",
@@ -1140,182 +743,67 @@
         let totalIncome = 0;
         let totalExpense = 0;
         let incomeData = [];
-        let currentUser = null;
+        let expenseData = [];
 
-        // DOM Elements
-        const splashScreen = document.getElementById('splashScreen');
-        const splashProgress = document.getElementById('splashProgress');
-        const loginPage = document.getElementById('loginPage');
-        const mainApp = document.getElementById('mainApp');
-        const bottomNav = document.getElementById('bottomNav');
-        const toast = document.getElementById('toast');
-        const loginError = document.getElementById('loginError');
-
-        // Initialize App
-        window.addEventListener('load', () => {
-            // Splash screen animation
-            let width = 0;
-            const interval = setInterval(() => {
-                width += 1;
-                splashProgress.style.width = width + '%';
-                if (width >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        splashScreen.style.opacity = '0';
-                        setTimeout(() => {
-                            splashScreen.style.display = 'none';
-                        }, 500);
-                    }, 500);
-                }
-            }, 20);
-
-            // Populate week selects
-            const weekSelects = ['incomeWeek', 'filterWeek'];
-            weekSelects.forEach(id => {
-                const select = document.getElementById(id);
-                if (select) {
-                    for (let i = 1; i <= 52; i++) {
-                        const option = document.createElement('option');
-                        option.value = `Week-${i}`;
-                        option.textContent = `အပတ် ${i}`;
-                        select.appendChild(option);
-                    }
-                }
-            });
-
-            // Set today's date
-            const today = new Date().toISOString().split('T')[0];
-            ['incomeDate', 'expDate'].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) input.value = today;
-            });
-
-            // Check auth state
-            checkAuthState();
+        // Check Auth State
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadData();
+            } else {
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            }
         });
 
-        // Auth State Observer
-        function checkAuthState() {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    loginPage.classList.add('hide');
-                    mainApp.classList.remove('hide');
-                    bottomNav.classList.remove('hide');
-                    document.getElementById('welcomeMessage').textContent = 
-                        `ကြိုဆိုပါတယ် ${user.email || 'အသုံးပြုသူ'}`;
-                    loadData();
-                } else {
-                    currentUser = null;
-                    loginPage.classList.remove('hide');
-                    mainApp.classList.add('hide');
-                    bottomNav.classList.add('hide');
-                }
+        // Set today's date
+        document.getElementById('incomeDate').valueAsDate = new Date();
+        document.getElementById('expDate').valueAsDate = new Date();
+
+        // Login
+        window.login = function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    showToast('အကောင့်ဝင်ရောက်၍မရပါ', 'error');
+                });
+        };
+
+        // Sign Up
+        window.signup = function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .catch(error => {
+                    showToast('အကောင့်ဖွင့်၍မရပါ', 'error');
+                });
+        };
+
+        // Logout
+        window.logout = function() {
+            auth.signOut();
+        };
+
+        // Show Page
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
             });
-        }
+            document.getElementById(pageId).classList.add('active');
+        };
 
-        // Login Functions
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('loginBtn');
-
-            if (!email || !password) {
-                showToast('အီးမေးလ်နှင့် စကားဝှက် ဖြည့်သွင်းပါ', 'error');
-                return;
-            }
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ဝင်ရောက်နေသည်...';
-                
-                await auth.signInWithEmailAndPassword(email, password);
-                showToast('အောင်မြင်စွာဝင်ရောက်ပြီး', 'success');
-            } catch (error) {
-                console.error('Login error:', error);
-                let message = 'ဝင်ရောက်၍မရပါ';
-                
-                if (error.code === 'auth/user-not-found') {
-                    message = 'အကောင့်မရှိပါ။ အသစ်ဖွင့်ပါ။';
-                } else if (error.code === 'auth/wrong-password') {
-                    message = 'စကားဝှက် မှားယွင်းနေသည်';
-                } else if (error.code === 'auth/invalid-email') {
-                    message = 'အီးမေးလ် မမှန်ကန်ပါ';
-                }
-                
-                showToast(message, 'error');
-                loginError.textContent = message;
-                loginError.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> အကောင့်ဝင်မည်';
-            }
-        }
-
-        async function handleSignUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('signupBtn');
-
-            if (!email || !password) {
-                showToast('အီးမေးလ်နှင့် စကားဝှက် ဖြည့်သွင်းပါ', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('စကားဝှက် အနည်းဆုံး ၆လုံးရှိရပါမည်', 'error');
-                return;
-            }
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ဖွင့်နေသည်...';
-                
-                await auth.createUserWithEmailAndPassword(email, password);
-                showToast('အကောင့်ဖွင့်ပြီးပါပြီ', 'success');
-            } catch (error) {
-                console.error('Signup error:', error);
-                let message = 'အကောင့်ဖွင့်၍မရပါ';
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    message = 'ဤအီးမေးလ် သုံးပြီးသားဖြစ်သည်';
-                }
-                
-                showToast(message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-user-plus"></i> အကောင့်အသစ်ဖွင့်မည်';
-            }
-        }
-
-        async function handleGoogleLogin() {
-            const btn = document.getElementById('googleBtn');
-            const provider = new firebase.auth.GoogleAuthProvider();
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ချိတ်ဆက်နေသည်...';
-                
-                await auth.signInWithPopup(provider);
-                showToast('Google ဖြင့်ဝင်ရောက်ပြီး', 'success');
-            } catch (error) {
-                console.error('Google login error:', error);
-                showToast('Google ဝင်ရောက်၍မရပါ', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fab fa-google"></i> Google ဖြင့်ဝင်မည်';
-            }
-        }
-
-        // Data Loading
+        // Load Data
         function loadData() {
-            // Load income
+            // Load Income
             db.ref('weekly_donations').on('value', snapshot => {
                 totalIncome = 0;
                 incomeData = [];
                 
                 snapshot.forEach(weekSnapshot => {
-                    const week = weekSnapshot.key;
                     weekSnapshot.forEach(donationSnapshot => {
                         const donation = donationSnapshot.val();
                         const amount = parseFloat(donation.amount) || 0;
@@ -1323,70 +811,58 @@
                         
                         incomeData.push({
                             id: donationSnapshot.key,
-                            week: week,
-                            donorName: donation.donorName,
+                            week: weekSnapshot.key,
+                            name: donation.donorName,
                             amount: amount,
+                            month: donation.month || 'ဇန်နဝါရီ',
                             date: donation.date
                         });
                     });
                 });
                 
-                // Sort by date
-                incomeData.sort((a, b) => (a.date || '') < (b.date || '') ? 1 : -1);
-                
                 updateUI();
-                renderIncomeTable();
+                renderDonorTable();
             });
 
-            // Load expenses
+            // Load Expenses
             db.ref('expenses').on('value', snapshot => {
                 totalExpense = 0;
-                const historyList = document.getElementById('expenseHistoryList');
+                expenseData = [];
+                const historyList = document.getElementById('historyList');
                 historyList.innerHTML = '';
                 
-                const expenses = [];
                 snapshot.forEach(childSnapshot => {
                     const expense = childSnapshot.val();
                     const amount = parseFloat(expense.amount) || 0;
                     totalExpense += amount;
                     
-                    expenses.push({
+                    expenseData.push({
                         id: childSnapshot.key,
                         ...expense,
                         amount: amount
                     });
-                });
-                
-                // Display expenses
-                expenses.reverse().forEach(expense => {
+                    
+                    // Add to history list
                     const card = document.createElement('div');
-                    card.className = 'glass-card';
-                    card.style.marginBottom = '15px';
-                    card.style.padding = '20px';
+                    card.className = 'history-card';
+                    card.setAttribute('data-id', childSnapshot.key);
                     card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-building" style="color: var(--primary);"></i>
-                                <strong style="font-size: 16px;">${expense.org || '-'}</strong>
-                            </div>
-                            <span style="color: var(--text-secondary); font-size: 12px;">${expense.date || ''}</span>
+                        <div class="title">${expense.org || '-'}</div>
+                        <div class="details">
+                            <i class="fas fa-running"></i> ${expense.activity || '-'} | 
+                            <i class="fas fa-map-marker-alt"></i> ${expense.region || '-'}
                         </div>
-                        <div style="margin: 10px 0; color: var(--text-secondary);">
-                            <i class="fas fa-running" style="margin-right: 5px;"></i> ${expense.activity || '-'}
-                            <i class="fas fa-map-marker-alt" style="margin-left: 15px; margin-right: 5px;"></i> ${expense.region || '-'}
+                        <div class="amount">${amount.toLocaleString()} ဘတ်</div>
+                        <div style="color: var(--text-light); font-size: 14px; margin: 10px 0;">
+                            <i class="fas fa-calendar"></i> ${expense.date || '-'}
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 20px; font-weight: bold; color: var(--danger);">
-                                ${expense.amount.toLocaleString()} ဘတ်
-                            </span>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn btn-primary" style="padding: 10px 15px; width: auto;" onclick="exportExpensePNG('${expense.id}')">
-                                    <i class="fas fa-camera"></i>
-                                </button>
-                                <button class="btn btn-secondary" style="padding: 10px 15px; width: auto;" onclick="deleteExpense('${expense.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                        <div class="card-actions">
+                            <button class="btn-export" onclick="exportExpense('${childSnapshot.key}')">
+                                <i class="fas fa-image"></i> ပုံထုတ်
+                            </button>
+                            <button class="btn-delete" onclick="deleteExpense('${childSnapshot.key}')">
+                                <i class="fas fa-trash"></i> ဖျက်
+                            </button>
                         </div>
                     `;
                     historyList.appendChild(card);
@@ -1405,247 +881,238 @@
             document.getElementById('netBalance').textContent = netBalance.toLocaleString() + ' ဘတ်';
         }
 
-        // Render Income Table
-        function renderIncomeTable() {
-            const filter = document.getElementById('filterWeek')?.value || '';
-            const tbody = document.getElementById('incomeTableBody');
-            if (!tbody) return;
-            
+        // Render Donor Table
+        window.renderDonorTable = function() {
+            const filterMonth = document.getElementById('filterMonth').value;
+            const tbody = document.getElementById('donorTableBody');
             tbody.innerHTML = '';
-            const filteredData = filter ? incomeData.filter(item => item.week === filter) : incomeData;
             
-            filteredData.forEach(item => {
+            let filteredData = filterMonth ? 
+                incomeData.filter(item => item.month === filterMonth) : 
+                incomeData;
+            
+            filteredData.sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
+            
+            filteredData.forEach((item, index) => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
-                    <td>${item.week}</td>
-                    <td>${item.donorName || '-'}</td>
-                    <td>${(item.amount || 0).toLocaleString()}</td>
+                    <td>${index + 1}</td>
+                    <td>${item.name || '-'}</td>
+                    <td>${item.amount.toLocaleString()}</td>
+                    <td>${item.month || '-'}</td>
                     <td>${item.date || '-'}</td>
                     <td>
-                        <button class="btn btn-secondary" style="padding: 5px 10px; width: auto;" onclick="deleteIncome('${item.week}', '${item.id}')">
-                            <i class="fas fa-trash" style="font-size: 12px;"></i>
+                        <button class="delete-btn" onclick="deleteDonation('${item.week}', '${item.id}')">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 `;
             });
-            
-            if (filteredData.length > 0) {
-                const total = filteredData.reduce((sum, item) => sum + (item.amount || 0), 0);
-                const totalRow = tbody.insertRow();
-                totalRow.style.background = 'rgba(201, 162, 39, 0.1)';
-                totalRow.style.fontWeight = 'bold';
-                totalRow.innerHTML = `
-                    <td colspan="2" style="text-align: right;">စုစုပေါင်း</td>
-                    <td>${total.toLocaleString()}</td>
-                    <td colspan="2"></td>
-                `;
-            }
-        }
+        };
 
         // Save Income
-        function saveIncome() {
+        window.saveIncome = function() {
             const name = document.getElementById('donorName').value;
             const amount = document.getElementById('incomeAmount').value;
-            const week = document.getElementById('incomeWeek').value;
+            const month = document.getElementById('incomeMonth').value;
             const date = document.getElementById('incomeDate').value;
+            const week = `Month-${month}`;
 
             if (!name || !amount) {
-                showToast('အမည်နှင့် ပမာဏ ဖြည့်သွင်းပါ', 'error');
+                showToast('အမည်နှင့်ပမာဏ ဖြည့်သွင်းပါ', 'error');
                 return;
             }
 
             db.ref(`weekly_donations/${week}`).push({
                 donorName: name,
                 amount: parseFloat(amount),
+                month: month,
                 date: date
             }).then(() => {
-                showToast('သိမ်းဆည်းပြီးပါပြီ', 'success');
+                showToast('သိမ်းဆည်းပြီးပါပြီ');
                 document.getElementById('donorName').value = '';
                 document.getElementById('incomeAmount').value = '';
-            }).catch(error => {
-                console.error('Save error:', error);
-                showToast('သိမ်း၍မရပါ', 'error');
             });
-        }
+        };
+
+        // Delete Donation
+        window.deleteDonation = function(week, id) {
+            if (confirm('ဤအလှူငွေကို ဖျက်ရန် သေချာပါသလား?')) {
+                db.ref(`weekly_donations/${week}/${id}`).remove()
+                    .then(() => showToast('ဖျက်ပြီးပါပြီ'));
+            }
+        };
 
         // Save Expense
-        function saveExpense() {
+        window.saveExpense = function() {
             const org = document.getElementById('expOrg').value;
             const amount = document.getElementById('expAmount').value;
-            
+
             if (!org || !amount) {
-                showToast('အဖွဲ့အမည်နှင့် ပမာဏ ဖြည့်သွင်းပါ', 'error');
+                showToast('အဖွဲ့အမည်နှင့်ပမာဏ ဖြည့်သွင်းပါ', 'error');
                 return;
             }
 
-            const expense = {
+            db.ref('expenses').push({
                 org: org,
-                amount: parseFloat(amount),
                 activity: document.getElementById('expActivity').value,
                 region: document.getElementById('expRegion').value,
+                amount: parseFloat(amount),
                 date: document.getElementById('expDate').value,
                 note: document.getElementById('expNote').value
-            };
-
-            db.ref('expenses').push(expense).then(() => {
-                showToast('မှတ်တမ်းတင်ပြီးပါပြီ', 'success');
-                ['expOrg', 'expActivity', 'expRegion', 'expAmount', 'expNote'].forEach(id => {
-                    document.getElementById(id).value = '';
-                });
-            }).catch(error => {
-                console.error('Save error:', error);
-                showToast('သိမ်း၍မရပါ', 'error');
+            }).then(() => {
+                showToast('သိမ်းဆည်းပြီးပါပြီ');
+                document.getElementById('expOrg').value = '';
+                document.getElementById('expActivity').value = '';
+                document.getElementById('expRegion').value = '';
+                document.getElementById('expAmount').value = '';
+                document.getElementById('expNote').value = '';
             });
-        }
-
-        // Delete Income
-        function deleteIncome(week, id) {
-            if (confirm('ဤအလှူငွေကို ဖျက်ရန် သေချာပါသလား?')) {
-                db.ref(`weekly_donations/${week}/${id}`).remove()
-                    .then(() => showToast('ဖျက်ပြီးပါပြီ', 'success'))
-                    .catch(() => showToast('ဖျက်၍မရပါ', 'error'));
-            }
-        }
+        };
 
         // Delete Expense
-        function deleteExpense(id) {
+        window.deleteExpense = function(id) {
             if (confirm('ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?')) {
                 db.ref(`expenses/${id}`).remove()
-                    .then(() => showToast('ဖျက်ပြီးပါပြီ', 'success'))
-                    .catch(() => showToast('ဖျက်၍မရပါ', 'error'));
+                    .then(() => showToast('ဖျက်ပြီးပါပြီ'));
             }
-        }
+        };
 
         // Filter History
-        function filterHistory() {
-            const search = document.getElementById('historySearch').value.toLowerCase();
-            const cards = document.querySelectorAll('#expenseHistoryList .glass-card');
+        window.filterHistory = function() {
+            const search = document.getElementById('searchHistory').value.toLowerCase();
+            const cards = document.querySelectorAll('.history-card');
             
             cards.forEach(card => {
                 const text = card.textContent.toLowerCase();
                 card.style.display = text.includes(search) ? 'block' : 'none';
             });
-        }
+        };
 
-        // Export Functions
-        function exportExpensePNG(id) {
-            showToast('ပုံထုတ်နေသည်...');
-            
-            db.ref(`expenses/${id}`).once('value', snapshot => {
-                const expense = snapshot.val();
-                
-                document.getElementById('outOrg').textContent = expense.org || '-';
-                document.getElementById('outAct').textContent = expense.activity || '-';
-                document.getElementById('outReg').textContent = expense.region || '-';
-                document.getElementById('outAmt').textContent = (expense.amount || 0).toLocaleString();
-                document.getElementById('outDate').textContent = expense.date || '-';
-
-                const area = document.getElementById('exportExpenseArea');
-                area.style.left = '0';
-                area.style.top = '0';
-                area.style.position = 'fixed';
-                
-                html2canvas(area, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `LFM_${expense.org}_${expense.date}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    area.style.left = '-9999px';
-                    showToast('ပုံထုတ်ပြီးပါပြီ', 'success');
-                }).catch(error => {
-                    console.error('Export error:', error);
-                    area.style.left = '-9999px';
-                    showToast('ပုံထုတ်၍မရပါ', 'error');
-                });
-            });
-        }
-
-        function exportIncomeTable() {
-            const filter = document.getElementById('filterWeek')?.value || '';
-            const filteredData = filter ? incomeData.filter(item => item.week === filter) : incomeData;
+        // Export Certificate
+        window.exportCertificate = function() {
+            const filterMonth = document.getElementById('filterMonth').value;
+            const filteredData = filterMonth ? 
+                incomeData.filter(item => item.month === filterMonth) : 
+                incomeData;
             
             if (filteredData.length === 0) {
                 showToast('ပြသရန်ဒေတာမရှိပါ', 'error');
                 return;
             }
 
-            const tbody = document.getElementById('incomeExportBody');
+            // Sort by date
+            filteredData.sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
+
+            // Set certificate data
+            document.getElementById('certificateMonth').textContent = 
+                filterMonth ? `လစဉ်: ${filterMonth}` : 'လစဉ်အလှူရှင်များ';
+            document.getElementById('certificateDate').textContent = 
+                new Date().toLocaleDateString('my-MM', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Populate table
+            const tbody = document.getElementById('certificateTableBody');
             tbody.innerHTML = '';
             
-            filteredData.forEach(item => {
+            filteredData.forEach((item, index) => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
-                    <td>${item.week}</td>
-                    <td>${item.donorName || '-'}</td>
-                    <td>${(item.amount || 0).toLocaleString()}</td>
+                    <td>${index + 1}</td>
+                    <td>${item.name || '-'}</td>
+                    <td>${item.amount.toLocaleString()}</td>
                     <td>${item.date || '-'}</td>
                 `;
             });
 
-            const total = filteredData.reduce((sum, item) => sum + (item.amount || 0), 0);
-            document.getElementById('outIncomeTotal').textContent = total.toLocaleString();
-
-            const area = document.getElementById('exportIncomeArea');
+            // Export as PNG
+            const area = document.getElementById('certificateArea');
             area.style.left = '0';
             area.style.top = '0';
             area.style.position = 'fixed';
             
-            html2canvas(area, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+            showToast('Certificate ထုတ်နေသည်...');
+            
+            html2canvas(area, { 
+                scale: 2, 
+                backgroundColor: '#ffffff',
+                allowTaint: false,
+                useCORS: true
+            }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `LFM_Income_${filter || 'All'}_${new Date().toISOString().split('T')[0]}.png`;
+                link.download = `ဖိုးစောင့်တောင်မီးအိမ်_${filterMonth || 'All'}_${new Date().toISOString().split('T')[0]}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
                 area.style.left = '-9999px';
-                showToast('ဇယားပုံထုတ်ပြီးပါပြီ', 'success');
+                showToast('Certificate ထုတ်ယူပြီးပါပြီ');
             }).catch(error => {
                 console.error('Export error:', error);
                 area.style.left = '-9999px';
                 showToast('ပုံထုတ်၍မရပါ', 'error');
             });
-        }
+        };
 
-        // Navigation
-        function switchToPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.add('hide');
+        // Export Expense
+        window.exportExpense = function(id) {
+            const expense = expenseData.find(e => e.id === id);
+            if (!expense) return;
+
+            // Create temporary export area
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'fixed';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.width = '500px';
+            tempDiv.style.background = 'white';
+            tempDiv.style.padding = '30px';
+            tempDiv.style.borderRadius = '30px';
+            tempDiv.style.boxShadow = '0 30px 60px rgba(0,0,0,0.3)';
+            
+            tempDiv.innerHTML = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <i class="fas fa-mosque" style="font-size: 60px; color: #c9a227;"></i>
+                    <h2 style="color: #c9a227; margin-top: 10px;">ဖိုးစောင့်တောင်မီးအိမ်</h2>
+                    <h3 style="color: #1e293b;">ထောက်ပို့လှူဒါန်းမှုမှတ်တမ်း</h3>
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>လက်ခံသူ</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.org || '-'}</td></tr>
+                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>လှုပ်ရှားမှု</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.activity || '-'}</td></tr>
+                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>ဒေသ</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.region || '-'}</td></tr>
+                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>ရက်စွဲ</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.date || '-'}</td></tr>
+                </table>
+                
+                <div style="background: #fef3c7; padding: 20px; border-radius: 15px; text-align: center; margin: 20px 0;">
+                    <div style="color: #64748b;">လှူဒါန်းငွေစုစုပေါင်း</div>
+                    <div style="font-size: 36px; font-weight: bold; color: #c9a227;">${expense.amount.toLocaleString()} ဘတ်</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; color: #94a3b8;">
+                    ဤမှတ်တမ်းကို LFM အဖွဲ့မှ ထုတ်ပေးသည်
+                </div>
+            `;
+
+            document.body.appendChild(tempDiv);
+
+            html2canvas(tempDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `LFM_${expense.org}_${expense.date}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                document.body.removeChild(tempDiv);
+                showToast('ပုံထုတ်ပြီးပါပြီ');
             });
-            
-            // Show selected page
-            document.getElementById(pageId).classList.remove('hide');
-            
-            // Update bottom nav
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Set active nav based on page
-            const navMap = {
-                'dashboardPage': 0,
-                'incomePage': 1,
-                'expensePage': 2,
-                'historyPage': 3
-            };
-            
-            const index = navMap[pageId];
-            if (index !== undefined) {
-                document.querySelectorAll('.nav-item')[index].classList.add('active');
-            }
-        }
+        };
 
-        // Logout
-        function logout() {
-            if (confirm('ထွက်ရန် သေချာပါသလား?')) {
-                auth.signOut();
-            }
-        }
-
-        // Toast
+        // Show Toast
         function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.style.background = type === 'success' ? 'var(--gradient-gold)' : '#ef4444';
+            toast.style.background = type === 'success' ? 'var(--primary)' : 'var(--danger)';
             toast.style.display = 'block';
             
             setTimeout(() => {
@@ -1653,20 +1120,8 @@
             }, 3000);
         }
 
-        // Make functions global
-        window.handleLogin = handleLogin;
-        window.handleSignUp = handleSignUp;
-        window.handleGoogleLogin = handleGoogleLogin;
-        window.switchToPage = switchToPage;
-        window.saveIncome = saveIncome;
-        window.saveExpense = saveExpense;
-        window.renderIncomeTable = renderIncomeTable;
-        window.filterHistory = filterHistory;
-        window.exportExpensePNG = exportExpensePNG;
-        window.exportIncomeTable = exportIncomeTable;
-        window.deleteIncome = deleteIncome;
-        window.deleteExpense = deleteExpense;
-        window.logout = logout;
+        // Filter change listener
+        document.getElementById('filterMonth').addEventListener('change', renderDonorTable);
     </script>
 </body>
 </html>
