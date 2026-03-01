@@ -2,7 +2,7 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <title>LFM - Weekly Manager Pro (Final Fixed)</title>
+    <title>LFM - Weekly Manager Pro (Login Fixed)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -69,6 +69,11 @@
         .income-export-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         .income-export-table th { background: #10b981; color: white; padding: 12px; }
         .income-export-table td { padding: 10px; border: 1px solid #e2e8f0; color: #1e293b; }
+
+        /* Loading Spinner */
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #27ae60; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .login-error { color: #ef4444; text-align: center; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -82,9 +87,11 @@
             <p style="color: #64748b;">Financial Management System</p>
         </div>
         <div class="card">
-            <input type="email" id="email" placeholder="အီးမေးလ်">
-            <input type="password" id="password" placeholder="လျှို့ဝှက်နံပါတ်">
-            <button class="btn btn-save" onclick="login()">အကောင့်ဝင်မည်</button>
+            <input type="email" id="email" placeholder="အီးမေးလ်" value="test@test.com">
+            <input type="password" id="password" placeholder="လျှို့ဝှက်နံပါတ်" value="password123">
+            <div id="loginError" class="login-error hide"></div>
+            <button class="btn btn-save" onclick="login()" id="loginBtn">အကောင့်ဝင်မည်</button>
+            <button class="btn" style="background:#334155;" onclick="createTestAccount()" id="createAccountBtn">စမ်းသပ်အကောင့်ဖွင့်မည်</button>
         </div>
     </div>
 
@@ -220,7 +227,7 @@
     </nav>
 
     <script>
-        // Firebase Config
+        // Firebase Config - အမှန်ကန်ဆုံးပုံစံ
         const firebaseConfig = {
             apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
             authDomain: "lamp-88a25.firebaseapp.com",
@@ -230,10 +237,21 @@
             messagingSenderId: "151980650338",
             appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
         };
+
+        // Firebase ကို စတင်ချိတ်ဆက်ခြင်း
+        let app;
+        let auth;
+        let db;
         
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.database();
+            console.log("Firebase connected successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            showToast("Firebase ချိတ်ဆက်မှု ချို့ယွင်းနေသည်", "error");
+        }
 
         let totalInc = 0;
         let totalExp = 0;
@@ -242,27 +260,72 @@
         // Auto Weeks
         const ws = document.getElementById('incomeWeek');
         const filterWeek = document.getElementById('filterWeek');
-        for (let i = 1; i <= 100; i++) {
-            let o = document.createElement('option');
-            o.value = `Week-${i}`; o.textContent = `အပတ်စဉ် ${i}`;
-            ws.appendChild(o);
-            
-            let f = document.createElement('option');
-            f.value = `Week-${i}`; f.textContent = `အပတ်စဉ် ${i}`;
-            filterWeek.appendChild(f);
+        if (ws && filterWeek) {
+            for (let i = 1; i <= 100; i++) {
+                let o = document.createElement('option');
+                o.value = `Week-${i}`; o.textContent = `အပတ်စဉ် ${i}`;
+                ws.appendChild(o);
+                
+                let f = document.createElement('option');
+                f.value = `Week-${i}`; f.textContent = `အပတ်စဉ် ${i}`;
+                filterWeek.appendChild(f);
+            }
         }
 
         function showToast(m, type="success") {
             const t = document.getElementById('toast');
+            if (!t) return;
             t.textContent = m;
             t.style.background = type === "success" ? "#10b981" : "#ef4444";
             t.style.display = "block";
             setTimeout(() => t.style.display = "none", 2500);
         }
 
+        // စမ်းသပ်အကောင့်ဖွင့်ရန်
+        async function createTestAccount() {
+            const email = document.getElementById('email').value || "test@test.com";
+            const password = document.getElementById('password').value || "password123";
+            const loginBtn = document.getElementById('loginBtn');
+            const createBtn = document.getElementById('createAccountBtn');
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                loginBtn.disabled = true;
+                createBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;"></span>';
+                
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                console.log("Account created:", userCredential.user.email);
+                showToast("အကောင့်ဖွင့်ပြီးပါပြီ", "success");
+            } catch (error) {
+                console.error("Create account error:", error);
+                let errorMessage = "အကောင့်ဖွင့်၍မရပါ";
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "ဤအီးမေးလ်ရှိပြီးသားဖြစ်သည်။ ဝင်ရန်ကြိုးစားပါ။";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "လျှို့ဝှက်နံပါတ် အနည်းဆုံး ၆လုံးရှိရပါမည်";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "အီးမေးလ်လိပ်စာ မှားယွင်းနေသည်";
+                } else {
+                    errorMessage = error.message;
+                }
+                
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.remove('hide');
+                showToast(errorMessage, "error");
+            } finally {
+                loginBtn.disabled = false;
+                createBtn.disabled = false;
+                loginBtn.innerHTML = 'အကောင့်ဝင်မည်';
+            }
+        }
+
         function renderIncomeTable() {
-            const filter = document.getElementById('filterWeek').value;
+            const filter = document.getElementById('filterWeek')?.value || '';
             const tbody = document.getElementById('incomeTableBody');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             let filteredData = filter ? incomeData.filter(item => item.week === filter) : incomeData;
             
@@ -270,16 +333,16 @@
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${item.week}</td>
-                    <td>${item.donorName}</td>
-                    <td>${parseFloat(item.amount).toLocaleString()} ဘတ်</td>
-                    <td>${item.date}</td>
+                    <td>${item.donorName || '-'}</td>
+                    <td>${parseFloat(item.amount || 0).toLocaleString()} ဘတ်</td>
+                    <td>${item.date || '-'}</td>
                     <td><button class="btn btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteIncome('${item.week}', '${item.id}')">ဖျက်</button></td>
                 `;
             });
             
             // Add total row
             if (filteredData.length > 0) {
-                const total = filteredData.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+                const total = filteredData.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
                 const totalRow = tbody.insertRow();
                 totalRow.className = 'donor-total-row';
                 totalRow.innerHTML = `<td colspan="2" style="text-align:right;">စုစုပေါင်း</td><td>${total.toLocaleString()} ဘတ်</td><td colspan="2"></td>`;
@@ -288,108 +351,49 @@
 
         function deleteIncome(week, id) {
             if(confirm("ဤအလှူငွေကို ဖျက်ရန် သေချာပါသလား?")) {
-                db.ref(`weekly_donations/${week}/${id}`).remove();
+                if (db) {
+                    db.ref(`weekly_donations/${week}/${id}`).remove()
+                    .then(() => showToast("ဖျက်ပြီးပါပြီ"))
+                    .catch(err => showToast("ဖျက်၍မရပါ", "error"));
+                }
             }
         }
 
         function syncData() {
+            if (!db) {
+                console.error("Database not initialized");
+                return;
+            }
+
             // Income data
             db.ref('weekly_donations').on('value', s => {
                 totalInc = 0;
                 incomeData = [];
-                s.forEach(w => { 
-                    const week = w.key;
-                    w.forEach(c => { 
-                        const val = c.val();
-                        totalInc += parseFloat(val.amount || 0);
-                        incomeData.push({
-                            id: c.key,
-                            week: week,
-                            donorName: val.donorName,
-                            amount: val.amount,
-                            date: val.date
-                        });
-                    }); 
-                });
+                if (s.exists()) {
+                    s.forEach(w => { 
+                        const week = w.key;
+                        w.forEach(c => { 
+                            const val = c.val();
+                            totalInc += parseFloat(val.amount || 0);
+                            incomeData.push({
+                                id: c.key,
+                                week: week,
+                                donorName: val.donorName,
+                                amount: val.amount,
+                                date: val.date
+                            });
+                        }); 
+                    });
+                }
                 // Sort by date (newest first)
-                incomeData.sort((a, b) => (a.date < b.date) ? 1 : -1);
+                incomeData.sort((a, b) => (a.date || '') < (b.date || '') ? 1 : -1);
                 document.getElementById('globalIncome').textContent = totalInc.toLocaleString();
                 renderIncomeTable();
                 updateNet();
+            }, (error) => {
+                console.error("Income data error:", error);
+                showToast("ဒေတာဖတ်၍မရပါ", "error");
             });
 
             // Expense data
-            db.ref('expenses').on('value', s => {
-                totalExp = 0;
-                const list = document.getElementById('expenseHistoryList');
-                list.innerHTML = '';
-                let arr = [];
-                s.forEach(c => {
-                    const v = c.val();
-                    arr.push({id: c.key, ...v});
-                    totalExp += parseFloat(v.amount || 0);
-                });
-                arr.reverse().forEach(item => {
-                    list.insertAdjacentHTML('beforeend', `
-                        <div class="card" style="border-right: 4px solid #ea580c;">
-                            <div style="display:flex; justify-content: space-between;">
-                                <b style="color:#22c55e; font-size:1.1em;">${item.org}</b>
-                                <span style="font-size:12px; color:#64748b;">${item.date}</span>
-                            </div>
-                            <div style="margin: 8px 0; font-size:14px; color:#cbd5e1;">${item.activity} - ${item.region}</div>
-                            <div style="font-weight:bold; font-size:16px;">${parseFloat(item.amount).toLocaleString()} ဘတ်</div>
-                            <div style="display:flex; gap:8px; margin-top:12px;">
-                                <button class="btn btn-save" style="flex:1; padding:8px; font-size:12px;" onclick="exportPNG('${item.id}')">📷 ပုံထုတ်ရန်</button>
-                                <button class="btn" style="flex:1; padding:8px; font-size:12px; background:#334155; color:white;" onclick="delExp('${item.id}')">ဖျက်မည်</button>
-                            </div>
-                        </div>
-                    `);
-                });
-                document.getElementById('globalExpense').textContent = totalExp.toLocaleString();
-                document.getElementById('historyCount').textContent = arr.length;
-                updateNet();
-            });
-        }
-
-        function updateNet() {
-            const net = totalInc - totalExp;
-            const nEl = document.getElementById('netBalance');
-            nEl.textContent = net.toLocaleString() + " ဘတ်";
-            nEl.style.color = net >= 0 ? "#22c55e" : "#ef4444";
-        }
-
-        async function login() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            try { await auth.signInWithEmailAndPassword(e, p); } 
-            catch { showToast("အချက်အလက်မှားယွင်းနေသည်", "error"); }
-        }
-
-        auth.onAuthStateChanged(u => {
-            if (u) {
-                document.getElementById('loginPage').classList.add('hide');
-                document.getElementById('mainApp').classList.remove('hide');
-                document.getElementById('bottomNav').classList.remove('hide');
-                document.getElementById('incomeDate').valueAsDate = new Date();
-                document.getElementById('expDate').valueAsDate = new Date();
-                syncData();
-            }
-        });
-
-        function switchTab(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hide'));
-            document.getElementById(id).classList.remove('hide');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function historyClick(el) {
-            switchTab('historyTab', el);
-        }
-
-        function saveIncome() {
-            const name = document.getElementById('donorName').value;
-            const amt = document.getElementById('incomeAmount').value;
-            const week = document.getElementById('incomeWeek').value;
-            const date = document.getElementById('incomeDate').value;
-            
+            db.ref('
