@@ -2,1126 +2,1228 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <title>✨ ဖိုးစောင့်တောင်မီးအိမ် - လစဉ်အလှူရှင်စာရင်း</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+    <title>နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့ - ဖိုးစောင့်တောင်မီးအိမ်</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Firebase SDK -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
-    <!-- HTML2Canvas -->
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Pyidaungsu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg: #0a0f1c;
+            --card: #151b2b;
+            --income: #facc15;
+            --expense: #ef4444;
+            --net: #10b981;
+            --text: #e2e8f0;
+            --gold: #facc15;
         }
 
-        :root {
-            --primary: #c9a227;
-            --primary-light: #f5d47a;
-            --primary-dark: #9e7b1f;
-            --success: #4CAF50;
-            --danger: #f44336;
-            --dark: #0a0f1e;
-            --dark-light: #1e293b;
-            --text: #ffffff;
-            --text-light: #94a3b8;
-            --gradient-gold: linear-gradient(135deg, #c9a227, #f5d47a, #c9a227);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background: var(--dark);
+            background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Pyidaungsu', 'Myanmar3', 'Noto Sans Myanmar', system-ui, sans-serif;
+            line-height: 1.6;
+            padding-bottom: 80px;
         }
 
-        /* Main Container */
         .container {
-            max-width: 600px;
+            max-width: 540px;
             margin: 0 auto;
+            padding: 16px;
         }
 
-        /* Login Page */
-        #loginPage {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-card {
-            background: var(--dark-light);
-            padding: 40px 30px;
-            border-radius: 30px;
-            border: 2px solid var(--primary);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header i {
-            font-size: 60px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .login-header h2 {
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            background: #2a3545;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #1e293b;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-
-        .btn-primary {
-            background: var(--gradient-gold);
-            color: var(--dark);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px var(--primary);
-        }
-
-        .btn-secondary {
-            background: #2a3545;
-            color: white;
-            border: 1px solid var(--primary);
-        }
-
-        /* Main App */
-        #mainApp {
-            display: none;
-        }
-
+        /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: var(--dark-light);
-            border-radius: 20px;
-            border: 1px solid var(--primary);
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px 0;
+            background: linear-gradient(135deg, #151b2b, #1e2937);
+            border-radius: 30px;
+            border: 1px solid rgba(250,204,21,0.2);
         }
-
         .header h1 {
-            color: var(--primary);
-            font-size: 24px;
+            color: var(--gold);
+            font-size: 28px;
+            text-shadow: 0 0 20px rgba(250,204,21,0.5);
+        }
+        .header .subtitle {
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 15px;
+            margin: 8px 0 4px;
+        }
+        .header .slogan {
+            color: #94a3b8;
+            font-size: 13px;
+            letter-spacing: 1px;
         }
 
+        /* Balance Cards */
         .balance-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .balance-card {
-            background: var(--dark-light);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid #2a3545;
-        }
-
-        .balance-card .label {
-            color: var(--text-light);
-            margin-bottom: 10px;
-        }
-
-        .balance-card .amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .balance-card.total {
-            grid-column: span 2;
-            background: var(--gradient-gold);
-        }
-
-        .balance-card.total .amount {
-            color: var(--dark);
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .menu-item {
-            background: var(--dark-light);
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid #2a3545;
-            transition: 0.3s;
-        }
-
-        .menu-item:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .menu-item i {
-            font-size: 40px;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 20px;
-            cursor: pointer;
-            color: var(--primary);
         }
-
-        .form-card {
-            background: var(--dark-light);
-            padding: 25px;
-            border-radius: 20px;
-        }
-
-        .form-card input,
-        .form-card select,
-        .form-card textarea {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #2a3545;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-        }
-
-        .form-card input:focus,
-        .form-card select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* Table Styles */
-        .table-container {
-            background: var(--dark-light);
-            border-radius: 20px;
-            padding: 15px;
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 15px 10px;
-            color: var(--primary);
-            border-bottom: 2px solid #2a3545;
-        }
-
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #2a3545;
-            color: var(--text-light);
-        }
-
-        .delete-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .export-btn {
-            background: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        /* Certificate Export Area */
-        #certificateArea {
-            position: fixed;
-            left: -9999px;
-            top: 0;
-            width: 600px;
-            background: white;
-            color: #1e293b;
-            padding: 0;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-        }
-
-        .certificate-header {
-            background: var(--gradient-gold);
-            padding: 50px 30px;
+        .balance-card {
+            padding: 20px 15px;
+            border-radius: 24px;
             text-align: center;
-            border-bottom: 5px solid #9e7b1f;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
         }
-
-        .certificate-header::before {
-            content: '✦';
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 40px;
-            color: rgba(255,255,255,0.2);
+        .balance-card.income {
+            background: linear-gradient(135deg, #facc15, #f97316);
+            color: #111;
         }
-
-        .certificate-header::after {
-            content: '✦';
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 40px;
-            color: rgba(255,255,255,0.2);
-        }
-
-        .certificate-header h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-            color: #0a0f1e;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
-        }
-
-        .certificate-header h2 {
-            font-size: 24px;
-            color: #0a0f1e;
-            font-weight: 600;
-        }
-
-        .certificate-header p {
-            font-size: 18px;
-            color: #0a0f1e;
-            margin-top: 15px;
-            font-style: italic;
-        }
-
-        .certificate-body {
-            padding: 40px;
-            background: white;
-        }
-
-        .certificate-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            border: 2px solid #c9a227;
-        }
-
-        .certificate-table th {
-            background: #c9a227;
-            color: #0a0f1e;
-            padding: 15px;
-            font-size: 16px;
-            text-align: center;
-            border: 1px solid #9e7b1f;
-        }
-
-        .certificate-table td {
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            color: #1e293b;
-            text-align: center;
-        }
-
-        .certificate-table tr:nth-child(even) {
-            background: #f8fafc;
-        }
-
-        .certificate-table tr:hover {
-            background: #fef3c7;
-        }
-
-        .certificate-footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 3px double #c9a227;
-            font-size: 18px;
-            font-weight: bold;
-            color: #0a0f1e;
-            font-style: italic;
-        }
-
-        .certificate-stamp {
-            text-align: right;
-            margin-top: 30px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .certificate-stamp .date {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        /* History Cards */
-        .history-card {
-            background: var(--dark-light);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .history-card .title {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .history-card .details {
-            color: var(--text-light);
-            margin-bottom: 10px;
-        }
-
-        .history-card .amount {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .card-actions button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-export {
-            background: var(--primary);
-            color: var(--dark);
-        }
-
-        .btn-delete {
-            background: var(--danger);
+        .balance-card.expense {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
             color: white;
         }
-
-        /* Toast */
-        #toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: var(--dark);
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        .balance-card.net {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white;
+        }
+        .balance-card h2 {
+            font-size: 32px;
+            margin: 8px 0 0;
+            font-weight: 700;
+        }
+        .balance-card small {
+            font-size: 13px;
+            opacity: 0.9;
         }
 
-        .hide {
-            display: none !important;
+        /* Glass Card */
+        .glass-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
 
-        .search-box {
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
             margin-bottom: 20px;
         }
+        .menu-btn {
+            background: var(--card);
+            padding: 16px 6px;
+            border-radius: 18px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid rgba(250,204,21,0.1);
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 20px rgba(250,204,21,0.2);
+        }
+        .menu-btn i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .menu-btn .income-icon { color: #facc15; }
+        .menu-btn .expense-icon { color: #ef4444; }
 
-        .search-box input {
-            width: 100%;
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
             padding: 15px;
-            background: #2a3545;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
+            border-radius: 18px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--gold);
         }
 
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--primary);
+        /* List Items */
+        .list-item {
+            padding: 14px 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+            transition: all 0.3s;
         }
+        .list-item:hover {
+            background: rgba(250,204,21,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Transaction Items */
+        .transaction-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .transaction-income { color: #facc15; font-weight: 600; }
+        .transaction-expense { color: #ef4444; font-weight: 600; }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            max-width: 550px;
+            border-radius: 28px;
+            padding: 24px;
+            margin: 20px auto;
+            border: 1px solid rgba(250,204,21,0.2);
+        }
+
+        /* Form Elements */
+        .search-box, select, input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: #1e2937;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        .search-box:focus, select:focus, input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        /* Buttons */
+        .btn-full {
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            font-weight: 600;
+            margin-top: 8px;
+            cursor: pointer;
+            border: none;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn-income { 
+            background: linear-gradient(135deg, #facc15, #f97316);
+            color: #111;
+        }
+        .btn-expense { 
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+        }
+        .btn-outline { 
+            background: transparent; 
+            border: 2px solid var(--gold); 
+            color: var(--gold);
+        }
+        .btn-outline:hover {
+            background: var(--gold);
+            color: #111;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(250,204,21,0.2);
+            color: var(--gold);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 200px;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+        }
+
+        /* Report Styles */
+        .report-section {
+            margin: 20px 0;
+            padding: 18px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            border-left: 4px solid var(--gold);
+        }
+        .report-header {
+            color: var(--gold);
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .report-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+        }
+        .report-total {
+            font-size: 20px;
+            text-align: center;
+            padding: 15px;
+            background: rgba(16,185,129,0.1);
+            border-radius: 16px;
+            margin: 15px 0;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            margin-bottom: 8px;
+        }
+        .rank-1 { background: linear-gradient(135deg, #facc15, #f97316); color: #111; }
+        .rank-2 { background: #94a3b8; color: #111; }
+        .rank-3 { background: #64748b; color: white; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Page -->
-        <div id="loginPage">
-            <div class="login-card">
-                <div class="login-header">
-                    <i class="fas fa-mosque"></i>
-                    <h2>ဖိုးစောင့်တောင်မီးအိမ်</h2>
-                    <p style="color: var(--text-light);">အလှူရှင်စာရင်းစီမံခန့်ခွဲရေး</p>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="email" placeholder="အီးမေးလ်" value="admin@lfm.com">
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" placeholder="စကားဝှက်" value="123456">
-                </div>
-                <button class="btn btn-primary" onclick="login()">အကောင့်ဝင်မည်</button>
-                <button class="btn btn-secondary" onclick="signup()">အကောင့်အသစ်ဖွင့်မည်</button>
-                <div id="loginError" style="color: var(--danger); text-align: center; margin-top: 15px; display: none;"></div>
-            </div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
+        <div class="subtitle">နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့</div>
+        <div class="slogan">အောင်ပွဲချိန်အထိ အတူတကွ ✊</div>
+    </div>
+
+    <!-- Balance Cards -->
+    <div class="balance-grid">
+        <div class="balance-card income">
+            <i class="fas fa-hand-holding-heart"></i>
+            <small>စုစုပေါင်း အလှူငွေ</small>
+            <h2 id="totalIncome">0 ဘတ်</h2>
         </div>
-
-        <!-- Main App -->
-        <div id="mainApp">
-            <!-- Header -->
-            <div class="header">
-                <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
-                <i class="fas fa-sign-out-alt" onclick="logout()" style="cursor: pointer; color: var(--primary);"></i>
-            </div>
-
-            <!-- Dashboard -->
-            <div id="dashboardPage" class="page active">
-                <div class="balance-grid">
-                    <div class="balance-card">
-                        <div class="label">စုစုပေါင်းအလှူငွေ</div>
-                        <div class="amount" id="totalIncome">0 ဘတ်</div>
-                    </div>
-                    <div class="balance-card">
-                        <div class="label">စုစုပေါင်းအသုံးစရိတ်</div>
-                        <div class="amount" id="totalExpense">0 ဘတ်</div>
-                    </div>
-                </div>
-                <div class="balance-card total">
-                    <div class="label">လက်ကျန်ငွေ</div>
-                    <div class="amount" id="netBalance">0 ဘတ်</div>
-                </div>
-
-                <div class="menu-grid">
-                    <div class="menu-item" onclick="showPage('incomePage')">
-                        <i class="fas fa-hand-holding-heart"></i>
-                        <span>အလှူငွေထည့်</span>
-                    </div>
-                    <div class="menu-item" onclick="showPage('expensePage')">
-                        <i class="fas fa-truck"></i>
-                        <span>ထောက်ပို့စရိတ်</span>
-                    </div>
-                    <div class="menu-item" onclick="showPage('donorListPage')">
-                        <i class="fas fa-list"></i>
-                        <span>အလှူရှင်စာရင်း</span>
-                    </div>
-                    <div class="menu-item" onclick="showPage('historyPage')">
-                        <i class="fas fa-history"></i>
-                        <span>မှတ်တမ်း</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Income Page -->
-            <div id="incomePage" class="page">
-                <div class="back-btn" onclick="showPage('dashboardPage')">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>အလှူငွေထည့်ရန်</span>
-                </div>
-                <div class="form-card">
-                    <input type="text" id="donorName" placeholder="အလှူရှင်အမည်">
-                    <input type="number" id="incomeAmount" placeholder="ပမာဏ (ဘတ်)">
-                    <select id="incomeMonth">
-                        <option value="ဇန်နဝါရီ">ဇန်နဝါရီ</option>
-                        <option value="ဖေဖော်ဝါရီ">ဖေဖော်ဝါရီ</option>
-                        <option value="မတ်">မတ်</option>
-                        <option value="ဧပြီ">ဧပြီ</option>
-                        <option value="မေ">မေ</option>
-                        <option value="ဇွန်">ဇွန်</option>
-                        <option value="ဇူလိုင်">ဇူလိုင်</option>
-                        <option value="သြဂုတ်">သြဂုတ်</option>
-                        <option value="စက်တင်ဘာ">စက်တင်ဘာ</option>
-                        <option value="အောက်တိုဘာ">အောက်တိုဘာ</option>
-                        <option value="နိုဝင်ဘာ">နိုဝင်ဘာ</option>
-                        <option value="ဒီဇင်ဘာ">ဒီဇင်ဘာ</option>
-                    </select>
-                    <input type="date" id="incomeDate">
-                    <button class="btn btn-primary" onclick="saveIncome()">သိမ်းဆည်းမည်</button>
-                </div>
-            </div>
-
-            <!-- Donor List Page -->
-            <div id="donorListPage" class="page">
-                <div class="back-btn" onclick="showPage('dashboardPage')">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>အလှူရှင်စာရင်း</span>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <select id="filterMonth" style="flex: 2; padding: 15px; background: #2a3545; border: 2px solid transparent; border-radius: 15px; color: white;">
-                        <option value="">လစဉ်ရွေးရန်</option>
-                        <option value="ဇန်နဝါရီ">ဇန်နဝါရီ</option>
-                        <option value="ဖေဖော်ဝါရီ">ဖေဖော်ဝါရီ</option>
-                        <option value="မတ်">မတ်</option>
-                        <option value="ဧပြီ">ဧပြီ</option>
-                        <option value="မေ">မေ</option>
-                        <option value="ဇွန်">ဇွန်</option>
-                        <option value="ဇူလိုင်">ဇူလိုင်</option>
-                        <option value="သြဂုတ်">သြဂုတ်</option>
-                        <option value="စက်တင်ဘာ">စက်တင်ဘာ</option>
-                        <option value="အောက်တိုဘာ">အောက်တိုဘာ</option>
-                        <option value="နိုဝင်ဘာ">နိုဝင်ဘာ</option>
-                        <option value="ဒီဇင်ဘာ">ဒီဇင်ဘာ</option>
-                    </select>
-                    <button class="btn-primary" style="flex: 1; padding: 15px;" onclick="exportCertificate()">
-                        <i class="fas fa-certificate"></i> Certificate
-                    </button>
-                </div>
-
-                <div class="table-container">
-                    <table id="donorTable">
-                        <thead>
-                            <tr>
-                                <th>နံပါတ်</th>
-                                <th>အလှူရှင်အမည်</th>
-                                <th>ပမာဏ</th>
-                                <th>လ</th>
-                                <th>ရက်စွဲ</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="donorTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Expense Page -->
-            <div id="expensePage" class="page">
-                <div class="back-btn" onclick="showPage('dashboardPage')">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>ထောက်ပို့စရိတ်မှတ်တမ်း</span>
-                </div>
-                <div class="form-card">
-                    <input type="text" id="expOrg" placeholder="လက်ခံသည့်အဖွဲ့">
-                    <input type="text" id="expActivity" placeholder="လှုပ်ရှားမှု">
-                    <input type="text" id="expRegion" placeholder="ဒေသ">
-                    <input type="number" id="expAmount" placeholder="ပမာဏ (ဘတ်)">
-                    <input type="date" id="expDate">
-                    <textarea id="expNote" rows="3" placeholder="မှတ်ချက်"></textarea>
-                    <button class="btn btn-primary" onclick="saveExpense()">သိမ်းဆည်းမည်</button>
-                </div>
-            </div>
-
-            <!-- History Page -->
-            <div id="historyPage" class="page">
-                <div class="back-btn" onclick="showPage('dashboardPage')">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>ထောက်ပို့မှတ်တမ်း</span>
-                </div>
-                
-                <div class="search-box">
-                    <input type="text" id="searchHistory" placeholder="ရှာဖွေရန်..." onkeyup="filterHistory()">
-                </div>
-                
-                <div id="historyList"></div>
-            </div>
+        <div class="balance-card expense">
+            <i class="fas fa-fist-raised"></i>
+            <small>စုစုပေါင်း ထောက်ပို့ငွေ</small>
+            <h2 id="totalExpense">0 ဘတ်</h2>
+        </div>
+        <div class="balance-card net">
+            <i class="fas fa-balance-scale"></i>
+            <small>လက်ရှိ ထောက်ပို့ရန်ပုံငွေ</small>
+            <h2 id="netBalance">0 ဘတ်</h2>
         </div>
     </div>
 
-    <!-- Certificate Export Area -->
-    <div id="certificateArea">
-        <div class="certificate-header">
-            <h1>✨ ဖိုးစောင့်တောင်မီးအိမ် ✨</h1>
-            <h2>လစဉ်အလှူရှင်စာရင်း</h2>
-            <p id="certificateMonth">လစဉ်ရွေးချယ်ထားသည်</p>
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-users" style="color: var(--gold);"></i>
+            <div class="stat-value" id="totalDonors">0</div>
+            <small>တော်လှန်ရေး မိတ်ဆွေ</small>
         </div>
+        <div class="stat-card">
+            <i class="fas fa-calendar-check" style="color: var(--gold);"></i>
+            <div class="stat-value" id="totalTransactions">0</div>
+            <small>စုစုပေါင်း လှုပ်ရှားမှု</small>
+        </div>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu-grid">
+        <div class="menu-btn" onclick="toggleSection('donorListSection')">
+            <i class="fas fa-users" style="color: var(--gold);"></i>
+            တော်လှန်ရေး မိတ်ဆွေ
+        </div>
+        <div class="menu-btn" onclick="toggleSection('addIncomeSection')">
+            <i class="fas fa-hand-holding-heart income-icon"></i>
+            အလှူငွေထည့်ရန်
+        </div>
+        <div class="menu-btn" onclick="toggleSection('addExpenseSection')">
+            <i class="fas fa-fist-raised expense-icon"></i>
+            ထောက်ပို့ရန်
+        </div>
+        <div class="menu-btn" onclick="showYearlyReport()">
+            <i class="fas fa-chart-line" style="color: var(--gold);"></i>
+            နှစ်ချုပ် စာရင်း
+        </div>
+        <div class="menu-btn" onclick="showMonthlyReport()">
+            <i class="fas fa-calendar-alt" style="color: var(--gold);"></i>
+            လချုပ် စာရင်း
+        </div>
+        <div class="menu-btn" onclick="showFullDonorList()">
+            <i class="fas fa-list" style="color: var(--gold);"></i>
+            မိတ်ဆွေစာရင်း
+        </div>
+        <div class="menu-btn" onclick="exportToCSV()">
+            <i class="fas fa-file-csv" style="color: var(--gold);"></i>
+            CSV ထုတ်ရန်
+        </div>
+        <div class="menu-btn" onclick="backupData()">
+            <i class="fas fa-database" style="color: var(--gold);"></i>
+            Backup
+        </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="glass-card">
+        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+            <i class="fas fa-crown" style="color: var(--gold);"></i>
+            ထိပ်တန်း တော်လှန်ရေး မိတ်ဆွေများ
+        </h3>
+        <div id="leaderboardContent"></div>
+    </div>
+
+    <!-- Donor List Section -->
+    <div id="donorListSection" style="display:none;">
+        <div class="glass-card">
+            <h3 style="margin-bottom: 15px;">တော်လှန်ရေး မိတ်ဆွေစာရင်း</h3>
+            <input type="text" id="donorSearch" class="search-box" placeholder="အမည်ဖြင့် ရှာရန်..." onkeyup="renderDonors()">
+            <div id="allDonorsList" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- Add Income (အလှူငွေထည့်ရန်) -->
+    <div id="addIncomeSection" style="display:none;">
+        <div class="glass-card">
+            <h3 style="color: #facc15; margin-bottom: 15px;">
+                <i class="fas fa-hand-holding-heart"></i> အလှူငွေထည့်ရန်
+            </h3>
+            <input type="text" id="inName" class="search-box" placeholder="အလှူရှင် အမည်">
+            <select id="incomeCategory" class="search-box">
+                <option value="general">📦 အထွေထွေ အလှူငွေ</option>
+                <option value="cdm">📢 အာဏာဖီဆန်ရေး ရန်ပုံငွေ</option>
+                <option value="military">⚔️ စစ်ရေး ထောက်ပို့ရန်ပုံငွေ</option>
+                <option value="medical">💊 ကျန်းမာရေး ရန်ပုံငွေ</option>
+                <option value="food">🍚 ရိက္ခာ ရန်ပုံငွေ</option>
+            </select>
+            <input type="number" id="inAmount" class="search-box" placeholder="ပမာဏ (ဘတ်)">
+            <input type="date" id="inDate" class="search-box" value="">
+            <button class="btn-full btn-income" onclick="saveIncome()">
+                <i class="fas fa-save"></i> အလှူငွေ သိမ်းဆည်းမည်
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Expense (ထောက်ပို့ရန်) -->
+    <div id="addExpenseSection" style="display:none;">
+        <div class="glass-card">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">
+                <i class="fas fa-fist-raised"></i> ထောက်ပို့ရန်
+            </h3>
+            <input type="text" id="exGroupName" class="search-box" placeholder="လက်ခံသည့် အဖွဲ့အမည်">
+            <input type="text" id="exActivity" class="search-box" placeholder="လှုပ်ရှားမှု အမျိုးအစား (ဥပမာ - ရှေ့တန်းထောက်ပို့၊ စစ်ရေး၊ ရိက္ခာ)">
+            <select id="expenseCategory" class="search-box">
+                <option value="food">🍚 ရိက္ခာ ထောက်ပို့ခြင်း</option>
+                <option value="military">⚔️ စစ်ရေး ထောက်ပို့ခြင်း</option>
+                <option value="medical">💊 ကျန်းမာရေး ထောက်ပို့ခြင်း</option>
+                <option value="transport">🚚 သယ်ယူပို့ဆောင်ရေး</option>
+                <option value="communication">📡 ဆက်သွယ်ရေး</option>
+                <option value="other">📦 အခြား ထောက်ပို့ခြင်း</option>
+            </select>
+            <input type="number" id="exAmount" class="search-box" placeholder="ထောက်ပို့ငွေ ပမာဏ (ဘတ်)">
+            <textarea id="exDescription" class="search-box" rows="2" placeholder="အသေးစိတ် မှတ်ချက် (ဥပမာ - ရှေ့တန်းသို့ ရိက္ခာ ၅၀ စုံ)"></textarea>
+            <input type="date" id="exDate" class="search-box" value="">
+            <button class="btn-full btn-expense" onclick="saveExpense()">
+                <i class="fas fa-fist-raised"></i> ထောက်ပို့ငွေ သိမ်းဆည်းမည်
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Donor Detail Modal -->
+<div id="donorModal" class="modal">
+    <span class="close-btn" onclick="closeModal()">×</span>
+    <div class="modal-content">
+        <h2 id="mDonorName" style="color: var(--gold); text-align: center; margin-bottom: 20px;"></h2>
         
-        <div class="certificate-body">
-            <table class="certificate-table" id="certificateTable">
-                <thead>
-                    <tr>
-                        <th>နံပါတ်</th>
-                        <th>အလှူရှင်အမည်</th>
-                        <th>ပမာဏ (ဘတ်)</th>
-                        <th>ရက်စွဲ</th>
-                    </tr>
-                </thead>
-                <tbody id="certificateTableBody"></tbody>
-            </table>
-            
-            <div class="certificate-footer">
-                ဤမှတ်တမ်းကို LFM အဖွဲ့မှ ထုတ်ပေးသည်
+        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
+            <div style="text-align: center;">
+                <small>စုစုပေါင်း အလှူငွေ</small>
+                <div id="mTotal" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
             </div>
-            
-            <div class="certificate-stamp">
-                <div class="date">ထုတ်ပေးရက်စွဲ: <span id="certificateDate"></span></div>
+            <div style="text-align: center;">
+                <small>အကြိမ်ရေ</small>
+                <div id="mCount" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
             </div>
         </div>
+
+        <div class="chart-container">
+            <canvas id="donorChart"></canvas>
+        </div>
+
+        <h4 style="color: var(--gold); margin: 20px 0 10px;">
+            <i class="fas fa-calendar-alt"></i> နှစ်အလိုက် လအလိုက် စာရင်း
+        </h4>
+        <div id="mYearlyBreakdown" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+        <h4 style="color: var(--gold); margin: 20px 0 10px;">
+            <i class="fas fa-history"></i> အသေးစိတ် မှတ်တမ်း
+        </h4>
+        <div id="mHistoryList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+        <button class="btn-full btn-outline" onclick="exportDonorPNG()">
+            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
+        </button>
     </div>
+</div>
 
-    <!-- Toast -->
-    <div id="toast"></div>
+<!-- Yearly Report Modal -->
+<div id="yearlyReportModal" class="modal">
+    <span class="close-btn" onclick="closeYearlyModal()">×</span>
+    <div class="modal-content">
+        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
+            <i class="fas fa-chart-line"></i> နှစ်ချုပ် တော်လှန်ရေး စာရင်း
+        </h2>
+        <div class="chart-container">
+            <canvas id="yearlyChart"></canvas>
+        </div>
+        <div id="yearlyReportContent"></div>
+        <button class="btn-full btn-outline" onclick="exportYearlyPNG()">
+            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
+        </button>
+    </div>
+</div>
 
-    <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
-            authDomain: "lamp-88a25.firebaseapp.com",
-            databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "lamp-88a25",
-            storageBucket: "lamp-88a25.firebasestorage.app",
-            messagingSenderId: "151980650338",
-            appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
-        };
+<!-- Monthly Report Modal -->
+<div id="monthlyReportModal" class="modal">
+    <span class="close-btn" onclick="closeMonthlyModal()">×</span>
+    <div class="modal-content">
+        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
+            <i class="fas fa-calendar-alt"></i> လချုပ် တော်လှန်ရေး စာရင်း
+        </h2>
+        <select id="monthYearSelect" class="search-box" onchange="loadMonthlyReport()">
+            <option value="">လကို ရွေးချယ်ပါ</option>
+        </select>
+        <div class="chart-container">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+        <div id="monthlyReportContent"></div>
+        <button class="btn-full btn-outline" onclick="exportMonthlyPNG()">
+            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
+        </button>
+    </div>
+</div>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+<!-- Full Donor List Modal -->
+<div id="fullDonorListModal" class="modal" style="display:none;">
+    <span class="close-btn" onclick="this.parentElement.style.display='none'">×</span>
+    <div class="modal-content">
+        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
+            <i class="fas fa-users"></i> တော်လှန်ရေး မိတ်ဆွေများ စာရင်း
+        </h2>
+        <div id="fullDonorList" style="max-height: 500px; overflow-y: auto;"></div>
+    </div>
+</div>
 
-        // Global Variables
-        let totalIncome = 0;
-        let totalExpense = 0;
-        let incomeData = [];
-        let expenseData = [];
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+        authDomain: "lamp-88a25.firebaseapp.com",
+        databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "lamp-88a25",
+        storageBucket: "lamp-88a25.firebasestorage.app",
+        messagingSenderId: "151980650338",
+        appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        // Check Auth State
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                loadData();
-            } else {
-                document.getElementById('loginPage').style.display = 'flex';
-                document.getElementById('mainApp').style.display = 'none';
+    // Global variables
+    let donorData = {};
+    let allTransactions = [];
+    let currentChart = null;
+
+    // Helper Functions
+    function cleanName(n) {
+        return n ? n.replace(/^(ကို|ဦး|မောင်|မ|Sayadaw|Daw|U|Ko|Maung)\s?/gi, "").trim() : "";
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('my-MM', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    }
+
+    // Fetch Data
+    function fetchData() {
+        // Fetch Income (donations)
+        db.ref('weekly_donations').on('value', snap => {
+            donorData = {};
+            allTransactions = [];
+            let totalIncome = 0;
+
+            snap.forEach(week => {
+                week.forEach(d => {
+                    const val = d.val();
+                    const amt = parseFloat(val.amount || 0);
+                    const cName = cleanName(val.donorName);
+                    totalIncome += amt;
+
+                    const trans = {
+                        type: 'income',
+                        id: d.key,
+                        week: week.key,
+                        donorName: val.donorName,
+                        amount: amt,
+                        category: val.category || 'general',
+                        date: val.date || new Date().toISOString().split('T')[0],
+                        description: val.donorName
+                    };
+                    allTransactions.push(trans);
+
+                    if (!donorData[cName]) {
+                        donorData[cName] = {
+                            originalName: val.donorName,
+                            total: 0,
+                            count: 0,
+                            transactions: []
+                        };
+                    }
+                    donorData[cName].total += amt;
+                    donorData[cName].count++;
+                    donorData[cName].transactions.push(trans);
+                });
+            });
+
+            // Fetch Expenses (support)
+            db.ref('expenses').once('value', expSnap => {
+                expSnap.forEach(item => {
+                    const val = item.val();
+                    const exp = {
+                        type: 'expense',
+                        id: item.key,
+                        groupName: val.groupName || '',
+                        activity: val.activity || '',
+                        amount: parseFloat(val.amount || 0),
+                        category: val.category || 'other',
+                        date: val.date || new Date().toISOString().split('T')[0],
+                        description: val.description || ''
+                    };
+                    allTransactions.push(exp);
+                });
+                updateUI();
+            });
+        });
+    }
+
+    function updateUI() {
+        const totalIncome = allTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const totalExpense = allTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const netBalance = totalIncome - totalExpense;
+
+        document.getElementById('totalIncome').textContent = totalIncome.toLocaleString() + " ဘတ်";
+        document.getElementById('totalExpense').textContent = totalExpense.toLocaleString() + " ဘတ်";
+        document.getElementById('netBalance').textContent = netBalance.toLocaleString() + " ဘတ်";
+        document.getElementById('totalDonors').textContent = Object.keys(donorData).length;
+        document.getElementById('totalTransactions').textContent = allTransactions.length;
+
+        renderLeaderboard();
+        renderDonors();
+        updateMonthSelect();
+    }
+
+    function renderLeaderboard() {
+        const sorted = Object.entries(donorData).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
+        let html = '';
+        sorted.forEach(([_, data], i) => {
+            const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : 'rank-3';
+            html += `
+                <div class="leaderboard-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                    <span class="badge" style="background: ${i===0?'#facc15':i===1?'#94a3b8':'#64748b'}; color: #111; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">${i+1}</span>
+                    <span style="flex: 1;">${data.originalName}</span>
+                    <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
+                </div>
+            `;
+        });
+        document.getElementById('leaderboardContent').innerHTML = html;
+    }
+
+    function renderDonors() {
+        const term = document.getElementById('donorSearch')?.value.toLowerCase() || '';
+        const filtered = Object.entries(donorData).filter(([_, d]) => d.originalName.toLowerCase().includes(term))
+            .sort((a, b) => b[1].total - a[1].total);
+        
+        let html = '';
+        filtered.forEach(([_, data]) => {
+            html += `
+                <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                    <span>${data.originalName}</span>
+                    <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
+                </div>
+            `;
+        });
+        document.getElementById('allDonorsList').innerHTML = html || '<p style="text-align: center; padding: 20px;">မိတ်ဆွေ မတွေ့ရှိပါ</p>';
+    }
+
+    function openDonorModal(donorName) {
+        const data = Object.values(donorData).find(d => d.originalName === donorName);
+        if (!data) return;
+
+        document.getElementById('mDonorName').textContent = data.originalName;
+        document.getElementById('mTotal').textContent = data.total.toLocaleString() + " ဘတ်";
+        document.getElementById('mCount').textContent = data.count;
+
+        // Yearly breakdown
+        const yearly = {};
+        const monthlyTotals = {};
+        data.transactions.forEach(t => {
+            const year = t.date.split('-')[0];
+            const month = t.date.substring(0,7);
+            
+            if (!yearly[year]) yearly[year] = { total: 0, months: {} };
+            yearly[year].total += t.amount;
+            if (!yearly[year].months[month]) yearly[year].months[month] = 0;
+            yearly[year].months[month] += t.amount;
+            
+            monthlyTotals[month] = (monthlyTotals[month] || 0) + t.amount;
+        });
+
+        let yearlyHTML = '';
+        Object.keys(yearly).sort((a,b) => b-a).forEach(year => {
+            let monthHTML = '';
+            Object.keys(yearly[year].months).sort().reverse().forEach(month => {
+                monthHTML += `
+                    <div style="display: flex; justify-content: space-between; padding: 6px 0 6px 15px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <span>${month}</span>
+                        <span style="color: #facc15;">${yearly[year].months[month].toLocaleString()} ဘတ်</span>
+                    </div>
+                `;
+            });
+            yearlyHTML += `
+                <details style="margin-bottom: 8px;">
+                    <summary style="padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;">
+                        ${year} ခုနှစ် (စုစုပေါင်း ${yearly[year].total.toLocaleString()} ဘတ်)
+                    </summary>
+                    ${monthHTML}
+                </details>
+            `;
+        });
+        document.getElementById('mYearlyBreakdown').innerHTML = yearlyHTML;
+
+        // History
+        const historyHTML = data.transactions.sort((a,b) => new Date(b.date) - new Date(a.date))
+            .map(t => `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <span>${t.date}</span>
+                    <span style="color: #facc15;">${t.amount.toLocaleString()} ဘတ်</span>
+                </div>
+            `).join('');
+        document.getElementById('mHistoryList').innerHTML = historyHTML;
+
+        // Chart
+        const sortedMonths = Object.keys(monthlyTotals).sort();
+        if (currentChart) currentChart.destroy();
+        
+        const ctx = document.getElementById('donorChart').getContext('2d');
+        currentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sortedMonths,
+                datasets: [{
+                    label: 'လစဉ် အလှူငွေ',
+                    data: sortedMonths.map(m => monthlyTotals[m]),
+                    backgroundColor: '#facc15',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', maxRotation: 45 }
+                    }
+                }
             }
         });
 
-        // Set today's date
-        document.getElementById('incomeDate').valueAsDate = new Date();
-        document.getElementById('expDate').valueAsDate = new Date();
+        document.getElementById('donorModal').style.display = 'flex';
+    }
 
-        // Login
-        window.login = function() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(error => {
-                    showToast('အကောင့်ဝင်ရောက်၍မရပါ', 'error');
-                });
-        };
+    function saveIncome() {
+        const name = document.getElementById('inName').value.trim();
+        const amount = parseFloat(document.getElementById('inAmount').value);
+        const category = document.getElementById('incomeCategory').value;
+        const date = document.getElementById('inDate').value;
 
-        // Sign Up
-        window.signup = function() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            auth.createUserWithEmailAndPassword(email, password)
-                .catch(error => {
-                    showToast('အကောင့်ဖွင့်၍မရပါ', 'error');
-                });
-        };
-
-        // Logout
-        window.logout = function() {
-            auth.signOut();
-        };
-
-        // Show Page
-        window.showPage = function(pageId) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            document.getElementById(pageId).classList.add('active');
-        };
-
-        // Load Data
-        function loadData() {
-            // Load Income
-            db.ref('weekly_donations').on('value', snapshot => {
-                totalIncome = 0;
-                incomeData = [];
-                
-                snapshot.forEach(weekSnapshot => {
-                    weekSnapshot.forEach(donationSnapshot => {
-                        const donation = donationSnapshot.val();
-                        const amount = parseFloat(donation.amount) || 0;
-                        totalIncome += amount;
-                        
-                        incomeData.push({
-                            id: donationSnapshot.key,
-                            week: weekSnapshot.key,
-                            name: donation.donorName,
-                            amount: amount,
-                            month: donation.month || 'ဇန်နဝါရီ',
-                            date: donation.date
-                        });
-                    });
-                });
-                
-                updateUI();
-                renderDonorTable();
-            });
-
-            // Load Expenses
-            db.ref('expenses').on('value', snapshot => {
-                totalExpense = 0;
-                expenseData = [];
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = '';
-                
-                snapshot.forEach(childSnapshot => {
-                    const expense = childSnapshot.val();
-                    const amount = parseFloat(expense.amount) || 0;
-                    totalExpense += amount;
-                    
-                    expenseData.push({
-                        id: childSnapshot.key,
-                        ...expense,
-                        amount: amount
-                    });
-                    
-                    // Add to history list
-                    const card = document.createElement('div');
-                    card.className = 'history-card';
-                    card.setAttribute('data-id', childSnapshot.key);
-                    card.innerHTML = `
-                        <div class="title">${expense.org || '-'}</div>
-                        <div class="details">
-                            <i class="fas fa-running"></i> ${expense.activity || '-'} | 
-                            <i class="fas fa-map-marker-alt"></i> ${expense.region || '-'}
-                        </div>
-                        <div class="amount">${amount.toLocaleString()} ဘတ်</div>
-                        <div style="color: var(--text-light); font-size: 14px; margin: 10px 0;">
-                            <i class="fas fa-calendar"></i> ${expense.date || '-'}
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn-export" onclick="exportExpense('${childSnapshot.key}')">
-                                <i class="fas fa-image"></i> ပုံထုတ်
-                            </button>
-                            <button class="btn-delete" onclick="deleteExpense('${childSnapshot.key}')">
-                                <i class="fas fa-trash"></i> ဖျက်
-                            </button>
-                        </div>
-                    `;
-                    historyList.appendChild(card);
-                });
-                
-                updateUI();
-            });
+        if (!name || !amount || amount < 10) {
+            alert("❌ အမည်နှင့် ပမာဏ (အနည်းဆုံး ၁၀ဘတ်) ဖြည့်ပါ");
+            return;
         }
 
-        // Update UI
-        function updateUI() {
-            const netBalance = totalIncome - totalExpense;
-            
-            document.getElementById('totalIncome').textContent = totalIncome.toLocaleString() + ' ဘတ်';
-            document.getElementById('totalExpense').textContent = totalExpense.toLocaleString() + ' ဘတ်';
-            document.getElementById('netBalance').textContent = netBalance.toLocaleString() + ' ဘတ်';
+        const week = getCurrentWeek();
+        db.ref(`weekly_donations/${week}`).push({
+            donorName: name,
+            amount: amount,
+            category: category,
+            date: date || new Date().toISOString().split('T')[0]
+        }).then(() => {
+            confetti({ particleCount: 150, spread: 70, colors: ['#facc15', '#f97316'] });
+            alert("✅ အလှူငွေ သိမ်းဆည်းပြီးပါပြီ။ ကျေးဇူးတင်ပါသည်။");
+            document.getElementById('inName').value = '';
+            document.getElementById('inAmount').value = '';
+            document.getElementById('inDate').value = '';
+            toggleSection('');
+        });
+    }
+
+    function saveExpense() {
+        const groupName = document.getElementById('exGroupName').value.trim();
+        const activity = document.getElementById('exActivity').value.trim();
+        const amount = parseFloat(document.getElementById('exAmount').value);
+        const category = document.getElementById('expenseCategory').value;
+        const description = document.getElementById('exDescription').value.trim();
+        const date = document.getElementById('exDate').value;
+
+        if (!groupName || !amount || amount < 10) {
+            alert("❌ အဖွဲ့အမည်နှင့် ပမာဏ ဖြည့်ပါ");
+            return;
         }
 
-        // Render Donor Table
-        window.renderDonorTable = function() {
-            const filterMonth = document.getElementById('filterMonth').value;
-            const tbody = document.getElementById('donorTableBody');
-            tbody.innerHTML = '';
-            
-            let filteredData = filterMonth ? 
-                incomeData.filter(item => item.month === filterMonth) : 
-                incomeData;
-            
-            filteredData.sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
-            
-            filteredData.forEach((item, index) => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${item.name || '-'}</td>
-                    <td>${item.amount.toLocaleString()}</td>
-                    <td>${item.month || '-'}</td>
-                    <td>${item.date || '-'}</td>
-                    <td>
-                        <button class="delete-btn" onclick="deleteDonation('${item.week}', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
+        db.ref('expenses').push({
+            groupName: groupName,
+            activity: activity,
+            amount: amount,
+            category: category,
+            description: description,
+            date: date || new Date().toISOString().split('T')[0]
+        }).then(() => {
+            confetti({ particleCount: 150, spread: 70, colors: ['#ef4444', '#b91c1c'] });
+            alert("✅ ထောက်ပို့ငွေ သိမ်းဆည်းပြီးပါပြီ။ အောင်ပွဲဆီသို့ အတူတကွ။");
+            document.getElementById('exGroupName').value = '';
+            document.getElementById('exActivity').value = '';
+            document.getElementById('exAmount').value = '';
+            document.getElementById('exDescription').value = '';
+            document.getElementById('exDate').value = '';
+            toggleSection('');
+        });
+    }
+
+    function showYearlyReport() {
+        const years = {};
+        allTransactions.forEach(t => {
+            const year = t.date.split('-')[0];
+            if (!years[year]) years[year] = { income: 0, expense: 0, count: 0 };
+            if (t.type === 'income') years[year].income += t.amount;
+            else years[year].expense += t.amount;
+            years[year].count++;
+        });
+
+        // Chart data
+        const sortedYears = Object.keys(years).sort((a,b) => b-a);
+        const incomeData = sortedYears.map(y => years[y].income);
+        const expenseData = sortedYears.map(y => years[y].expense);
+
+        setTimeout(() => {
+            const ctx = document.getElementById('yearlyChart').getContext('2d');
+            if (window.yearlyChart) window.yearlyChart.destroy();
+            window.yearlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedYears,
+                    datasets: [
+                        { label: 'အလှူငွေ', data: incomeData, backgroundColor: '#facc15', borderRadius: 6 },
+                        { label: 'ထောက်ပို့ငွေ', data: expenseData, backgroundColor: '#ef4444', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#e2e8f0' } } },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' } } }
+                }
             });
-        };
+        }, 100);
 
-        // Save Income
-        window.saveIncome = function() {
-            const name = document.getElementById('donorName').value;
-            const amount = document.getElementById('incomeAmount').value;
-            const month = document.getElementById('incomeMonth').value;
-            const date = document.getElementById('incomeDate').value;
-            const week = `Month-${month}`;
-
-            if (!name || !amount) {
-                showToast('အမည်နှင့်ပမာဏ ဖြည့်သွင်းပါ', 'error');
-                return;
-            }
-
-            db.ref(`weekly_donations/${week}`).push({
-                donorName: name,
-                amount: parseFloat(amount),
-                month: month,
-                date: date
-            }).then(() => {
-                showToast('သိမ်းဆည်းပြီးပါပြီ');
-                document.getElementById('donorName').value = '';
-                document.getElementById('incomeAmount').value = '';
-            });
-        };
-
-        // Delete Donation
-        window.deleteDonation = function(week, id) {
-            if (confirm('ဤအလှူငွေကို ဖျက်ရန် သေချာပါသလား?')) {
-                db.ref(`weekly_donations/${week}/${id}`).remove()
-                    .then(() => showToast('ဖျက်ပြီးပါပြီ'));
-            }
-        };
-
-        // Save Expense
-        window.saveExpense = function() {
-            const org = document.getElementById('expOrg').value;
-            const amount = document.getElementById('expAmount').value;
-
-            if (!org || !amount) {
-                showToast('အဖွဲ့အမည်နှင့်ပမာဏ ဖြည့်သွင်းပါ', 'error');
-                return;
-            }
-
-            db.ref('expenses').push({
-                org: org,
-                activity: document.getElementById('expActivity').value,
-                region: document.getElementById('expRegion').value,
-                amount: parseFloat(amount),
-                date: document.getElementById('expDate').value,
-                note: document.getElementById('expNote').value
-            }).then(() => {
-                showToast('သိမ်းဆည်းပြီးပါပြီ');
-                document.getElementById('expOrg').value = '';
-                document.getElementById('expActivity').value = '';
-                document.getElementById('expRegion').value = '';
-                document.getElementById('expAmount').value = '';
-                document.getElementById('expNote').value = '';
-            });
-        };
-
-        // Delete Expense
-        window.deleteExpense = function(id) {
-            if (confirm('ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?')) {
-                db.ref(`expenses/${id}`).remove()
-                    .then(() => showToast('ဖျက်ပြီးပါပြီ'));
-            }
-        };
-
-        // Filter History
-        window.filterHistory = function() {
-            const search = document.getElementById('searchHistory').value.toLowerCase();
-            const cards = document.querySelectorAll('.history-card');
-            
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(search) ? 'block' : 'none';
-            });
-        };
-
-        // Export Certificate
-        window.exportCertificate = function() {
-            const filterMonth = document.getElementById('filterMonth').value;
-            const filteredData = filterMonth ? 
-                incomeData.filter(item => item.month === filterMonth) : 
-                incomeData;
-            
-            if (filteredData.length === 0) {
-                showToast('ပြသရန်ဒေတာမရှိပါ', 'error');
-                return;
-            }
-
-            // Sort by date
-            filteredData.sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
-
-            // Set certificate data
-            document.getElementById('certificateMonth').textContent = 
-                filterMonth ? `လစဉ်: ${filterMonth}` : 'လစဉ်အလှူရှင်များ';
-            document.getElementById('certificateDate').textContent = 
-                new Date().toLocaleDateString('my-MM', { year: 'numeric', month: 'long', day: 'numeric' });
-
-            // Populate table
-            const tbody = document.getElementById('certificateTableBody');
-            tbody.innerHTML = '';
-            
-            filteredData.forEach((item, index) => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${item.name || '-'}</td>
-                    <td>${item.amount.toLocaleString()}</td>
-                    <td>${item.date || '-'}</td>
-                `;
-            });
-
-            // Export as PNG
-            const area = document.getElementById('certificateArea');
-            area.style.left = '0';
-            area.style.top = '0';
-            area.style.position = 'fixed';
-            
-            showToast('Certificate ထုတ်နေသည်...');
-            
-            html2canvas(area, { 
-                scale: 2, 
-                backgroundColor: '#ffffff',
-                allowTaint: false,
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `ဖိုးစောင့်တောင်မီးအိမ်_${filterMonth || 'All'}_${new Date().toISOString().split('T')[0]}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                
-                area.style.left = '-9999px';
-                showToast('Certificate ထုတ်ယူပြီးပါပြီ');
-            }).catch(error => {
-                console.error('Export error:', error);
-                area.style.left = '-9999px';
-                showToast('ပုံထုတ်၍မရပါ', 'error');
-            });
-        };
-
-        // Export Expense
-        window.exportExpense = function(id) {
-            const expense = expenseData.find(e => e.id === id);
-            if (!expense) return;
-
-            // Create temporary export area
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'fixed';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.width = '500px';
-            tempDiv.style.background = 'white';
-            tempDiv.style.padding = '30px';
-            tempDiv.style.borderRadius = '30px';
-            tempDiv.style.boxShadow = '0 30px 60px rgba(0,0,0,0.3)';
-            
-            tempDiv.innerHTML = `
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <i class="fas fa-mosque" style="font-size: 60px; color: #c9a227;"></i>
-                    <h2 style="color: #c9a227; margin-top: 10px;">ဖိုးစောင့်တောင်မီးအိမ်</h2>
-                    <h3 style="color: #1e293b;">ထောက်ပို့လှူဒါန်းမှုမှတ်တမ်း</h3>
-                </div>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>လက်ခံသူ</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.org || '-'}</td></tr>
-                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>လှုပ်ရှားမှု</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.activity || '-'}</td></tr>
-                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>ဒေသ</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.region || '-'}</td></tr>
-                    <tr><td style="padding: 12px; border: 1px solid #e2e8f0;"><strong>ရက်စွဲ</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e2e8f0;">${expense.date || '-'}</td></tr>
-                </table>
-                
-                <div style="background: #fef3c7; padding: 20px; border-radius: 15px; text-align: center; margin: 20px 0;">
-                    <div style="color: #64748b;">လှူဒါန်းငွေစုစုပေါင်း</div>
-                    <div style="font-size: 36px; font-weight: bold; color: #c9a227;">${expense.amount.toLocaleString()} ဘတ်</div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 30px; color: #94a3b8;">
-                    ဤမှတ်တမ်းကို LFM အဖွဲ့မှ ထုတ်ပေးသည်
+        let html = '';
+        sortedYears.forEach(year => {
+            const y = years[year];
+            const net = y.income - y.expense;
+            html += `
+                <div class="report-section">
+                    <div class="report-header">
+                        <i class="fas fa-calendar-alt"></i> နှစ်တော်လှန် ${year}
+                    </div>
+                    <div class="report-row">
+                        <span>📥 စုစုပေါင်း အလှူငွေ</span>
+                        <span style="color: #facc15; font-weight: 600;">${y.income.toLocaleString()} ဘတ်</span>
+                    </div>
+                    <div class="report-row">
+                        <span>📤 စုစုပေါင်း ထောက်ပို့ငွေ</span>
+                        <span style="color: #ef4444; font-weight: 600;">${y.expense.toLocaleString()} ဘတ်</span>
+                    </div>
+                    <div class="report-row">
+                        <span>⚖️ လက်ကျန် ရန်ပုံငွေ</span>
+                        <span style="color: ${net >= 0 ? '#10b981' : '#ef4444'}; font-weight: 600;">${net.toLocaleString()} ဘတ်</span>
+                    </div>
+                    <div class="report-row">
+                        <span>📊 စုစုပေါင်း လှုပ်ရှားမှု</span>
+                        <span>${y.count} ကြိမ်</span>
+                    </div>
                 </div>
             `;
+        });
 
-            document.body.appendChild(tempDiv);
+        document.getElementById('yearlyReportContent').innerHTML = html;
+        document.getElementById('yearlyReportModal').style.display = 'flex';
+    }
 
-            html2canvas(tempDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `LFM_${expense.org}_${expense.date}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                
-                document.body.removeChild(tempDiv);
-                showToast('ပုံထုတ်ပြီးပါပြီ');
+    function showMonthlyReport() {
+        updateMonthSelect();
+        document.getElementById('monthlyReportModal').style.display = 'flex';
+    }
+
+    function updateMonthSelect() {
+        const months = new Set();
+        allTransactions.forEach(t => {
+            months.add(t.date.substring(0,7));
+        });
+        
+        const select = document.getElementById('monthYearSelect');
+        select.innerHTML = '<option value="">လကို ရွေးချယ်ပါ</option>';
+        Array.from(months).sort().reverse().forEach(m => {
+            select.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+    }
+
+    function loadMonthlyReport() {
+        const month = document.getElementById('monthYearSelect').value;
+        if (!month) return;
+
+        const monthTrans = allTransactions.filter(t => t.date.startsWith(month));
+        const income = monthTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expense = monthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const net = income - expense;
+
+        // Daily chart
+        const daily = {};
+        monthTrans.forEach(t => {
+            const day = t.date.split('-')[2];
+            if (!daily[day]) daily[day] = { income: 0, expense: 0 };
+            if (t.type === 'income') daily[day].income += t.amount;
+            else daily[day].expense += t.amount;
+        });
+
+        const days = Object.keys(daily).sort((a,b) => a-b);
+        const incomeDaily = days.map(d => daily[d].income);
+        const expenseDaily = days.map(d => daily[d].expense);
+
+        setTimeout(() => {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            if (window.monthlyChart) window.monthlyChart.destroy();
+            window.monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days.map(d => d + ' ရက်'),
+                    datasets: [
+                        { label: 'အလှူငွေ', data: incomeDaily, borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.1)', tension: 0.4 },
+                        { label: 'ထောက်ပို့ငွေ', data: expenseDaily, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#e2e8f0' } } }
+                }
             });
-        };
+        }, 100);
 
-        // Show Toast
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.background = type === 'success' ? 'var(--primary)' : 'var(--danger)';
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-        }
+        let html = `
+            <div class="report-section">
+                <div class="report-header">
+                    <i class="fas fa-calendar-check"></i> လတော်လှန် ${month}
+                </div>
+                <div class="report-total">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <small>📥 အလှူငွေ</small>
+                            <div style="color: #facc15; font-size: 22px;">${income.toLocaleString()} ဘတ်</div>
+                        </div>
+                        <div>
+                            <small>📤 ထောက်ပို့ငွေ</small>
+                            <div style="color: #ef4444; font-size: 22px;">${expense.toLocaleString()} ဘတ်</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <small>⚖️ လက်ကျန် ရန်ပုံငွေ</small>
+                        <div style="color: ${net >= 0 ? '#10b981' : '#ef4444'}; font-size: 24px;">${net.toLocaleString()} ဘတ်</div>
+                    </div>
+                </div>
+                <h4 style="margin: 15px 0 10px; color: var(--gold);">📋 အသေးစိတ် မှတ်တမ်း</h4>
+        `;
 
-        // Filter change listener
-        document.getElementById('filterMonth').addEventListener('change', renderDonorTable);
-    </script>
+        monthTrans.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+            const typeIcon = t.type === 'income' ? '📥' : '📤';
+            const typeColor = t.type === 'income' ? '#facc15' : '#ef4444';
+            const name = t.donorName || t.groupName || '';
+            html += `
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <span style="color: #94a3b8; font-size: 12px;">${t.date}</span>
+                        <div>${typeIcon} ${name} ${t.activity ? ' - ' + t.activity : ''}</div>
+                        <small style="color: #64748b;">${t.description || ''}</small>
+                    </div>
+                    <span style="color: ${typeColor}; font-weight: 600;">${t.amount.toLocaleString()} ဘတ်</span>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        document.getElementById('monthlyReportContent').innerHTML = html;
+    }
+
+    function showFullDonorList() {
+        let html = '';
+        Object.entries(donorData).sort((a,b) => b[1].total - a[1].total).forEach(([_, data]) => {
+            html += `
+                <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                    <span>${data.originalName}</span>
+                    <span style="color: #facc15;">${data.total.toLocaleString()} ဘတ်</span>
+                </div>
+            `;
+        });
+        document.getElementById('fullDonorList').innerHTML = html;
+        document.getElementById('fullDonorListModal').style.display = 'flex';
+    }
+
+    function getCurrentWeek() {
+        const now = new Date();
+        let d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+        let dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return "Week-" + weekNo;
+    }
+
+    function toggleSection(id) {
+        ['donorListSection', 'addIncomeSection', 'addExpenseSection'].forEach(s => {
+            const el = document.getElementById(s);
+            if (el) el.style.display = s === id ? 'block' : 'none';
+        });
+    }
+
+    function closeModal() {
+        document.getElementById('donorModal').style.display = 'none';
+        if (currentChart) currentChart.destroy();
+    }
+
+    function closeYearlyModal() {
+        document.getElementById('yearlyReportModal').style.display = 'none';
+        if (window.yearlyChart) window.yearlyChart.destroy();
+    }
+
+    function closeMonthlyModal() {
+        document.getElementById('monthlyReportModal').style.display = 'none';
+        if (window.monthlyChart) window.monthlyChart.destroy();
+    }
+
+    // PNG Export Functions
+    async function exportDonorPNG() {
+        const donorName = document.getElementById('mDonorName').textContent;
+        const total = document.getElementById('mTotal').textContent;
+        const count = document.getElementById('mCount').textContent;
+        const yearly = document.getElementById('mYearlyBreakdown').innerHTML;
+        const history = document.getElementById('mHistoryList').innerHTML;
+
+        const exportDiv = document.createElement('div');
+        exportDiv.style.background = '#151b2b';
+        exportDiv.style.padding = '30px';
+        exportDiv.style.width = '550px';
+        exportDiv.style.color = '#e2e8f0';
+        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+        exportDiv.style.borderRadius = '28px';
+        exportDiv.innerHTML = `
+            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">✨ ${donorName} ✨</h2>
+            <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
+                <div style="text-align: center;">
+                    <small>စုစုပေါင်း အလှူငွေ</small>
+                    <div style="font-size: 28px; color: #facc15;">${total}</div>
+                </div>
+                <div style="text-align: center;">
+                    <small>အကြိမ်ရေ</small>
+                    <div style="font-size: 28px; color: #facc15;">${count}</div>
+                </div>
+            </div>
+            <h4 style="color: #facc15; margin: 20px 0 10px;">📅 နှစ်အလိုက် လအလိုက် စာရင်း</h4>
+            ${yearly}
+            <h4 style="color: #facc15; margin: 20px 0 10px;">📝 အသေးစိတ် မှတ်တမ်း</h4>
+            ${history}
+            <div style="margin-top: 30px; text-align: center; color: #facc15; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                📅 ${new Date().toLocaleDateString('my-MM')} · နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့
+            </div>
+        `;
+
+        document.body.appendChild(exportDiv);
+        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+        const link = document.createElement('a');
+        link.download = `${donorName.replace(/\s/g, '_')}_report.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(exportDiv);
+    }
+
+    async function exportYearlyPNG() {
+        const content = document.getElementById('yearlyReportContent').innerHTML;
+        const exportDiv = document.createElement('div');
+        exportDiv.style.background = '#151b2b';
+        exportDiv.style.padding = '30px';
+        exportDiv.style.width = '550px';
+        exportDiv.style.color = '#e2e8f0';
+        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+        exportDiv.style.borderRadius = '28px';
+        exportDiv.innerHTML = `
+            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📊 နှစ်ချုပ် တော်လှန်ရေး စာရင်း</h2>
+            ${content}
+            <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
+        `;
+
+        document.body.appendChild(exportDiv);
+        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+        const link = document.createElement('a');
+        link.download = `yearly_report_${new Date().getFullYear()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(exportDiv);
+    }
+
+    async function exportMonthlyPNG() {
+        const month = document.getElementById('monthYearSelect').value;
+        const content = document.getElementById('monthlyReportContent').innerHTML;
+        const exportDiv = document.createElement('div');
+        exportDiv.style.background = '#151b2b';
+        exportDiv.style.padding = '30px';
+        exportDiv.style.width = '550px';
+        exportDiv.style.color = '#e2e8f0';
+        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+        exportDiv.style.borderRadius = '28px';
+        exportDiv.innerHTML = `
+            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📅 လချုပ် တော်လှန်ရေး စာရင်း - ${month}</h2>
+            ${content}
+            <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
+        `;
+
+        document.body.appendChild(exportDiv);
+        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+        const link = document.createElement('a');
+        link.download = `monthly_report_${month}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(exportDiv);
+    }
+
+    function exportToCSV() {
+        let csv = "အမျိုးအစား,ရက်စွဲ,အမည်/အဖွဲ့,လှုပ်ရှားမှု,ပမာဏ,အမျိုးအစား\n";
+        allTransactions.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+            const type = t.type === 'income' ? 'အလှူငွေ' : 'ထောက်ပို့ငွေ';
+            const name = t.donorName || t.groupName || '';
+            const activity = t.activity || '';
+            csv += `"${type}",${t.date},"${name}","${activity}",${t.amount},${t.category}\n`;
+        });
+        
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tawhlanyay_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        alert("✅ CSV ဖိုင် ထုတ်ပြီးပါပြီ");
+    }
+
+    function backupData() {
+        Promise.all([
+            db.ref('weekly_donations').once('value'),
+            db.ref('expenses').once('value')
+        ]).then(([donations, expenses]) => {
+            const backup = {
+                donations: donations.val(),
+                expenses: expenses.val(),
+                date: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tawhlanyay_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            alert("✅ Backup လုပ်ပြီးပါပြီ");
+        });
+    }
+
+    // Set today's date in date inputs
+    document.getElementById('inDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exDate').value = new Date().toISOString().split('T')[0];
+
+    // Start the app
+    fetchData();
+</script>
 </body>
 </html>
