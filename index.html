@@ -7,6 +7,7 @@
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <!-- Libraries -->
@@ -38,7 +39,82 @@
             color: var(--text);
             font-family: 'Pyidaungsu', 'Myanmar3', 'Noto Sans Myanmar', system-ui, sans-serif;
             line-height: 1.6;
-            padding-bottom: 80px;
+            min-height: 100vh;
+        }
+
+        /* Login Page */
+        #loginPage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0f1c, #151b2b);
+        }
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: var(--card);
+            border-radius: 30px;
+            padding: 40px 30px;
+            border: 1px solid rgba(250,204,21,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h1 {
+            color: var(--gold);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .login-header .subtitle {
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .login-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: #1e2937;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #facc15, #f97316);
+            color: #111;
+            font-weight: bold;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(250,204,21,0.3);
+        }
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* Main App */
+        #mainApp {
+            display: none;
         }
 
         .container {
@@ -55,6 +131,23 @@
             background: linear-gradient(135deg, #151b2b, #1e2937);
             border-radius: 30px;
             border: 1px solid rgba(250,204,21,0.2);
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .logout-btn:hover {
+            background: var(--gold);
+            color: #111;
         }
         .header h1 {
             color: var(--gold);
@@ -69,10 +162,19 @@
             font-size: 15px;
             margin: 8px 0 4px;
         }
-        .header .slogan {
+        .motivation-text {
             color: #94a3b8;
-            font-size: 13px;
-            letter-spacing: 1px;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(250,204,21,0.1);
+            border-radius: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
         }
 
         /* Balance Cards */
@@ -107,10 +209,6 @@
             font-size: 32px;
             margin: 8px 0 0;
             font-weight: 700;
-        }
-        .balance-card small {
-            font-size: 13px;
-            opacity: 0.9;
         }
 
         /* Glass Card */
@@ -150,8 +248,6 @@
             display: block;
             margin-bottom: 6px;
         }
-        .menu-btn .income-icon { color: #facc15; }
-        .menu-btn .expense-icon { color: #ef4444; }
 
         /* Stats Grid */
         .stats-grid {
@@ -189,7 +285,7 @@
             transform: translateX(5px);
         }
 
-        /* Transaction Items */
+        /* Transaction Items with Actions */
         .transaction-item {
             padding: 12px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -198,6 +294,26 @@
             align-items: center;
             font-size: 14px;
         }
+        .transaction-info {
+            flex: 1;
+        }
+        .transaction-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        .transaction-actions i {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+        .transaction-actions i:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        .fa-edit { color: #facc15; }
+        .fa-trash { color: #ef4444; }
         .transaction-income { color: #facc15; font-weight: 600; }
         .transaction-expense { color: #ef4444; font-weight: 600; }
 
@@ -224,7 +340,7 @@
         }
 
         /* Form Elements */
-        .search-box, select, input[type="text"], input[type="number"], input[type="date"] {
+        .search-box, select, input[type="text"], input[type="number"], input[type="date"], textarea {
             width: 100%;
             padding: 14px 16px;
             border-radius: 16px;
@@ -235,7 +351,11 @@
             margin-bottom: 12px;
             font-family: inherit;
         }
-        .search-box:focus, select:focus, input:focus {
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .search-box:focus, select:focus, input:focus, textarea:focus {
             outline: none;
             border-color: var(--gold);
         }
@@ -269,6 +389,10 @@
         .btn-outline:hover {
             background: var(--gold);
             color: #111;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
         }
 
         .close-btn {
@@ -312,23 +436,12 @@
             color: var(--gold);
             font-size: 18px;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .report-row {
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
             border-bottom: 1px dashed rgba(255,255,255,0.1);
-        }
-        .report-total {
-            font-size: 20px;
-            text-align: center;
-            padding: 15px;
-            background: rgba(16,185,129,0.1);
-            border-radius: 16px;
-            margin: 15px 0;
         }
 
         /* Leaderboard */
@@ -341,889 +454,1025 @@
             border-radius: 16px;
             margin-bottom: 8px;
         }
-        .rank-1 { background: linear-gradient(135deg, #facc15, #f97316); color: #111; }
-        .rank-2 { background: #94a3b8; color: #111; }
-        .rank-3 { background: #64748b; color: white; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
-        <div class="subtitle">နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့</div>
-        <div class="slogan">အောင်ပွဲချိန်အထိ အတူတကွ ✊</div>
-    </div>
-
-    <!-- Balance Cards -->
-    <div class="balance-grid">
-        <div class="balance-card income">
-            <i class="fas fa-hand-holding-heart"></i>
-            <small>စုစုပေါင်း အလှူငွေ</small>
-            <h2 id="totalIncome">0 ဘတ်</h2>
-        </div>
-        <div class="balance-card expense">
-            <i class="fas fa-fist-raised"></i>
-            <small>စုစုပေါင်း ထောက်ပို့ငွေ</small>
-            <h2 id="totalExpense">0 ဘတ်</h2>
-        </div>
-        <div class="balance-card net">
-            <i class="fas fa-balance-scale"></i>
-            <small>လက်ရှိ ထောက်ပို့ရန်ပုံငွေ</small>
-            <h2 id="netBalance">0 ဘတ်</h2>
-        </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <i class="fas fa-users" style="color: var(--gold);"></i>
-            <div class="stat-value" id="totalDonors">0</div>
-            <small>တော်လှန်ရေး မိတ်ဆွေ</small>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-calendar-check" style="color: var(--gold);"></i>
-            <div class="stat-value" id="totalTransactions">0</div>
-            <small>စုစုပေါင်း လှုပ်ရှားမှု</small>
-        </div>
-    </div>
-
-    <!-- Menu -->
-    <div class="menu-grid">
-        <div class="menu-btn" onclick="toggleSection('donorListSection')">
-            <i class="fas fa-users" style="color: var(--gold);"></i>
-            တော်လှန်ရေး မိတ်ဆွေ
-        </div>
-        <div class="menu-btn" onclick="toggleSection('addIncomeSection')">
-            <i class="fas fa-hand-holding-heart income-icon"></i>
-            အလှူငွေထည့်ရန်
-        </div>
-        <div class="menu-btn" onclick="toggleSection('addExpenseSection')">
-            <i class="fas fa-fist-raised expense-icon"></i>
-            ထောက်ပို့ရန်
-        </div>
-        <div class="menu-btn" onclick="showYearlyReport()">
-            <i class="fas fa-chart-line" style="color: var(--gold);"></i>
-            နှစ်ချုပ် စာရင်း
-        </div>
-        <div class="menu-btn" onclick="showMonthlyReport()">
-            <i class="fas fa-calendar-alt" style="color: var(--gold);"></i>
-            လချုပ် စာရင်း
-        </div>
-        <div class="menu-btn" onclick="showFullDonorList()">
-            <i class="fas fa-list" style="color: var(--gold);"></i>
-            မိတ်ဆွေစာရင်း
-        </div>
-        <div class="menu-btn" onclick="exportToCSV()">
-            <i class="fas fa-file-csv" style="color: var(--gold);"></i>
-            CSV ထုတ်ရန်
-        </div>
-        <div class="menu-btn" onclick="backupData()">
-            <i class="fas fa-database" style="color: var(--gold);"></i>
-            Backup
-        </div>
-    </div>
-
-    <!-- Leaderboard -->
-    <div class="glass-card">
-        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
-            <i class="fas fa-crown" style="color: var(--gold);"></i>
-            ထိပ်တန်း တော်လှန်ရေး မိတ်ဆွေများ
-        </h3>
-        <div id="leaderboardContent"></div>
-    </div>
-
-    <!-- Donor List Section -->
-    <div id="donorListSection" style="display:none;">
-        <div class="glass-card">
-            <h3 style="margin-bottom: 15px;">တော်လှန်ရေး မိတ်ဆွေစာရင်း</h3>
-            <input type="text" id="donorSearch" class="search-box" placeholder="အမည်ဖြင့် ရှာရန်..." onkeyup="renderDonors()">
-            <div id="allDonorsList" style="max-height: 400px; overflow-y: auto;"></div>
-        </div>
-    </div>
-
-    <!-- Add Income (အလှူငွေထည့်ရန်) -->
-    <div id="addIncomeSection" style="display:none;">
-        <div class="glass-card">
-            <h3 style="color: #facc15; margin-bottom: 15px;">
-                <i class="fas fa-hand-holding-heart"></i> အလှူငွေထည့်ရန်
-            </h3>
-            <input type="text" id="inName" class="search-box" placeholder="အလှူရှင် အမည်">
-            <select id="incomeCategory" class="search-box">
-                <option value="general">📦 အထွေထွေ အလှူငွေ</option>
-                <option value="cdm">📢 အာဏာဖီဆန်ရေး ရန်ပုံငွေ</option>
-                <option value="military">⚔️ စစ်ရေး ထောက်ပို့ရန်ပုံငွေ</option>
-                <option value="medical">💊 ကျန်းမာရေး ရန်ပုံငွေ</option>
-                <option value="food">🍚 ရိက္ခာ ရန်ပုံငွေ</option>
-            </select>
-            <input type="number" id="inAmount" class="search-box" placeholder="ပမာဏ (ဘတ်)">
-            <input type="date" id="inDate" class="search-box" value="">
-            <button class="btn-full btn-income" onclick="saveIncome()">
-                <i class="fas fa-save"></i> အလှူငွေ သိမ်းဆည်းမည်
-            </button>
-        </div>
-    </div>
-
-    <!-- Add Expense (ထောက်ပို့ရန်) -->
-    <div id="addExpenseSection" style="display:none;">
-        <div class="glass-card">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">
-                <i class="fas fa-fist-raised"></i> ထောက်ပို့ရန်
-            </h3>
-            <input type="text" id="exGroupName" class="search-box" placeholder="လက်ခံသည့် အဖွဲ့အမည်">
-            <input type="text" id="exActivity" class="search-box" placeholder="လှုပ်ရှားမှု အမျိုးအစား (ဥပမာ - ရှေ့တန်းထောက်ပို့၊ စစ်ရေး၊ ရိက္ခာ)">
-            <select id="expenseCategory" class="search-box">
-                <option value="food">🍚 ရိက္ခာ ထောက်ပို့ခြင်း</option>
-                <option value="military">⚔️ စစ်ရေး ထောက်ပို့ခြင်း</option>
-                <option value="medical">💊 ကျန်းမာရေး ထောက်ပို့ခြင်း</option>
-                <option value="transport">🚚 သယ်ယူပို့ဆောင်ရေး</option>
-                <option value="communication">📡 ဆက်သွယ်ရေး</option>
-                <option value="other">📦 အခြား ထောက်ပို့ခြင်း</option>
-            </select>
-            <input type="number" id="exAmount" class="search-box" placeholder="ထောက်ပို့ငွေ ပမာဏ (ဘတ်)">
-            <textarea id="exDescription" class="search-box" rows="2" placeholder="အသေးစိတ် မှတ်ချက် (ဥပမာ - ရှေ့တန်းသို့ ရိက္ခာ ၅၀ စုံ)"></textarea>
-            <input type="date" id="exDate" class="search-box" value="">
-            <button class="btn-full btn-expense" onclick="saveExpense()">
-                <i class="fas fa-fist-raised"></i> ထောက်ပို့ငွေ သိမ်းဆည်းမည်
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Donor Detail Modal -->
-<div id="donorModal" class="modal">
-    <span class="close-btn" onclick="closeModal()">×</span>
-    <div class="modal-content">
-        <h2 id="mDonorName" style="color: var(--gold); text-align: center; margin-bottom: 20px;"></h2>
-        
-        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
-            <div style="text-align: center;">
-                <small>စုစုပေါင်း အလှူငွေ</small>
-                <div id="mTotal" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
+    <!-- Login Page -->
+    <div id="loginPage">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
+                <div class="subtitle">နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့</div>
+                <p style="color: #94a3b8; margin-top: 10px;">အောင်ပွဲချိန်အထိ အတူတကွ ✊</p>
             </div>
-            <div style="text-align: center;">
-                <small>အကြိမ်ရေ</small>
-                <div id="mCount" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
+            <input type="text" id="username" class="login-input" placeholder="အသုံးပြုသူအမည်">
+            <input type="password" id="password" class="login-input" placeholder="စကားဝှက်">
+            <button class="login-btn" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> ဝင်ရောက်မည်
+            </button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp">
+        <div class="container">
+            <!-- Header with Logout -->
+            <div class="header">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ထွက်မည်
+                </button>
+                <h1>✨ ဖိုးစောင့်တောင်မီးအိမ်</h1>
+                <div class="subtitle">နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့</div>
+                <div id="motivationMessage" class="motivation-text"></div>
+            </div>
+
+            <!-- Balance Cards -->
+            <div class="balance-grid">
+                <div class="balance-card income">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <small>စုစုပေါင်း အလှူငွေ</small>
+                    <h2 id="totalIncome">0 ဘတ်</h2>
+                </div>
+                <div class="balance-card expense">
+                    <i class="fas fa-fist-raised"></i>
+                    <small>စုစုပေါင်း ထောက်ပို့ငွေ</small>
+                    <h2 id="totalExpense">0 ဘတ်</h2>
+                </div>
+                <div class="balance-card net">
+                    <i class="fas fa-balance-scale"></i>
+                    <small>လက်ရှိ ရန်ပုံငွေ</small>
+                    <h2 id="netBalance">0 ဘတ်</h2>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users" style="color: var(--gold);"></i>
+                    <div class="stat-value" id="totalDonors">0</div>
+                    <small>တော်လှန်ရေး မိတ်ဆွေ</small>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check" style="color: var(--gold);"></i>
+                    <div class="stat-value" id="totalTransactions">0</div>
+                    <small>စုစုပေါင်း လှုပ်ရှားမှု</small>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <div class="menu-grid">
+                <div class="menu-btn" onclick="toggleSection('donorListSection')">
+                    <i class="fas fa-users" style="color: var(--gold);"></i>
+                    မိတ်ဆွေများ
+                </div>
+                <div class="menu-btn" onclick="toggleSection('addIncomeSection')">
+                    <i class="fas fa-hand-holding-heart" style="color: #facc15;"></i>
+                    အလှူငွေထည့်
+                </div>
+                <div class="menu-btn" onclick="toggleSection('addExpenseSection')">
+                    <i class="fas fa-fist-raised" style="color: #ef4444;"></i>
+                    ထောက်ပို့ရန်
+                </div>
+                <div class="menu-btn" onclick="showYearlyReport()">
+                    <i class="fas fa-chart-line" style="color: var(--gold);"></i>
+                    နှစ်ချုပ်
+                </div>
+                <div class="menu-btn" onclick="showMonthlyReport()">
+                    <i class="fas fa-calendar-alt" style="color: var(--gold);"></i>
+                    လချုပ်
+                </div>
+                <div class="menu-btn" onclick="showFullDonorList()">
+                    <i class="fas fa-list" style="color: var(--gold);"></i>
+                    စာရင်း
+                </div>
+                <div class="menu-btn" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv" style="color: var(--gold);"></i>
+                    CSV
+                </div>
+                <div class="menu-btn" onclick="backupData()">
+                    <i class="fas fa-database" style="color: var(--gold);"></i>
+                    Backup
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="glass-card">
+                <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                    <i class="fas fa-crown" style="color: var(--gold);"></i>
+                    ထိပ်တန်း မိတ်ဆွေများ
+                </h3>
+                <div id="leaderboardContent"></div>
+            </div>
+
+            <!-- Donor List Section -->
+            <div id="donorListSection" style="display:none;">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 15px;">မိတ်ဆွေစာရင်း</h3>
+                    <input type="text" id="donorSearch" class="search-box" placeholder="အမည်ဖြင့် ရှာရန်..." onkeyup="renderDonors()">
+                    <div id="allDonorsList" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- Add Income -->
+            <div id="addIncomeSection" style="display:none;">
+                <div class="glass-card">
+                    <h3 style="color: #facc15; margin-bottom: 15px;">
+                        <i class="fas fa-hand-holding-heart"></i> အလှူငွေထည့်ရန်
+                    </h3>
+                    <input type="text" id="inName" class="search-box" placeholder="အလှူရှင် အမည်">
+                    <select id="incomeCategory" class="search-box">
+                        <option value="general">📦 အထွေထွေ အလှူငွေ</option>
+                        <option value="cdm">📢 အာဏာဖီဆန်ရေး</option>
+                        <option value="military">⚔️ စစ်ရေး ရန်ပုံငွေ</option>
+                        <option value="medical">💊 ကျန်းမာရေး</option>
+                        <option value="food">🍚 ရိက္ခာ</option>
+                    </select>
+                    <input type="number" id="inAmount" class="search-box" placeholder="ပမာဏ (ဘတ်)">
+                    <input type="date" id="inDate" class="search-box">
+                    <button class="btn-full btn-income" onclick="saveIncome()">
+                        <i class="fas fa-save"></i> သိမ်းမည်
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Expense -->
+            <div id="addExpenseSection" style="display:none;">
+                <div class="glass-card">
+                    <h3 style="color: #ef4444; margin-bottom: 15px;">
+                        <i class="fas fa-fist-raised"></i> ထောက်ပို့ရန်
+                    </h3>
+                    <input type="text" id="exGroupName" class="search-box" placeholder="လက်ခံသည့် အဖွဲ့အမည်">
+                    <input type="text" id="exActivity" class="search-box" placeholder="လှုပ်ရှားမှု အမျိုးအစား">
+                    <select id="expenseCategory" class="search-box">
+                        <option value="food">🍚 ရိက္ခာ ထောက်ပို့</option>
+                        <option value="military">⚔️ စစ်ရေး ထောက်ပို့</option>
+                        <option value="medical">💊 ကျန်းမာရေး ထောက်ပို့</option>
+                        <option value="transport">🚚 သယ်ယူပို့ဆောင်ရေး</option>
+                        <option value="other">📦 အခြား ထောက်ပို့</option>
+                    </select>
+                    <input type="number" id="exAmount" class="search-box" placeholder="ပမာဏ (ဘတ်)">
+                    <textarea id="exDescription" class="search-box" placeholder="အသေးစိတ် မှတ်ချက်"></textarea>
+                    <input type="date" id="exDate" class="search-box">
+                    <button class="btn-full btn-expense" onclick="saveExpense()">
+                        <i class="fas fa-fist-raised"></i> သိမ်းမည်
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="chart-container">
-            <canvas id="donorChart"></canvas>
+    <!-- Edit Transaction Modal -->
+    <div id="editModal" class="modal">
+        <span class="close-btn" onclick="closeEditModal()">×</span>
+        <div class="modal-content">
+            <h3 id="editTitle" style="color: var(--gold); margin-bottom: 20px;"></h3>
+            <div id="editForm"></div>
         </div>
-
-        <h4 style="color: var(--gold); margin: 20px 0 10px;">
-            <i class="fas fa-calendar-alt"></i> နှစ်အလိုက် လအလိုက် စာရင်း
-        </h4>
-        <div id="mYearlyBreakdown" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;"></div>
-
-        <h4 style="color: var(--gold); margin: 20px 0 10px;">
-            <i class="fas fa-history"></i> အသေးစိတ် မှတ်တမ်း
-        </h4>
-        <div id="mHistoryList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
-
-        <button class="btn-full btn-outline" onclick="exportDonorPNG()">
-            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
-        </button>
     </div>
-</div>
 
-<!-- Yearly Report Modal -->
-<div id="yearlyReportModal" class="modal">
-    <span class="close-btn" onclick="closeYearlyModal()">×</span>
-    <div class="modal-content">
-        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
-            <i class="fas fa-chart-line"></i> နှစ်ချုပ် တော်လှန်ရေး စာရင်း
-        </h2>
-        <div class="chart-container">
-            <canvas id="yearlyChart"></canvas>
-        </div>
-        <div id="yearlyReportContent"></div>
-        <button class="btn-full btn-outline" onclick="exportYearlyPNG()">
-            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
-        </button>
-    </div>
-</div>
-
-<!-- Monthly Report Modal -->
-<div id="monthlyReportModal" class="modal">
-    <span class="close-btn" onclick="closeMonthlyModal()">×</span>
-    <div class="modal-content">
-        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
-            <i class="fas fa-calendar-alt"></i> လချုပ် တော်လှန်ရေး စာရင်း
-        </h2>
-        <select id="monthYearSelect" class="search-box" onchange="loadMonthlyReport()">
-            <option value="">လကို ရွေးချယ်ပါ</option>
-        </select>
-        <div class="chart-container">
-            <canvas id="monthlyChart"></canvas>
-        </div>
-        <div id="monthlyReportContent"></div>
-        <button class="btn-full btn-outline" onclick="exportMonthlyPNG()">
-            <i class="fas fa-image"></i> PNG ပုံထုတ်မည်
-        </button>
-    </div>
-</div>
-
-<!-- Full Donor List Modal -->
-<div id="fullDonorListModal" class="modal" style="display:none;">
-    <span class="close-btn" onclick="this.parentElement.style.display='none'">×</span>
-    <div class="modal-content">
-        <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
-            <i class="fas fa-users"></i> တော်လှန်ရေး မိတ်ဆွေများ စာရင်း
-        </h2>
-        <div id="fullDonorList" style="max-height: 500px; overflow-y: auto;"></div>
-    </div>
-</div>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
-        authDomain: "lamp-88a25.firebaseapp.com",
-        databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "lamp-88a25",
-        storageBucket: "lamp-88a25.firebasestorage.app",
-        messagingSenderId: "151980650338",
-        appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Global variables
-    let donorData = {};
-    let allTransactions = [];
-    let currentChart = null;
-
-    // Helper Functions
-    function cleanName(n) {
-        return n ? n.replace(/^(ကို|ဦး|မောင်|မ|Sayadaw|Daw|U|Ko|Maung)\s?/gi, "").trim() : "";
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('my-MM', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    }
-
-    // Fetch Data
-    function fetchData() {
-        // Fetch Income (donations)
-        db.ref('weekly_donations').on('value', snap => {
-            donorData = {};
-            allTransactions = [];
-            let totalIncome = 0;
-
-            snap.forEach(week => {
-                week.forEach(d => {
-                    const val = d.val();
-                    const amt = parseFloat(val.amount || 0);
-                    const cName = cleanName(val.donorName);
-                    totalIncome += amt;
-
-                    const trans = {
-                        type: 'income',
-                        id: d.key,
-                        week: week.key,
-                        donorName: val.donorName,
-                        amount: amt,
-                        category: val.category || 'general',
-                        date: val.date || new Date().toISOString().split('T')[0],
-                        description: val.donorName
-                    };
-                    allTransactions.push(trans);
-
-                    if (!donorData[cName]) {
-                        donorData[cName] = {
-                            originalName: val.donorName,
-                            total: 0,
-                            count: 0,
-                            transactions: []
-                        };
-                    }
-                    donorData[cName].total += amt;
-                    donorData[cName].count++;
-                    donorData[cName].transactions.push(trans);
-                });
-            });
-
-            // Fetch Expenses (support)
-            db.ref('expenses').once('value', expSnap => {
-                expSnap.forEach(item => {
-                    const val = item.val();
-                    const exp = {
-                        type: 'expense',
-                        id: item.key,
-                        groupName: val.groupName || '',
-                        activity: val.activity || '',
-                        amount: parseFloat(val.amount || 0),
-                        category: val.category || 'other',
-                        date: val.date || new Date().toISOString().split('T')[0],
-                        description: val.description || ''
-                    };
-                    allTransactions.push(exp);
-                });
-                updateUI();
-            });
-        });
-    }
-
-    function updateUI() {
-        const totalIncome = allTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const totalExpense = allTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-        const netBalance = totalIncome - totalExpense;
-
-        document.getElementById('totalIncome').textContent = totalIncome.toLocaleString() + " ဘတ်";
-        document.getElementById('totalExpense').textContent = totalExpense.toLocaleString() + " ဘတ်";
-        document.getElementById('netBalance').textContent = netBalance.toLocaleString() + " ဘတ်";
-        document.getElementById('totalDonors').textContent = Object.keys(donorData).length;
-        document.getElementById('totalTransactions').textContent = allTransactions.length;
-
-        renderLeaderboard();
-        renderDonors();
-        updateMonthSelect();
-    }
-
-    function renderLeaderboard() {
-        const sorted = Object.entries(donorData).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
-        let html = '';
-        sorted.forEach(([_, data], i) => {
-            const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : 'rank-3';
-            html += `
-                <div class="leaderboard-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
-                    <span class="badge" style="background: ${i===0?'#facc15':i===1?'#94a3b8':'#64748b'}; color: #111; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">${i+1}</span>
-                    <span style="flex: 1;">${data.originalName}</span>
-                    <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
-                </div>
-            `;
-        });
-        document.getElementById('leaderboardContent').innerHTML = html;
-    }
-
-    function renderDonors() {
-        const term = document.getElementById('donorSearch')?.value.toLowerCase() || '';
-        const filtered = Object.entries(donorData).filter(([_, d]) => d.originalName.toLowerCase().includes(term))
-            .sort((a, b) => b[1].total - a[1].total);
-        
-        let html = '';
-        filtered.forEach(([_, data]) => {
-            html += `
-                <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
-                    <span>${data.originalName}</span>
-                    <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
-                </div>
-            `;
-        });
-        document.getElementById('allDonorsList').innerHTML = html || '<p style="text-align: center; padding: 20px;">မိတ်ဆွေ မတွေ့ရှိပါ</p>';
-    }
-
-    function openDonorModal(donorName) {
-        const data = Object.values(donorData).find(d => d.originalName === donorName);
-        if (!data) return;
-
-        document.getElementById('mDonorName').textContent = data.originalName;
-        document.getElementById('mTotal').textContent = data.total.toLocaleString() + " ဘတ်";
-        document.getElementById('mCount').textContent = data.count;
-
-        // Yearly breakdown
-        const yearly = {};
-        const monthlyTotals = {};
-        data.transactions.forEach(t => {
-            const year = t.date.split('-')[0];
-            const month = t.date.substring(0,7);
+    <!-- Donor Detail Modal -->
+    <div id="donorModal" class="modal">
+        <span class="close-btn" onclick="closeModal()">×</span>
+        <div class="modal-content">
+            <h2 id="mDonorName" style="color: var(--gold); text-align: center; margin-bottom: 20px;"></h2>
             
-            if (!yearly[year]) yearly[year] = { total: 0, months: {} };
-            yearly[year].total += t.amount;
-            if (!yearly[year].months[month]) yearly[year].months[month] = 0;
-            yearly[year].months[month] += t.amount;
-            
-            monthlyTotals[month] = (monthlyTotals[month] || 0) + t.amount;
-        });
-
-        let yearlyHTML = '';
-        Object.keys(yearly).sort((a,b) => b-a).forEach(year => {
-            let monthHTML = '';
-            Object.keys(yearly[year].months).sort().reverse().forEach(month => {
-                monthHTML += `
-                    <div style="display: flex; justify-content: space-between; padding: 6px 0 6px 15px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-                        <span>${month}</span>
-                        <span style="color: #facc15;">${yearly[year].months[month].toLocaleString()} ဘတ်</span>
-                    </div>
-                `;
-            });
-            yearlyHTML += `
-                <details style="margin-bottom: 8px;">
-                    <summary style="padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;">
-                        ${year} ခုနှစ် (စုစုပေါင်း ${yearly[year].total.toLocaleString()} ဘတ်)
-                    </summary>
-                    ${monthHTML}
-                </details>
-            `;
-        });
-        document.getElementById('mYearlyBreakdown').innerHTML = yearlyHTML;
-
-        // History
-        const historyHTML = data.transactions.sort((a,b) => new Date(b.date) - new Date(a.date))
-            .map(t => `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <span>${t.date}</span>
-                    <span style="color: #facc15;">${t.amount.toLocaleString()} ဘတ်</span>
-                </div>
-            `).join('');
-        document.getElementById('mHistoryList').innerHTML = historyHTML;
-
-        // Chart
-        const sortedMonths = Object.keys(monthlyTotals).sort();
-        if (currentChart) currentChart.destroy();
-        
-        const ctx = document.getElementById('donorChart').getContext('2d');
-        currentChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: sortedMonths,
-                datasets: [{
-                    label: 'လစဉ် အလှူငွေ',
-                    data: sortedMonths.map(m => monthlyTotals[m]),
-                    backgroundColor: '#facc15',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#94a3b8' }
-                    },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#94a3b8', maxRotation: 45 }
-                    }
-                }
-            }
-        });
-
-        document.getElementById('donorModal').style.display = 'flex';
-    }
-
-    function saveIncome() {
-        const name = document.getElementById('inName').value.trim();
-        const amount = parseFloat(document.getElementById('inAmount').value);
-        const category = document.getElementById('incomeCategory').value;
-        const date = document.getElementById('inDate').value;
-
-        if (!name || !amount || amount < 10) {
-            alert("❌ အမည်နှင့် ပမာဏ (အနည်းဆုံး ၁၀ဘတ်) ဖြည့်ပါ");
-            return;
-        }
-
-        const week = getCurrentWeek();
-        db.ref(`weekly_donations/${week}`).push({
-            donorName: name,
-            amount: amount,
-            category: category,
-            date: date || new Date().toISOString().split('T')[0]
-        }).then(() => {
-            confetti({ particleCount: 150, spread: 70, colors: ['#facc15', '#f97316'] });
-            alert("✅ အလှူငွေ သိမ်းဆည်းပြီးပါပြီ။ ကျေးဇူးတင်ပါသည်။");
-            document.getElementById('inName').value = '';
-            document.getElementById('inAmount').value = '';
-            document.getElementById('inDate').value = '';
-            toggleSection('');
-        });
-    }
-
-    function saveExpense() {
-        const groupName = document.getElementById('exGroupName').value.trim();
-        const activity = document.getElementById('exActivity').value.trim();
-        const amount = parseFloat(document.getElementById('exAmount').value);
-        const category = document.getElementById('expenseCategory').value;
-        const description = document.getElementById('exDescription').value.trim();
-        const date = document.getElementById('exDate').value;
-
-        if (!groupName || !amount || amount < 10) {
-            alert("❌ အဖွဲ့အမည်နှင့် ပမာဏ ဖြည့်ပါ");
-            return;
-        }
-
-        db.ref('expenses').push({
-            groupName: groupName,
-            activity: activity,
-            amount: amount,
-            category: category,
-            description: description,
-            date: date || new Date().toISOString().split('T')[0]
-        }).then(() => {
-            confetti({ particleCount: 150, spread: 70, colors: ['#ef4444', '#b91c1c'] });
-            alert("✅ ထောက်ပို့ငွေ သိမ်းဆည်းပြီးပါပြီ။ အောင်ပွဲဆီသို့ အတူတကွ။");
-            document.getElementById('exGroupName').value = '';
-            document.getElementById('exActivity').value = '';
-            document.getElementById('exAmount').value = '';
-            document.getElementById('exDescription').value = '';
-            document.getElementById('exDate').value = '';
-            toggleSection('');
-        });
-    }
-
-    function showYearlyReport() {
-        const years = {};
-        allTransactions.forEach(t => {
-            const year = t.date.split('-')[0];
-            if (!years[year]) years[year] = { income: 0, expense: 0, count: 0 };
-            if (t.type === 'income') years[year].income += t.amount;
-            else years[year].expense += t.amount;
-            years[year].count++;
-        });
-
-        // Chart data
-        const sortedYears = Object.keys(years).sort((a,b) => b-a);
-        const incomeData = sortedYears.map(y => years[y].income);
-        const expenseData = sortedYears.map(y => years[y].expense);
-
-        setTimeout(() => {
-            const ctx = document.getElementById('yearlyChart').getContext('2d');
-            if (window.yearlyChart) window.yearlyChart.destroy();
-            window.yearlyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: sortedYears,
-                    datasets: [
-                        { label: 'အလှူငွေ', data: incomeData, backgroundColor: '#facc15', borderRadius: 6 },
-                        { label: 'ထောက်ပို့ငွေ', data: expenseData, backgroundColor: '#ef4444', borderRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { labels: { color: '#e2e8f0' } } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' } } }
-                }
-            });
-        }, 100);
-
-        let html = '';
-        sortedYears.forEach(year => {
-            const y = years[year];
-            const net = y.income - y.expense;
-            html += `
-                <div class="report-section">
-                    <div class="report-header">
-                        <i class="fas fa-calendar-alt"></i> နှစ်တော်လှန် ${year}
-                    </div>
-                    <div class="report-row">
-                        <span>📥 စုစုပေါင်း အလှူငွေ</span>
-                        <span style="color: #facc15; font-weight: 600;">${y.income.toLocaleString()} ဘတ်</span>
-                    </div>
-                    <div class="report-row">
-                        <span>📤 စုစုပေါင်း ထောက်ပို့ငွေ</span>
-                        <span style="color: #ef4444; font-weight: 600;">${y.expense.toLocaleString()} ဘတ်</span>
-                    </div>
-                    <div class="report-row">
-                        <span>⚖️ လက်ကျန် ရန်ပုံငွေ</span>
-                        <span style="color: ${net >= 0 ? '#10b981' : '#ef4444'}; font-weight: 600;">${net.toLocaleString()} ဘတ်</span>
-                    </div>
-                    <div class="report-row">
-                        <span>📊 စုစုပေါင်း လှုပ်ရှားမှု</span>
-                        <span>${y.count} ကြိမ်</span>
-                    </div>
-                </div>
-            `;
-        });
-
-        document.getElementById('yearlyReportContent').innerHTML = html;
-        document.getElementById('yearlyReportModal').style.display = 'flex';
-    }
-
-    function showMonthlyReport() {
-        updateMonthSelect();
-        document.getElementById('monthlyReportModal').style.display = 'flex';
-    }
-
-    function updateMonthSelect() {
-        const months = new Set();
-        allTransactions.forEach(t => {
-            months.add(t.date.substring(0,7));
-        });
-        
-        const select = document.getElementById('monthYearSelect');
-        select.innerHTML = '<option value="">လကို ရွေးချယ်ပါ</option>';
-        Array.from(months).sort().reverse().forEach(m => {
-            select.innerHTML += `<option value="${m}">${m}</option>`;
-        });
-    }
-
-    function loadMonthlyReport() {
-        const month = document.getElementById('monthYearSelect').value;
-        if (!month) return;
-
-        const monthTrans = allTransactions.filter(t => t.date.startsWith(month));
-        const income = monthTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const expense = monthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-        const net = income - expense;
-
-        // Daily chart
-        const daily = {};
-        monthTrans.forEach(t => {
-            const day = t.date.split('-')[2];
-            if (!daily[day]) daily[day] = { income: 0, expense: 0 };
-            if (t.type === 'income') daily[day].income += t.amount;
-            else daily[day].expense += t.amount;
-        });
-
-        const days = Object.keys(daily).sort((a,b) => a-b);
-        const incomeDaily = days.map(d => daily[d].income);
-        const expenseDaily = days.map(d => daily[d].expense);
-
-        setTimeout(() => {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            if (window.monthlyChart) window.monthlyChart.destroy();
-            window.monthlyChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: days.map(d => d + ' ရက်'),
-                    datasets: [
-                        { label: 'အလှူငွေ', data: incomeDaily, borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.1)', tension: 0.4 },
-                        { label: 'ထောက်ပို့ငွေ', data: expenseDaily, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { labels: { color: '#e2e8f0' } } }
-                }
-            });
-        }, 100);
-
-        let html = `
-            <div class="report-section">
-                <div class="report-header">
-                    <i class="fas fa-calendar-check"></i> လတော်လှန် ${month}
-                </div>
-                <div class="report-total">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <small>📥 အလှူငွေ</small>
-                            <div style="color: #facc15; font-size: 22px;">${income.toLocaleString()} ဘတ်</div>
-                        </div>
-                        <div>
-                            <small>📤 ထောက်ပို့ငွေ</small>
-                            <div style="color: #ef4444; font-size: 22px;">${expense.toLocaleString()} ဘတ်</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <small>⚖️ လက်ကျန် ရန်ပုံငွေ</small>
-                        <div style="color: ${net >= 0 ? '#10b981' : '#ef4444'}; font-size: 24px;">${net.toLocaleString()} ဘတ်</div>
-                    </div>
-                </div>
-                <h4 style="margin: 15px 0 10px; color: var(--gold);">📋 အသေးစိတ် မှတ်တမ်း</h4>
-        `;
-
-        monthTrans.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
-            const typeIcon = t.type === 'income' ? '📥' : '📤';
-            const typeColor = t.type === 'income' ? '#facc15' : '#ef4444';
-            const name = t.donorName || t.groupName || '';
-            html += `
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div>
-                        <span style="color: #94a3b8; font-size: 12px;">${t.date}</span>
-                        <div>${typeIcon} ${name} ${t.activity ? ' - ' + t.activity : ''}</div>
-                        <small style="color: #64748b;">${t.description || ''}</small>
-                    </div>
-                    <span style="color: ${typeColor}; font-weight: 600;">${t.amount.toLocaleString()} ဘတ်</span>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-        document.getElementById('monthlyReportContent').innerHTML = html;
-    }
-
-    function showFullDonorList() {
-        let html = '';
-        Object.entries(donorData).sort((a,b) => b[1].total - a[1].total).forEach(([_, data]) => {
-            html += `
-                <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
-                    <span>${data.originalName}</span>
-                    <span style="color: #facc15;">${data.total.toLocaleString()} ဘတ်</span>
-                </div>
-            `;
-        });
-        document.getElementById('fullDonorList').innerHTML = html;
-        document.getElementById('fullDonorListModal').style.display = 'flex';
-    }
-
-    function getCurrentWeek() {
-        const now = new Date();
-        let d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-        let dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        return "Week-" + weekNo;
-    }
-
-    function toggleSection(id) {
-        ['donorListSection', 'addIncomeSection', 'addExpenseSection'].forEach(s => {
-            const el = document.getElementById(s);
-            if (el) el.style.display = s === id ? 'block' : 'none';
-        });
-    }
-
-    function closeModal() {
-        document.getElementById('donorModal').style.display = 'none';
-        if (currentChart) currentChart.destroy();
-    }
-
-    function closeYearlyModal() {
-        document.getElementById('yearlyReportModal').style.display = 'none';
-        if (window.yearlyChart) window.yearlyChart.destroy();
-    }
-
-    function closeMonthlyModal() {
-        document.getElementById('monthlyReportModal').style.display = 'none';
-        if (window.monthlyChart) window.monthlyChart.destroy();
-    }
-
-    // PNG Export Functions
-    async function exportDonorPNG() {
-        const donorName = document.getElementById('mDonorName').textContent;
-        const total = document.getElementById('mTotal').textContent;
-        const count = document.getElementById('mCount').textContent;
-        const yearly = document.getElementById('mYearlyBreakdown').innerHTML;
-        const history = document.getElementById('mHistoryList').innerHTML;
-
-        const exportDiv = document.createElement('div');
-        exportDiv.style.background = '#151b2b';
-        exportDiv.style.padding = '30px';
-        exportDiv.style.width = '550px';
-        exportDiv.style.color = '#e2e8f0';
-        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
-        exportDiv.style.borderRadius = '28px';
-        exportDiv.innerHTML = `
-            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">✨ ${donorName} ✨</h2>
             <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
                 <div style="text-align: center;">
                     <small>စုစုပေါင်း အလှူငွေ</small>
-                    <div style="font-size: 28px; color: #facc15;">${total}</div>
+                    <div id="mTotal" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
                 </div>
                 <div style="text-align: center;">
                     <small>အကြိမ်ရေ</small>
-                    <div style="font-size: 28px; color: #facc15;">${count}</div>
+                    <div id="mCount" style="font-size: 28px; color: #facc15; font-weight: bold;"></div>
                 </div>
             </div>
-            <h4 style="color: #facc15; margin: 20px 0 10px;">📅 နှစ်အလိုက် လအလိုက် စာရင်း</h4>
-            ${yearly}
-            <h4 style="color: #facc15; margin: 20px 0 10px;">📝 အသေးစိတ် မှတ်တမ်း</h4>
-            ${history}
-            <div style="margin-top: 30px; text-align: center; color: #facc15; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                📅 ${new Date().toLocaleDateString('my-MM')} · နွေဦးတော်လှန်ရေး ထောက်ပို့အဖွဲ့
+
+            <div class="chart-container">
+                <canvas id="donorChart"></canvas>
             </div>
-        `;
 
-        document.body.appendChild(exportDiv);
-        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
-        const link = document.createElement('a');
-        link.download = `${donorName.replace(/\s/g, '_')}_report.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        document.body.removeChild(exportDiv);
-    }
+            <h4 style="color: var(--gold); margin: 20px 0 10px;">
+                <i class="fas fa-calendar-alt"></i> နှစ်အလိုက် လအလိုက်
+            </h4>
+            <div id="mYearlyBreakdown" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;"></div>
 
-    async function exportYearlyPNG() {
-        const content = document.getElementById('yearlyReportContent').innerHTML;
-        const exportDiv = document.createElement('div');
-        exportDiv.style.background = '#151b2b';
-        exportDiv.style.padding = '30px';
-        exportDiv.style.width = '550px';
-        exportDiv.style.color = '#e2e8f0';
-        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
-        exportDiv.style.borderRadius = '28px';
-        exportDiv.innerHTML = `
-            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📊 နှစ်ချုပ် တော်လှန်ရေး စာရင်း</h2>
-            ${content}
-            <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
-        `;
+            <h4 style="color: var(--gold); margin: 20px 0 10px;">
+                <i class="fas fa-history"></i> အသေးစိတ် မှတ်တမ်း
+            </h4>
+            <div id="mHistoryList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
 
-        document.body.appendChild(exportDiv);
-        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
-        const link = document.createElement('a');
-        link.download = `yearly_report_${new Date().getFullYear()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        document.body.removeChild(exportDiv);
-    }
+            <button class="btn-full btn-outline" onclick="exportDonorPNG()">
+                <i class="fas fa-image"></i> PNG ထုတ်မည်
+            </button>
+        </div>
+    </div>
 
-    async function exportMonthlyPNG() {
-        const month = document.getElementById('monthYearSelect').value;
-        const content = document.getElementById('monthlyReportContent').innerHTML;
-        const exportDiv = document.createElement('div');
-        exportDiv.style.background = '#151b2b';
-        exportDiv.style.padding = '30px';
-        exportDiv.style.width = '550px';
-        exportDiv.style.color = '#e2e8f0';
-        exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
-        exportDiv.style.borderRadius = '28px';
-        exportDiv.innerHTML = `
-            <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📅 လချုပ် တော်လှန်ရေး စာရင်း - ${month}</h2>
-            ${content}
-            <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
-        `;
+    <!-- Yearly Report Modal -->
+    <div id="yearlyReportModal" class="modal">
+        <span class="close-btn" onclick="closeYearlyModal()">×</span>
+        <div class="modal-content">
+            <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-chart-line"></i> နှစ်ချုပ် အစီရင်ခံစာ
+            </h2>
+            <div class="chart-container">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+            <div id="yearlyReportContent"></div>
+            <button class="btn-full btn-outline" onclick="exportYearlyPNG()">
+                <i class="fas fa-image"></i> PNG ထုတ်မည်
+            </button>
+        </div>
+    </div>
 
-        document.body.appendChild(exportDiv);
-        const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
-        const link = document.createElement('a');
-        link.download = `monthly_report_${month}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        document.body.removeChild(exportDiv);
-    }
+    <!-- Monthly Report Modal -->
+    <div id="monthlyReportModal" class="modal">
+        <span class="close-btn" onclick="closeMonthlyModal()">×</span>
+        <div class="modal-content">
+            <h2 style="color: var(--gold); text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-calendar-alt"></i> လချုပ် အစီရင်ခံစာ
+            </h2>
+            <select id="monthYearSelect" class="search-box" onchange="loadMonthlyReport()">
+                <option value="">လကို ရွေးပါ</option>
+            </select>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+            <div id="monthlyReportContent"></div>
+            <button class="btn-full btn-outline" onclick="exportMonthlyPNG()">
+                <i class="fas fa-image"></i> PNG ထုတ်မည်
+            </button>
+        </div>
+    </div>
 
-    function exportToCSV() {
-        let csv = "အမျိုးအစား,ရက်စွဲ,အမည်/အဖွဲ့,လှုပ်ရှားမှု,ပမာဏ,အမျိုးအစား\n";
-        allTransactions.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
-            const type = t.type === 'income' ? 'အလှူငွေ' : 'ထောက်ပို့ငွေ';
-            const name = t.donorName || t.groupName || '';
-            const activity = t.activity || '';
-            csv += `"${type}",${t.date},"${name}","${activity}",${t.amount},${t.category}\n`;
-        });
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBojMFTkLXmaFGqwq9tLKpXp-wXKqkN_no",
+            authDomain: "lamp-88a25.firebaseapp.com",
+            databaseURL: "https://lamp-88a25-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lamp-88a25",
+            storageBucket: "lamp-88a25.firebasestorage.app",
+            messagingSenderId: "151980650338",
+            appId: "1:151980650338:web:0e4e02c09d0ba58a16c63b"
+        };
         
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `tawhlanyay_report_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        alert("✅ CSV ဖိုင် ထုတ်ပြီးပါပြီ");
-    }
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-    function backupData() {
-        Promise.all([
-            db.ref('weekly_donations').once('value'),
-            db.ref('expenses').once('value')
-        ]).then(([donations, expenses]) => {
-            const backup = {
-                donations: donations.val(),
-                expenses: expenses.val(),
-                date: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+        // Global variables
+        let donorData = {};
+        let allTransactions = [];
+        let currentChart = null;
+        let currentEditItem = null;
+
+        // တော်လှန်ရေး စာသားများ
+        const motivationMessages = [
+            "အောင်ပွဲချိန်အထိ အတူတကွ ရှေ့ဆက်ကြမယ်! ✊",
+            "မြေပြင်က ရဲဘော်တွေအတွက် ဆက်လက်ထောက်ပို့ကြစို့",
+            "နွေဦးတော်လှန်ရေး အောင်ပွဲချိန်အထိ လက်တွဲသွားကြမယ်",
+            "ရှေ့တန်းရဲဘော်တွေရဲ့ နောက်ကွယ်က လက်တံတွေ ကျွန်တော်တို့ပါ",
+            "တစ်ဦးချင်းရဲ့ အားသည် တစ်သိန်းအား ဖြစ်စေတယ်",
+            "ဒီနေ့ ထောက်ပို့မှုက မနက်ဖြန် အောင်ပွဲပါ",
+            "ကျေးဇူးတင်ပါတယ် တော်လှန်ရေး မိတ်ဆွေများ",
+            "အတူရှိသရွေ့ အောင်ပွဲသေချာတယ်",
+            "မင်္ဂလာရှိသော နေ့ရက်တိုင်းမှာ တော်လှန်ရေးအတွက် ရှေ့ဆက်ကြမယ်",
+            "ပြည်သူ့အားကို အားကိုးပြီး အောင်ပွဲဆီ ချီတက်ကြမယ်"
+        ];
+
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                updateMotivationMessage();
+                fetchData();
+                setInterval(updateMotivationMessage, 10000); // Update every 10 seconds
+            } else {
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            }
+        });
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorDiv.textContent = 'အသုံးပြုသူအမည်နှင့် စကားဝှက် ဖြည့်ပါ';
+                return;
+            }
+
+            // For demo, using email format
+            const email = username.includes('@') ? username : username + '@lfm.com';
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    errorDiv.textContent = 'အကောင့်ဝင်ရောက်ရန် မအောင်မြင်ပါ';
+                });
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut();
+        }
+
+        // Update motivation message
+        function updateMotivationMessage() {
+            const randomIndex = Math.floor(Math.random() * motivationMessages.length);
+            document.getElementById('motivationMessage').textContent = motivationMessages[randomIndex];
+        }
+
+        // Helper Functions
+        function cleanName(n) {
+            return n ? n.replace(/^(ကို|ဦး|မောင်|မ|Sayadaw|Daw|U|Ko|Maung)\s?/gi, "").trim() : "";
+        }
+
+        // Fetch Data
+        function fetchData() {
+            // Fetch Income
+            db.ref('weekly_donations').on('value', snap => {
+                donorData = {};
+                allTransactions = [];
+
+                snap.forEach(week => {
+                    week.forEach(d => {
+                        const val = d.val();
+                        const amt = parseFloat(val.amount || 0);
+                        const cName = cleanName(val.donorName);
+
+                        const trans = {
+                            type: 'income',
+                            id: d.key,
+                            week: week.key,
+                            donorName: val.donorName,
+                            amount: amt,
+                            category: val.category || 'general',
+                            date: val.date || new Date().toISOString().split('T')[0],
+                            description: val.donorName
+                        };
+                        allTransactions.push(trans);
+
+                        if (!donorData[cName]) {
+                            donorData[cName] = {
+                                originalName: val.donorName,
+                                total: 0,
+                                count: 0,
+                                transactions: []
+                            };
+                        }
+                        donorData[cName].total += amt;
+                        donorData[cName].count++;
+                        donorData[cName].transactions.push(trans);
+                    });
+                });
+
+                // Fetch Expenses
+                db.ref('expenses').on('value', expSnap => {
+                    expSnap.forEach(item => {
+                        const val = item.val();
+                        const exp = {
+                            type: 'expense',
+                            id: item.key,
+                            groupName: val.groupName || '',
+                            activity: val.activity || '',
+                            amount: parseFloat(val.amount || 0),
+                            category: val.category || 'other',
+                            date: val.date || new Date().toISOString().split('T')[0],
+                            description: val.description || ''
+                        };
+                        allTransactions.push(exp);
+                    });
+                    updateUI();
+                });
+            });
+        }
+
+        function updateUI() {
+            const totalIncome = allTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = allTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const netBalance = totalIncome - totalExpense;
+
+            document.getElementById('totalIncome').textContent = totalIncome.toLocaleString() + " ဘတ်";
+            document.getElementById('totalExpense').textContent = totalExpense.toLocaleString() + " ဘတ်";
+            document.getElementById('netBalance').textContent = netBalance.toLocaleString() + " ဘတ်";
+            document.getElementById('totalDonors').textContent = Object.keys(donorData).length;
+            document.getElementById('totalTransactions').textContent = allTransactions.length;
+
+            renderLeaderboard();
+            renderDonors();
+            updateMonthSelect();
+        }
+
+        function renderLeaderboard() {
+            const sorted = Object.entries(donorData).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
+            let html = '';
+            sorted.forEach(([_, data], i) => {
+                html += `
+                    <div class="leaderboard-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                        <span class="badge" style="background: ${i===0?'#facc15':i===1?'#94a3b8':'#64748b'}; color: #111; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">${i+1}</span>
+                        <span style="flex: 1;">${data.originalName}</span>
+                        <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
+                    </div>
+                `;
+            });
+            document.getElementById('leaderboardContent').innerHTML = html;
+        }
+
+        function renderDonors() {
+            const term = document.getElementById('donorSearch')?.value.toLowerCase() || '';
+            const filtered = Object.entries(donorData).filter(([_, d]) => d.originalName.toLowerCase().includes(term))
+                .sort((a, b) => b[1].total - a[1].total);
+            
+            let html = '';
+            filtered.forEach(([_, data]) => {
+                html += `
+                    <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                        <span>${data.originalName}</span>
+                        <span style="color: #facc15; font-weight: 600;">${data.total.toLocaleString()} ဘတ်</span>
+                    </div>
+                `;
+            });
+            document.getElementById('allDonorsList').innerHTML = html || '<p style="text-align: center; padding: 20px;">မိတ်ဆွေ မတွေ့ရှိပါ</p>';
+        }
+
+        // Edit Transaction Functions
+        function editTransaction(transaction) {
+            currentEditItem = transaction;
+            const editTitle = document.getElementById('editTitle');
+            const editForm = document.getElementById('editForm');
+
+            if (transaction.type === 'income') {
+                editTitle.innerHTML = '<i class="fas fa-edit"></i> အလှူငွေ ပြင်ဆင်ရန်';
+                editForm.innerHTML = `
+                    <input type="text" id="editName" class="search-box" value="${transaction.donorName}" placeholder="အလှူရှင် အမည်">
+                    <select id="editCategory" class="search-box">
+                        <option value="general" ${transaction.category === 'general' ? 'selected' : ''}>📦 အထွေထွေ အလှူငွေ</option>
+                        <option value="cdm" ${transaction.category === 'cdm' ? 'selected' : ''}>📢 အာဏာဖီဆန်ရေး</option>
+                        <option value="military" ${transaction.category === 'military' ? 'selected' : ''}>⚔️ စစ်ရေး ရန်ပုံငွေ</option>
+                        <option value="medical" ${transaction.category === 'medical' ? 'selected' : ''}>💊 ကျန်းမာရေး</option>
+                        <option value="food" ${transaction.category === 'food' ? 'selected' : ''}>🍚 ရိက္ခာ</option>
+                    </select>
+                    <input type="number" id="editAmount" class="search-box" value="${transaction.amount}" placeholder="ပမာဏ">
+                    <input type="date" id="editDate" class="search-box" value="${transaction.date}">
+                `;
+            } else {
+                editTitle.innerHTML = '<i class="fas fa-edit"></i> ထောက်ပို့ငွေ ပြင်ဆင်ရန်';
+                editForm.innerHTML = `
+                    <input type="text" id="editGroupName" class="search-box" value="${transaction.groupName || ''}" placeholder="အဖွဲ့အမည်">
+                    <input type="text" id="editActivity" class="search-box" value="${transaction.activity || ''}" placeholder="လှုပ်ရှားမှု">
+                    <select id="editCategory" class="search-box">
+                        <option value="food" ${transaction.category === 'food' ? 'selected' : ''}>🍚 ရိက္ခာ ထောက်ပို့</option>
+                        <option value="military" ${transaction.category === 'military' ? 'selected' : ''}>⚔️ စစ်ရေး ထောက်ပို့</option>
+                        <option value="medical" ${transaction.category === 'medical' ? 'selected' : ''}>💊 ကျန်းမာရေး ထောက်ပို့</option>
+                        <option value="transport" ${transaction.category === 'transport' ? 'selected' : ''}>🚚 သယ်ယူပို့ဆောင်ရေး</option>
+                        <option value="other" ${transaction.category === 'other' ? 'selected' : ''}>📦 အခြား ထောက်ပို့</option>
+                    </select>
+                    <input type="number" id="editAmount" class="search-box" value="${transaction.amount}" placeholder="ပမာဏ">
+                    <textarea id="editDescription" class="search-box" placeholder="အသေးစိတ်">${transaction.description || ''}</textarea>
+                    <input type="date" id="editDate" class="search-box" value="${transaction.date}">
+                `;
+            }
+
+            editForm.innerHTML += `
+                <button class="btn-full btn-income" onclick="saveEdit()">
+                    <i class="fas fa-save"></i> သိမ်းမည်
+                </button>
+                <button class="btn-full btn-danger" onclick="deleteTransaction()" style="margin-top: 10px;">
+                    <i class="fas fa-trash"></i> ဖျက်မည်
+                </button>
+            `;
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function saveEdit() {
+            if (!currentEditItem) return;
+
+            const updates = {};
+            
+            if (currentEditItem.type === 'income') {
+                updates.donorName = document.getElementById('editName').value;
+                updates.category = document.getElementById('editCategory').value;
+                updates.amount = parseFloat(document.getElementById('editAmount').value);
+                updates.date = document.getElementById('editDate').value;
+            } else {
+                updates.groupName = document.getElementById('editGroupName').value;
+                updates.activity = document.getElementById('editActivity').value;
+                updates.category = document.getElementById('editCategory').value;
+                updates.amount = parseFloat(document.getElementById('editAmount').value);
+                updates.description = document.getElementById('editDescription').value;
+                updates.date = document.getElementById('editDate').value;
+            }
+
+            if (currentEditItem.type === 'income') {
+                db.ref(`weekly_donations/${currentEditItem.week}/${currentEditItem.id}`).update(updates)
+                    .then(() => {
+                        alert('✅ ပြင်ဆင်ပြီးပါပြီ');
+                        closeEditModal();
+                    });
+            } else {
+                db.ref(`expenses/${currentEditItem.id}`).update(updates)
+                    .then(() => {
+                        alert('✅ ပြင်ဆင်ပြီးပါပြီ');
+                        closeEditModal();
+                    });
+            }
+        }
+
+        function deleteTransaction() {
+            if (!currentEditItem || !confirm('ဤမှတ်တမ်းကို ဖျက်မှာ သေချာပါသလား?')) return;
+
+            if (currentEditItem.type === 'income') {
+                db.ref(`weekly_donations/${currentEditItem.week}/${currentEditItem.id}`).remove()
+                    .then(() => {
+                        alert('✅ ဖျက်ပြီးပါပြီ');
+                        closeEditModal();
+                    });
+            } else {
+                db.ref(`expenses/${currentEditItem.id}`).remove()
+                    .then(() => {
+                        alert('✅ ဖျက်ပြီးပါပြီ');
+                        closeEditModal();
+                    });
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditItem = null;
+        }
+
+        // Save Functions
+        function saveIncome() {
+            const name = document.getElementById('inName').value.trim();
+            const amount = parseFloat(document.getElementById('inAmount').value);
+            const category = document.getElementById('incomeCategory').value;
+            const date = document.getElementById('inDate').value;
+
+            if (!name || !amount || amount < 10) {
+                alert("❌ အမည်နှင့် ပမာဏ ဖြည့်ပါ");
+                return;
+            }
+
+            const week = getCurrentWeek();
+            db.ref(`weekly_donations/${week}`).push({
+                donorName: name,
+                amount: amount,
+                category: category,
+                date: date || new Date().toISOString().split('T')[0]
+            }).then(() => {
+                confetti({ particleCount: 150, colors: ['#facc15'] });
+                alert("✅ အလှူငွေ သိမ်းပြီးပါပြီ။ ကျေးဇူးတင်ပါသည်။");
+                document.getElementById('inName').value = '';
+                document.getElementById('inAmount').value = '';
+                toggleSection('');
+            });
+        }
+
+        function saveExpense() {
+            const groupName = document.getElementById('exGroupName').value.trim();
+            const activity = document.getElementById('exActivity').value.trim();
+            const amount = parseFloat(document.getElementById('exAmount').value);
+            const category = document.getElementById('expenseCategory').value;
+            const description = document.getElementById('exDescription').value.trim();
+            const date = document.getElementById('exDate').value;
+
+            if (!groupName || !amount || amount < 10) {
+                alert("❌ အဖွဲ့အမည်နှင့် ပမာဏ ဖြည့်ပါ");
+                return;
+            }
+
+            db.ref('expenses').push({
+                groupName: groupName,
+                activity: activity,
+                amount: amount,
+                category: category,
+                description: description,
+                date: date || new Date().toISOString().split('T')[0]
+            }).then(() => {
+                confetti({ particleCount: 150, colors: ['#ef4444'] });
+                alert("✅ ထောက်ပို့ငွေ သိမ်းပြီးပါပြီ");
+                document.getElementById('exGroupName').value = '';
+                document.getElementById('exActivity').value = '';
+                document.getElementById('exAmount').value = '';
+                document.getElementById('exDescription').value = '';
+                toggleSection('');
+            });
+        }
+
+        // Report Functions
+        function showYearlyReport() {
+            const years = {};
+            allTransactions.forEach(t => {
+                const year = t.date.split('-')[0];
+                if (!years[year]) years[year] = { income: 0, expense: 0, count: 0 };
+                if (t.type === 'income') years[year].income += t.amount;
+                else years[year].expense += t.amount;
+                years[year].count++;
+            });
+
+            const sortedYears = Object.keys(years).sort((a,b) => b-a);
+            const incomeData = sortedYears.map(y => years[y].income);
+            const expenseData = sortedYears.map(y => years[y].expense);
+
+            setTimeout(() => {
+                const ctx = document.getElementById('yearlyChart').getContext('2d');
+                if (window.yearlyChart) window.yearlyChart.destroy();
+                window.yearlyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedYears,
+                        datasets: [
+                            { label: 'အလှူငွေ', data: incomeData, backgroundColor: '#facc15' },
+                            { label: 'ထောက်ပို့ငွေ', data: expenseData, backgroundColor: '#ef4444' }
+                        ]
+                    },
+                    options: { responsive: true }
+                });
+            }, 100);
+
+            let html = '';
+            sortedYears.forEach(year => {
+                const y = years[year];
+                const net = y.income - y.expense;
+                html += `
+                    <div class="report-section">
+                        <div class="report-header">📅 ${year} ခုနှစ်</div>
+                        <div class="report-row"><span>📥 အလှူငွေ</span><span style="color: #facc15;">${y.income.toLocaleString()} ဘတ်</span></div>
+                        <div class="report-row"><span>📤 ထောက်ပို့ငွေ</span><span style="color: #ef4444;">${y.expense.toLocaleString()} ဘတ်</span></div>
+                        <div class="report-row"><span>⚖️ လက်ကျန်</span><span style="color: ${net >= 0 ? '#10b981' : '#ef4444'};">${net.toLocaleString()} ဘတ်</span></div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('yearlyReportContent').innerHTML = html;
+            document.getElementById('yearlyReportModal').style.display = 'flex';
+        }
+
+        function showMonthlyReport() {
+            updateMonthSelect();
+            document.getElementById('monthlyReportModal').style.display = 'flex';
+        }
+
+        function updateMonthSelect() {
+            const months = new Set();
+            allTransactions.forEach(t => {
+                months.add(t.date.substring(0,7));
+            });
+            
+            const select = document.getElementById('monthYearSelect');
+            select.innerHTML = '<option value="">လကို ရွေးပါ</option>';
+            Array.from(months).sort().reverse().forEach(m => {
+                select.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+        }
+
+        function loadMonthlyReport() {
+            const month = document.getElementById('monthYearSelect').value;
+            if (!month) return;
+
+            const monthTrans = allTransactions.filter(t => t.date.startsWith(month));
+            const income = monthTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const expense = monthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const net = income - expense;
+
+            // Daily chart
+            const daily = {};
+            monthTrans.forEach(t => {
+                const day = t.date.split('-')[2];
+                if (!daily[day]) daily[day] = { income: 0, expense: 0 };
+                if (t.type === 'income') daily[day].income += t.amount;
+                else daily[day].expense += t.amount;
+            });
+
+            const days = Object.keys(daily).sort((a,b) => a-b);
+            const incomeDaily = days.map(d => daily[d].income);
+            const expenseDaily = days.map(d => daily[d].expense);
+
+            setTimeout(() => {
+                const ctx = document.getElementById('monthlyChart').getContext('2d');
+                if (window.monthlyChart) window.monthlyChart.destroy();
+                window.monthlyChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: days.map(d => d + ' ရက်'),
+                        datasets: [
+                            { label: 'အလှူငွေ', data: incomeDaily, borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.1)' },
+                            { label: 'ထောက်ပို့ငွေ', data: expenseDaily, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)' }
+                        ]
+                    },
+                    options: { responsive: true }
+                });
+            }, 100);
+
+            let html = `
+                <div class="report-section">
+                    <div class="report-header">📅 ${month}</div>
+                    <div class="report-row"><span>📥 အလှူငွေ</span><span style="color: #facc15;">${income.toLocaleString()} ဘတ်</span></div>
+                    <div class="report-row"><span>📤 ထောက်ပို့ငွေ</span><span style="color: #ef4444;">${expense.toLocaleString()} ဘတ်</span></div>
+                    <div class="report-row"><span>⚖️ လက်ကျန်</span><span style="color: ${net >= 0 ? '#10b981' : '#ef4444'};">${net.toLocaleString()} ဘတ်</span></div>
+                </div>
+                <h4 style="color: var(--gold); margin: 15px 0 10px;">📋 အသေးစိတ် မှတ်တမ်း</h4>
+            `;
+
+            monthTrans.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+                const typeColor = t.type === 'income' ? '#facc15' : '#ef4444';
+                const name = t.donorName || t.groupName || '';
+                html += `
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <span style="color: #94a3b8; font-size: 12px;">${t.date}</span>
+                            <div>${name} ${t.activity ? ' - ' + t.activity : ''}</div>
+                            <small style="color: #64748b;">${t.description || ''}</small>
+                        </div>
+                        <div>
+                            <span style="color: ${typeColor}; font-weight: 600;">${t.amount.toLocaleString()} ဘတ်</span>
+                            <span class="transaction-actions">
+                                <i class="fas fa-edit" onclick="editTransaction(${JSON.stringify(t).replace(/"/g, '&quot;')})"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('monthlyReportContent').innerHTML = html;
+        }
+
+        function openDonorModal(donorName) {
+            const data = Object.values(donorData).find(d => d.originalName === donorName);
+            if (!data) return;
+
+            document.getElementById('mDonorName').textContent = data.originalName;
+            document.getElementById('mTotal').textContent = data.total.toLocaleString() + " ဘတ်";
+            document.getElementById('mCount').textContent = data.count;
+
+            // Yearly breakdown
+            const yearly = {};
+            const monthlyTotals = {};
+            data.transactions.forEach(t => {
+                const year = t.date.split('-')[0];
+                const month = t.date.substring(0,7);
+                
+                if (!yearly[year]) yearly[year] = { total: 0, months: {} };
+                yearly[year].total += t.amount;
+                if (!yearly[year].months[month]) yearly[year].months[month] = 0;
+                yearly[year].months[month] += t.amount;
+                
+                monthlyTotals[month] = (monthlyTotals[month] || 0) + t.amount;
+            });
+
+            let yearlyHTML = '';
+            Object.keys(yearly).sort((a,b) => b-a).forEach(year => {
+                let monthHTML = '';
+                Object.keys(yearly[year].months).sort().reverse().forEach(month => {
+                    monthHTML += `
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0 6px 15px;">
+                            <span>${month}</span>
+                            <span style="color: #facc15;">${yearly[year].months[month].toLocaleString()} ဘတ်</span>
+                        </div>
+                    `;
+                });
+                yearlyHTML += `
+                    <details style="margin-bottom: 8px;">
+                        <summary style="padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            ${year} ခုနှစ် (${yearly[year].total.toLocaleString()} ဘတ်)
+                        </summary>
+                        ${monthHTML}
+                    </details>
+                `;
+            });
+            document.getElementById('mYearlyBreakdown').innerHTML = yearlyHTML;
+
+            // History with edit buttons
+            const historyHTML = data.transactions.sort((a,b) => new Date(b.date) - new Date(a.date))
+                .map(t => `
+                    <div class="transaction-item">
+                        <span>${t.date}</span>
+                        <div>
+                            <span style="color: #facc15;">${t.amount.toLocaleString()} ဘတ်</span>
+                            <span class="transaction-actions">
+                                <i class="fas fa-edit" onclick="editTransaction(${JSON.stringify(t).replace(/"/g, '&quot;')})"></i>
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('mHistoryList').innerHTML = historyHTML;
+
+            // Chart
+            const sortedMonths = Object.keys(monthlyTotals).sort();
+            if (currentChart) currentChart.destroy();
+            
+            const ctx = document.getElementById('donorChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedMonths,
+                    datasets: [{
+                        data: sortedMonths.map(m => monthlyTotals[m]),
+                        backgroundColor: '#facc15'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+
+            document.getElementById('donorModal').style.display = 'flex';
+        }
+
+        function showFullDonorList() {
+            let html = '';
+            Object.entries(donorData).sort((a,b) => b[1].total - a[1].total).forEach(([_, data]) => {
+                html += `
+                    <div class="list-item" onclick="openDonorModal('${data.originalName.replace(/'/g, "\\'")}')">
+                        <span>${data.originalName}</span>
+                        <span style="color: #facc15;">${data.total.toLocaleString()} ဘတ်</span>
+                    </div>
+                `;
+            });
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+                <div class="modal-content">
+                    <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📋 မိတ်ဆွေစာရင်း</h2>
+                    ${html}
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function getCurrentWeek() {
+            const now = new Date();
+            let d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+            let dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return "Week-" + weekNo;
+        }
+
+        function toggleSection(id) {
+            ['donorListSection', 'addIncomeSection', 'addExpenseSection'].forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.style.display = s === id ? 'block' : 'none';
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('donorModal').style.display = 'none';
+            if (currentChart) currentChart.destroy();
+        }
+
+        function closeYearlyModal() {
+            document.getElementById('yearlyReportModal').style.display = 'none';
+            if (window.yearlyChart) window.yearlyChart.destroy();
+        }
+
+        function closeMonthlyModal() {
+            document.getElementById('monthlyReportModal').style.display = 'none';
+            if (window.monthlyChart) window.monthlyChart.destroy();
+        }
+
+        // PNG Export Functions
+        async function exportDonorPNG() {
+            const donorName = document.getElementById('mDonorName').textContent;
+            const total = document.getElementById('mTotal').textContent;
+            const count = document.getElementById('mCount').textContent;
+            const yearly = document.getElementById('mYearlyBreakdown').innerHTML;
+            const history = document.getElementById('mHistoryList').innerHTML;
+
+            const exportDiv = document.createElement('div');
+            exportDiv.style.background = '#151b2b';
+            exportDiv.style.padding = '30px';
+            exportDiv.style.width = '550px';
+            exportDiv.style.color = '#e2e8f0';
+            exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+            exportDiv.style.borderRadius = '28px';
+            exportDiv.innerHTML = `
+                <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">✨ ${donorName} ✨</h2>
+                <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <small>စုစုပေါင်း အလှူငွေ</small>
+                        <div style="font-size: 28px; color: #facc15;">${total}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <small>အကြိမ်ရေ</small>
+                        <div style="font-size: 28px; color: #facc15;">${count}</div>
+                    </div>
+                </div>
+                <h4 style="color: #facc15; margin: 20px 0 10px;">📅 နှစ်အလိုက် လအလိုက်</h4>
+                ${yearly}
+                <h4 style="color: #facc15; margin: 20px 0 10px;">📝 အသေးစိတ် မှတ်တမ်း</h4>
+                ${history}
+                <div style="margin-top: 30px; text-align: center; color: #facc15; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    📅 ${new Date().toLocaleDateString('my-MM')}
+                </div>
+            `;
+
+            document.body.appendChild(exportDiv);
+            const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+            const link = document.createElement('a');
+            link.download = `${donorName.replace(/\s/g, '_')}_report.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            document.body.removeChild(exportDiv);
+        }
+
+        async function exportYearlyPNG() {
+            const content = document.getElementById('yearlyReportContent').innerHTML;
+            const exportDiv = document.createElement('div');
+            exportDiv.style.background = '#151b2b';
+            exportDiv.style.padding = '30px';
+            exportDiv.style.width = '550px';
+            exportDiv.style.color = '#e2e8f0';
+            exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+            exportDiv.style.borderRadius = '28px';
+            exportDiv.innerHTML = `
+                <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📊 နှစ်ချုပ် အစီရင်ခံစာ</h2>
+                ${content}
+                <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
+            `;
+
+            document.body.appendChild(exportDiv);
+            const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+            const link = document.createElement('a');
+            link.download = `yearly_report_${new Date().getFullYear()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            document.body.removeChild(exportDiv);
+        }
+
+        async function exportMonthlyPNG() {
+            const month = document.getElementById('monthYearSelect').value;
+            const content = document.getElementById('monthlyReportContent').innerHTML;
+            const exportDiv = document.createElement('div');
+            exportDiv.style.background = '#151b2b';
+            exportDiv.style.padding = '30px';
+            exportDiv.style.width = '550px';
+            exportDiv.style.color = '#e2e8f0';
+            exportDiv.style.fontFamily = 'Pyidaungsu, sans-serif';
+            exportDiv.style.borderRadius = '28px';
+            exportDiv.innerHTML = `
+                <h2 style="color: #facc15; text-align: center; margin-bottom: 20px;">📅 လချုပ် အစီရင်ခံစာ - ${month}</h2>
+                ${content}
+                <div style="margin-top: 30px; text-align: center; color: #facc15;">📅 ${new Date().toLocaleDateString('my-MM')}</div>
+            `;
+
+            document.body.appendChild(exportDiv);
+            const canvas = await html2canvas(exportDiv, { backgroundColor: '#151b2b', scale: 2 });
+            const link = document.createElement('a');
+            link.download = `monthly_report_${month}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            document.body.removeChild(exportDiv);
+        }
+
+        function exportToCSV() {
+            let csv = "အမျိုးအစား,ရက်စွဲ,အမည်/အဖွဲ့,လှုပ်ရှားမှု,ပမာဏ,အမျိုးအစား\n";
+            allTransactions.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+                const type = t.type === 'income' ? 'အလှူငွေ' : 'ထောက်ပို့ငွေ';
+                const name = t.donorName || t.groupName || '';
+                const activity = t.activity || '';
+                csv += `"${type}",${t.date},"${name}","${activity}",${t.amount},${t.category}\n`;
+            });
+            
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `tawhlanyay_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `report_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
-            alert("✅ Backup လုပ်ပြီးပါပြီ");
-        });
-    }
+            alert("✅ CSV ဖိုင် ထုတ်ပြီးပါပြီ");
+        }
 
-    // Set today's date in date inputs
-    document.getElementById('inDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('exDate').value = new Date().toISOString().split('T')[0];
+        function backupData() {
+            Promise.all([
+                db.ref('weekly_donations').once('value'),
+                db.ref('expenses').once('value')
+            ]).then(([donations, expenses]) => {
+                const backup = {
+                    donations: donations.val(),
+                    expenses: expenses.val(),
+                    date: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                alert("✅ Backup လုပ်ပြီးပါပြီ");
+            });
+        }
 
-    // Start the app
-    fetchData();
-</script>
+        // Set today's date
+        document.getElementById('inDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('exDate').value = new Date().toISOString().split('T')[0];
+    </script>
 </body>
 </html>
